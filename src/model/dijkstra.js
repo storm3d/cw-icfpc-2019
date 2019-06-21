@@ -132,22 +132,33 @@ function solve(graph, s) {
 function matrixToGraph(m: Matrix) {
   let c: Coord;
   let graph = {};
+  let mem = [];
   for (let y = 0; y < m.h; y++) {
     for (let x = 0; x < m.w; x++) {
       let n = m.toIndex(x, y);
+      let nx1 = m.toIndex(x - 1, y);
+      let nx2 = m.toIndex(x + 1, y);
+      let ny1 = m.toIndex(x, y - 1);
+      let ny2 = m.toIndex(x, y + 1);
       graph[n] = {};
+      
+      if (!mem.includes(nx1)) {
+        mem[nx1] = m.isValid(x - 1, y) && !m.isObstacle(x - 1, y);
+      }
+      if (!mem.includes(nx2)) {
+        mem[nx2] = m.isValid(x + 1, y) && !m.isObstacle(x + 1, y);
+      }
+      if (!mem.includes(ny1)) {
+        mem[ny1] = m.isValid(x, y - 1) && !m.isObstacle(x, y - 1);
+      }
+      if (!mem.includes(ny2)) {
+        mem[ny2] = m.isValid(x, y + 1) && !m.isObstacle(x, y + 1);
+      }
 
-      c = new Coord(x - 1, y);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x + 1, y);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x, y - 1);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x, y + 1);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
+      if (mem[nx1]) graph[n][nx1] = 1;
+      if (mem[nx2]) graph[n][nx2] = 1;
+      if (mem[ny1]) graph[n][ny1] = 1;
+      if (mem[ny2]) graph[n][ny2] = 1;
     }
   }
   return graph;
