@@ -1,7 +1,7 @@
 // @flow
 
 export const FREE = 0;
-export const OBSTACKLE = 1;
+export const OBSTACLE = 1;
 export const WRAPPED = 2;
 
 export class Coord {
@@ -62,7 +62,7 @@ export class Matrix {
     return this.pixels[this.coord2index(x, y)] > 0;
   }
 
-  isObstackle(x: number, y: number) {
+  isObstacle(x: number, y: number) {
     return this.pixels[this.coord2index(x, y)] > 0;
   }
 
@@ -81,11 +81,11 @@ export class Matrix {
       str += "|";
       for (let i = 0; i < this.w; i++) {
         let c = this.get(i, j);
-        if (c == FREE)
+        if (c === FREE)
           str += " ";
-        else if (c == OBSTACKLE)
+        else if (c === OBSTACLE)
           str += "#";
-        else if (c == WRAPPED)
+        else if (c === WRAPPED)
           str += ".";
       }
       str += "|\n";
