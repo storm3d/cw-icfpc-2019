@@ -154,6 +154,19 @@ function matrixToGraph(m: Matrix) {
 }
 
 export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
+
+  if (m.isValid(source.x + 1, source.y) && m.isFree(source.x + 1, source.y))
+    return [new Coord(source.x + 1, source.y)];
+
+  if (m.isValid(source.x, source.y + 1) && m.isFree(source.x, source.y + 1))
+    return [new Coord(source.x, source.y + 1)];
+
+  if (m.isValid(source.x - 1, source.y) && m.isFree(source.x - 1, source.y))
+    return [new Coord(source.x - 1, source.y)];
+
+  if (m.isValid(source.x, source.y - 1) && m.isFree(source.x, source.y - 1))
+    return [new Coord(source.x, source.y - 1)];
+
   let graph = matrixToGraph(m);
 
   let solutions = solve(graph, m.coord2index(source));
