@@ -57,11 +57,16 @@ describe("Basic model", () => {
   });
 
   test("Cross Obstacle", () => {
-    let m = new Matrix(4, 4);
-    m.set(2, 2, OBSTACLE);
+    const layout = `| . . . . . |
+| . . . . . |
+| . . # . . |
+| . . . . . |
+| * . . . . |
+`;
 
-    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
-    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
+    let s = parseState(layout);
+    expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
+    expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
   });
 
   test("State parse empty", () => {
