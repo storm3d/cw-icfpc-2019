@@ -96,7 +96,8 @@ export class Matrix {
 
 export const parseMatrix = (layer: string) : Matrix => {
 
-  const lines = layer.split("\n").filter((line) => (line));
+  const lines = layer.split("\n").filter((line) => line.replace(/^ *\|? /, "")
+    .replace(/ \|?$/, "") !== "");
   const h = lines.length;
   const w = lines[0].replace(/^ *\|? /, "")
     .replace(/ \|?$/, "")
@@ -177,12 +178,12 @@ export class State {
 
 export const parseState = (layer: string) : State => {
 
-  const lines = layer.split("\n").filter((line) => (line));
+  const lines = layer.split("\n").filter((line) => line.replace(/^ *\|? /, "")
+    .replace(/ \|?$/, "") !== "");
   const h = lines.length;
   const w = lines[0].replace(/^ *\|? /, "")
     .replace(/ \|?$/, "")
     .split(" ").length;
-
 
   const s = new State(w, h);
 

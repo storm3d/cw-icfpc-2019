@@ -55,4 +55,15 @@ describe("Basic model", () => {
     expect(s.dump()).toEqual(layout);
   });
 
+  test("State parse empty", () => {
+
+    const layout = `
+        | . . . . |
+        | . . . . |
+        `;
+    let s = parseState(layout);
+    expect(s.m.w).toEqual(4);
+    expect(s.m.h).toEqual(2);
+  });
+
 });
