@@ -1,6 +1,6 @@
 //@flow
 
-import {Matrix, Coord} from "./model";
+import {Matrix, Coord, State} from "./model";
 
 // dijkstra solve graph starting at s
 // from https://gist.github.com/jpillora/7382441
@@ -164,9 +164,9 @@ function matrixToGraph(m: Matrix) {
   return graph;
 }
 
-function breadthSearch(m: Matrix, source: Coord) {
+function breadthSearch(s: State, source: Coord) {
 
-  let lens = new Matrix(m.w, m.h);
+  let lens = new Matrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
   lens.set(source.x, source.y, 1)
 
@@ -180,49 +180,57 @@ function breadthSearch(m: Matrix, source: Coord) {
     let nx = c.x + 1;
     let ny = c.y;
 
-    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
-      nearestFree = new Coord(nx, ny);
-      break;
-    }
-    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
-      front.push(new Coord(nx, ny));
-      lens.set(nx, ny, curLen + 1);
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
     }
 
     nx = c.x;
     ny = c.y + 1;
 
-    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
-      nearestFree = new Coord(nx, ny);
-      break;
-    }
-    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
-      front.push(new Coord(nx, ny));
-      lens.set(nx, ny, curLen + 1);
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
     }
 
     nx = c.x - 1;
     ny = c.y;
 
-    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
-      nearestFree = new Coord(nx, ny);
-      break;
-    }
-    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
-      front.push(new Coord(nx, ny));
-      lens.set(nx, ny, curLen + 1);
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
     }
 
     nx = c.x;
     ny = c.y - 1;
 
-    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
-      nearestFree = new Coord(nx, ny);
-      break;
-    }
-    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
-      front.push(new Coord(nx, ny));
-      lens.set(nx, ny, curLen + 1);
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
     }
   }
 
@@ -282,9 +290,9 @@ function breadthSearch(m: Matrix, source: Coord) {
   return path.reverse();
 }
 
-export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
+export default function pathToNearestFreePoint(s: State, source: Coord) {
 
-  return breadthSearch(m, source);
+  return breadthSearch(s, source);
 
   /*
 

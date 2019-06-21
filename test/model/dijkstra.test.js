@@ -1,4 +1,4 @@
-import { Matrix, parseMatrix, Coord } from "../../src/model/model";
+import { Matrix, parseState, Coord } from "../../src/model/model";
 import nearestFree from "../../src/model/dijkstra";
 
 describe("Nearest Free Neighbor", () => {
@@ -6,9 +6,9 @@ describe("Nearest Free Neighbor", () => {
     const layout = `
        | . . . |
        | . . . |`;
-    let m = parseMatrix(layout);
+    let s = parseState(layout);
 
-    let path = nearestFree(m, new Coord(0, 0));
+    let path = nearestFree(s, new Coord(0, 0));
 
     expect(path).toEqual([new Coord(1, 0)]);
   });
@@ -17,9 +17,9 @@ describe("Nearest Free Neighbor", () => {
     const layout = `
        | * * * |
        | * # . |`;
-    let m = parseMatrix(layout);
+    let s = parseState(layout);
 
-    let path = nearestFree(m, new Coord(0, 0));
+    let path = nearestFree(s, new Coord(0, 0));
 
     expect(path).toEqual([new Coord(0, 1), new Coord(1, 1), new Coord(2, 1), new Coord(2, 0)]);
   });
@@ -28,9 +28,9 @@ describe("Nearest Free Neighbor", () => {
     const layout = `
        | * # * |
        | * # . |`;
-    let m = parseMatrix(layout);
+    let s = parseState(layout);
 
-    let path = nearestFree(m, new Coord(0, 0));
+    let path = nearestFree(s, new Coord(0, 0));
 
     expect(path).toBeUndefined();
 

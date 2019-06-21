@@ -1,7 +1,7 @@
 // @flow
 import fs from 'fs'
 
-import { State, OBSTACLE, FREE } from '../model/model'
+import { State, OBSTACLE, FREE, Coord, Booster } from '../model/model'
 
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g
 
@@ -42,7 +42,7 @@ export default class MapParser {
     this.state = new State(obj.maxX, obj.maxY)
 
     for (let y = 0; y <= obj.maxY; y++) {
-      let paint = OBSTACLE
+      let paint = OBSTACLE;
 
       for (let x = 0; x <= obj.maxX; x++) {
         if (obj.map[x] && obj.map[x].find(([startY, endY]) => startY <= y && y < endY)) {
@@ -53,7 +53,23 @@ export default class MapParser {
       }
     }
 
-    this.fillWorkerStartPos(initialWorkerPos)
+    this.fillWorkerStartPos(initialWorkerPos);
+
+    let boostersArr = boosters.split(';');
+    boostersArr.forEach(str => {
+      //console.log(str);
+
+      const type = str[0];
+      str = str.substr(1);
+
+      const t = str.split(',');
+      const x = parseInt(t[0].slice(1), 10);
+      const y = parseInt(t[1].slice(0, -1), 10);
+
+      //console.log(type + " " + x + " " + y);
+      this.state.boosters.push(new Booster(x, y, type));
+    });
+
 
     return this.state
   }
@@ -63,8 +79,8 @@ export default class MapParser {
     const x = parseInt(t[0].slice(1), 10)
     const y = parseInt(t[1].slice(0, -1), 10)
 
-    this.state.worker.pos.x = x
-    this.state.worker.pos.y = y
+    this.state.moveWorker(new Coord(x, y));
+
   }
 
   formContoursMap(contours: string, obj) {

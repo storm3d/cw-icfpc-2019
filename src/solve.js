@@ -17,7 +17,7 @@ export default class Solver {
   solve(): Solution {
 
     while(true) {
-      let path = nearestFree(this.state.m, this.state.worker.pos);
+      let path = nearestFree(this.state, this.state.worker.pos);
       if (path === undefined)
         return this.solution;
 
