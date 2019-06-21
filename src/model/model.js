@@ -97,9 +97,8 @@ export class Matrix {
   }
 
   wrap(x: number, y: number) {
-    if (this.pixels[this.toIndex(x, y) === OBSTACLE])
-      throw `Trying to wrap pixel (${x}, ${y}) however it's an obstacle`;
-    this.pixels[this.toIndex(x, y)] = WRAPPED;
+    if (this.pixels[this.toIndex(x, y)] !== OBSTACLE)
+      this.pixels[this.toIndex(x, y)] = WRAPPED;
   }
 
   isWrapped(x: number, y: number) {
@@ -252,17 +251,21 @@ export class Booster {
 export class State {
   m : Matrix;
   boosters : Array<Booster>;
-  workerPos : Coord;
+  worker : Rover;
 
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = new Array();
-    this.workerPos = new Coord(-1, -1);
+    this.worker = new Rover(new Coord(-1, -1), [new Coord(1, -1), new Coord(1, 0), new Coord(1, 1)]);
   }
 
   moveWorker(newPos : Coord) {
-    this.workerPos = newPos.getCopy();
-    this.m.wrap(this.workerPos.x, this.workerPos.y);
+    this.worker.pos = newPos.getCopy();
+
+    let wx = this.worker.pos.x;
+    let wy = this.worker.pos.y;
+    this.m.wrap(wx, wy);
+    // this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
   }
 
   dump() {
@@ -281,7 +284,7 @@ export class State {
         else if (c === WRAPPED)
           char = "* ";
 
-        if(this.workerPos.x === i && this.workerPos.y === j)
+        if(this.worker.pos.x === i && this.worker.pos.y === j)
           char = "W ";
 
         for(let k = 0; k < this.boosters.length; k++)
