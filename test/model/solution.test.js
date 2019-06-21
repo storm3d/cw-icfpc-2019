@@ -1,4 +1,5 @@
 import {Solution} from "../../src/model/solution";
+import {Coord} from "../../src/model/model";
 
 describe("Solution tests", () => {
     test("Move", () => {
@@ -45,6 +46,38 @@ describe("Solution tests", () => {
         let sDrill = new Solution();
         sDrill.startUsingDrill();
         expect(sDrill.solution()).toEqual(drill);
+    });
+    test("Should move right", () => {
+        const drill = "D";
+        let solution = new Solution();
+        let first = new Coord(0, 0)
+        let second = new Coord(1, 0)
+        solution.move(first, second)
+        expect(solution.solution()).toEqual(drill);
+    });
+    test("Should move left", () => {
+        const drill = "A";
+        let solution = new Solution();
+        let first = new Coord(1, 0)
+        let second = new Coord(0, 0)
+        solution.move(first, second)
+        expect(solution.solution()).toEqual(drill);
+    });
+    test("Should move up", () => {
+        const drill = "W";
+        let solution = new Solution();
+        let first = new Coord(0, 0)
+        let second = new Coord(0, 1)
+        solution.move(first, second)
+        expect(solution.solution()).toEqual(drill);
+    });
+    test("Should move down", () => {
+        const drill = "S";
+        let solution = new Solution();
+        let first = new Coord(0, 1)
+        let second = new Coord(0, 0)
+        solution.move(first, second)
+        expect(solution.solution()).toEqual(drill);
     });
 });
 
