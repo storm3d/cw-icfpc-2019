@@ -2,15 +2,21 @@
 import {read} from './io/read'
 import {write} from './io/write'
 import {Matrix, WRAPPED} from "./model/model.js";
+import {Solution} from "./model/solution.js";
 import Solver from "./solve";
+import { parseMatrix } from "./model/model";
 
 const exec = (callback: Function) => {
-    console.log(2);
-    let m = new Matrix(15, 6);
-    m.set(0, 0, WRAPPED);
-    console.log(2.5);
+
+    const layout = `
+        | . # # |
+        | . # # |
+        | . . . |
+        | x . . |`;
+    let m = parseMatrix(layout);
     console.log(m.dump());
-    console.log(3);
+
+    let solver = new Solver();
 
     callback();
 };
