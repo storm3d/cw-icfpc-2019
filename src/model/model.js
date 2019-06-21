@@ -55,7 +55,7 @@ export class Matrix {
   }
 
   wrap(x: number, y: number) {
-    this.voxels[this.coord2index(x, y)] = 1;
+    this.pixels[this.coord2index(x, y)] = 1;
   }
 
   isWrapped(x: number, y: number) {
