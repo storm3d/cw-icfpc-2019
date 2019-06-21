@@ -78,21 +78,50 @@ export class Matrix {
     let str = "";
 
     for (let j = this.h - 1; j >= 0; j--) {
-      str += "|";
+      str += "| ";
       for (let i = 0; i < this.w; i++) {
         let c = this.get(i, j);
         if (c === FREE)
-          str += " ";
+          str += ". ";
         else if (c === OBSTACLE)
-          str += "#";
+          str += "# ";
         else if (c === WRAPPED)
-          str += ".";
+          str += "x ";
       }
       str += "|\n";
     }
     return str;
   }
 }
+
+export const parseMatrix = (layer: string) : Matrix => {
+
+  const lines = layer.split("\n").filter((line) => (line));
+  const h = lines.length;
+  const w = lines[0].replace(/^ *\|? /, "")
+    .replace(/ \|?$/, "")
+    .split(" ").length;
+  const matrix = new Matrix(w, h);
+
+  for(let j = 0; j < h; j++) {
+    const cols = lines[j].replace(/^ *\|? /, "")
+      .replace(/ \|?$/, "")
+      .split(" ");
+
+    if(cols.length !== w)
+      throw `Invalid dimensions (${w} and ${cols.length}) of matrix template`;
+
+    for (let i = 0; i < w; i++) {
+      if (cols[i] !== "." && cols[i] !== "x" && cols[i] !== "#")
+        throw `Invalid character ${cols[i]} in matrix template`;
+
+      matrix.set(i, h - j - 1, cols[i] === "." ? FREE : cols[i] === "x" ? WRAPPED : OBSTACLE)
+    }
+  }
+
+  return matrix;
+};
+
 
 export class Booster {
   pos : Coord;

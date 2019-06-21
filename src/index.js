@@ -6,7 +6,7 @@ import Solver from "./solve";
 
 const exec = () => {
     console.log(2);
-    let m = new Matrix(15, 6);
+    let m = new Matrix(10, 10);
     m.set(0, 0, WRAPPED);
     console.log(2.5);
     console.log(m.dump());
