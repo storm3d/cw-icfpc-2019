@@ -277,7 +277,7 @@ export class State {
     // this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
 
     for(let i = this.boosters.length - 1; i >= 0; i--) {
-      if(this.boosters[i].pos.isEqual(this.workerPos)) {
+      if(this.boosters[i].pos.isEqual(this.worker.pos)) {
         if(this.boosters[i].type === 'B')
           this.extensions++;
         else if(this.boosters[i].type === 'F')

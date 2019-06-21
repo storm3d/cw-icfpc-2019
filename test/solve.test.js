@@ -10,7 +10,7 @@ describe("solver", () => {
         | . . . |
         | W . . |`;
     let s = parseState(layout);
-    expect(s.m.getFreeNum()).toEqual(9);
+    expect(s.m.getFreeNum()).toEqual(8);
 
     let solver = new Solver(s);
     let solution = solver.solve();
