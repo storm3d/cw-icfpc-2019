@@ -66,4 +66,24 @@ describe("Basic model", () => {
     expect(s.m.h).toEqual(2);
   });
 
+  test("State occupancy test", () => {
+
+    const layout = `
+        | * * * . |
+        | . # . . |
+        `;
+    let s = parseState(layout);
+    expect(s.m.isWrapped(0, 1)).toEqual(true);
+    expect(s.m.isWrapped(3, 1)).toEqual(false);
+    expect(s.m.isWrapped(1, 0)).toEqual(false);
+
+    expect(s.m.isPassable(1, 0)).toEqual(false);
+    expect(s.m.isPassable(0, 0)).toEqual(true);
+    expect(s.m.isPassable(0, 1)).toEqual(true);
+
+    expect(s.m.isObstacle(0, 0)).toEqual(false);
+    expect(s.m.isObstacle(0, 1)).toEqual(false);
+    expect(s.m.isObstacle(1, 0)).toEqual(true);
+  });
+
 });

@@ -59,11 +59,15 @@ export class Matrix {
   }
 
   isWrapped(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)] > 0;
+    return this.pixels[this.coord2index(x, y)] === WRAPPED;
   }
 
   isObstacle(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)] > 0;
+    return this.pixels[this.coord2index(x, y)] === OBSTACLE;
+  }
+
+  isPassable(x: number, y: number) {
+    return this.pixels[this.coord2index(x, y)] === WRAPPED || this.pixels[this.coord2index(x, y)] === FREE;
   }
 
   coord2index(x: number, y: number) {
