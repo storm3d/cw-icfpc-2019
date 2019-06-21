@@ -30,7 +30,7 @@ export class Solution {
     }
 
     attachNewManipulatorWithRelativeCoordinates(x: number, y: number) {
-        this.result += "B(" + x + ", " + y + ")"
+        this.result += "B(" + x + "," + y + ")"
     }
 
     attachFastWheels() {

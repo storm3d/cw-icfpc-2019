@@ -16,6 +16,6 @@ describe("Solution", () => {
         s.attachFastWheels();
         s.startUsingDrill();
 
-        expect(s.solution()).toEqual("WSADZEQB(2, 16)FL");
+        expect(s.solution()).toEqual("WSADZEQB(2,16)FL");
     })
 });
