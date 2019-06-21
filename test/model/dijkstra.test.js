@@ -10,7 +10,7 @@ describe("Nearest Free Neighbor", () => {
 
     let path = nearestFree(m, new Coord(0, 0));
 
-    expect(path.length).toEqual(1);
+    expect(path).toEqual([new Coord(1, 0)]);
   });
 
   test("beyond obstacle", () => {
@@ -21,8 +21,7 @@ describe("Nearest Free Neighbor", () => {
 
     let path = nearestFree(m, new Coord(0, 0));
 
-    expect(path).toEqual(["3", "4", "5", "2"]);
-
+    expect(path).toEqual([new Coord(0, 1), new Coord(1, 1), new Coord(2, 1), new Coord(2, 0)]);
   });
 
   test("no reachable free tiles", () => {

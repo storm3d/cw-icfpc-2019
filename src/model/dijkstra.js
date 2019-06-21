@@ -169,5 +169,9 @@ export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
       shortestPath = solutions[s].path;
     }
   }
+  if (shortestPath) {
+    shortestPath = shortestPath.map( i => m.index2Coord(i));
+  }
+
   return shortestPath;
 }

@@ -86,6 +86,10 @@ export class Matrix {
     return c.x + this.w * c.y;
   }
 
+  index2Coord(index: number): Coord {
+    return new Coord(index % this.w, Math.floor(index / this.w));
+  }
+
   toIndex(x: number, y: number): number {
     return x + this.w * y;
   }
