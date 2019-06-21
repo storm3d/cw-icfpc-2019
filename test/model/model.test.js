@@ -44,7 +44,7 @@ describe("Basic model", () => {
     expect(s.dump()).toEqual(one);
   });
 
-  test("State dump", () => {
+  test("State parse and dump", () => {
 
     const layout = `| B # # . |
 | W # # . |

@@ -1,6 +1,25 @@
 // @flow
+import {Coord} from "./model.js";
+
 export class Solution {
     result: string = "";
+
+    move(first: Coord, second: Coord) {
+        let diff = first.getDiff(second);
+
+        if (diff.x === 1 && diff.y === 0) {
+            this.moveRight()
+        }
+        if (diff.x === -1 && diff.y === 0) {
+            this.moveLeft()
+        }
+        if (diff.x === 0 && diff.y === 1) {
+            this.moveUp()
+        }
+        if (diff.x === 0 && diff.y === -1) {
+            this.moveDown()
+        }
+    }
 
     moveUp() {
         this.result += "W";
