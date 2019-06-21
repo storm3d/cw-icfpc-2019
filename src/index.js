@@ -20,7 +20,7 @@ const exec = (model: string, callback: Function) => {
     let reader = new Reader('part-1-initial',model);
     let s = reader.read();
 
-    console.log(s.dump());
+    // console.log(s.dump());
 
     let solver = new Solver(s);
     let solution = solver.solve();
@@ -33,11 +33,12 @@ const exec = (model: string, callback: Function) => {
 
 const highload = () => {
     let start = new Date();
-    let s = new State(400, 400);
+    let size = 800;
+    let s = new State(size, size);
     s.workerPos = new Coord(1, 1);
-    for (let j = 0; j < 400; j++) {
-        for (let i = 0; i < 400; i++) {
-            if (Math.random() < 0.95 || (i === 1 && j === 1)) {
+    for (let j = 0; j < size; j++) {
+        for (let i = 0; i < size; i++) {
+            if (Math.random() < 0.90 || (i === 1 && j === 1)) {
                 s.m.set(i, j, FREE);
             } else {
                 s.m.set(i,j, OBSTACLE)
