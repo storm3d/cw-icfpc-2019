@@ -1,37 +1,39 @@
 // @flow
-// import {read} from './io/read'
-// import {write} from './io/write'
-// import Solver from "./solve";
+import {read} from './io/read'
+import {write} from './io/write'
+import {Matrix, WRAPPED} from "./model/model.js";
+import {Solution} from "./model/solution.js";
+import Solver from "./solve";
 
-const exec = (inputFolder: string, outputFolder: string, num: string) => {
-    // eslint-disable-next-line no-console
-    console.log(inputFolder, outputFolder, num);
-    // here we go
-    // TODO: read here
+const exec = () => {
+    console.log(2);
+    let m = new Matrix(15, 6);
+    m.set(0, 0, WRAPPED);
+    console.log(2.5);
+    console.log(m.dump());
+    console.log(3);
 
-    // TODO: solve here
 
-    // TODO: write here
+    let s = new Solution();
+    s.moveUp();
+    s.moveDown();
+    s.moveLeft();
+    s.moveRight();
+    s.doNothing();
+    s.turnManipulatorsClockwise();
+    s.turnManipulatorsCounterclockwise();
+    s.attachNewManipulatorWithRelativeCoordinates(2, 16);
+    s.attachFastWheels();
+    s.startUsingDrill();
+
+    console.log(s.solution());
 };
 
 if (process.send === undefined) {
-    exec('part-1-initial', "solutions", "001");
+
+    exec();
 }
 
-// msg it is the number of the task
-process.on('message', (msg) => {
-    // eslint-disable-next-line no-console
-    console.log(msg);
-     if (msg === 'kill') {
-         process.exit(0);
-     } else if (msg === 'ask') {
-         if (process.send !== undefined) {
-             process.send('message');
-         }
-     } else {
-         exec('part-1-initial', 'solutions', msg);
-     }
-});
 
 module.exports = {
     exec

@@ -1,8 +1,10 @@
+// @flow
 import {cpus} from "os";
 // eslint-disable-next-line camelcase
 import child_process from 'child_process'
 
-function formatNum(num, size = 2) {
+
+function formatNum(num: number, size: number): string {
     let s = String(num);
     while (s.length < (size || 2)) {
         s = `0${s}`;
@@ -42,5 +44,5 @@ const launcher = () => {
 launcher();
 
 module.exports = {
-    launch
+    launch, formatNum
 };
