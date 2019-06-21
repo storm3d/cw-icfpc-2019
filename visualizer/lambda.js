@@ -4467,13 +4467,15 @@ validate;
     Nl || (Nl = new Ml);
     return Nl
   }
+  // run the wrapper
   function Ul(a) {
-    a.Qf.e() || (Sg(Tg()).clearInterval(a.Qf.Pa() | 0), a.Qf = A(), a.Dc = A(), a.Hi = !0, Vl(a))
+    a.Qf.e() || (Sg(Tg()).clearInterval(a.Qf.Pa() | 0), a.Qf = A(), a.Dc = A(), a.isPlaying = true, Vl(a))
   }
+  // toggle wrapper on Space/'S'
   function Wl() {
     var a = getMainNamespace();
     a.Dc.e() || (0 === a.Dc.Pa().Ve ? Xl(a, a.fh, Gg().vg)  : Xl(a, a.eh, Gg().vg));
-    a.Hi || Yl(a)
+    a.isPlaying || Yl(a)
   }
   function Zl(a, b, c, e, f, g, h, l, m) {
     var n = new $l(g),
@@ -4784,7 +4786,7 @@ validate;
     this.aj = this.mo = this.lo = 0;
     this.Qf = this.kh = null;
     this.gc = this.an = 0;
-    this.Hi = !1;
+    this.isPlaying = false;
     this.pe = this.Dc = this.vd = this.oe = this.Qc = this.ne = this.qe = this.re = this.Jh = this.mh = this.hh = this.Fh = this.Ih = this.wg = this.yg = this.xg = this.zg = this.Jf = this.qg = this.gh = this.bh = this.Zg = this.dh = this.eh = this.fh = this.ch = this.rg = this.og = this.ah = this.Yg = this.sg = this.tg = this.ug = this.Gh = this.yf = this.zf = this.Af = this.kf = this.ag = this.ji = this.Vi = this.Yi = this.Pf = null;
     this.q = 0;
     MainNamespace = this;
@@ -4795,7 +4797,7 @@ validate;
     this.kh = A();
     this.Qf = A();
     this.gc = this.an = 50;
-    this.Hi = !0;
+    this.isPlaying = true;
     this.Pf = new C(function (a) {
       return function () {
         Ul(getMainNamespace());
@@ -4842,6 +4844,7 @@ validate;
         }
       }
     }(this));
+    this.drawOnCanvasOnTick = this.Pf;
     this.Yi = new C(function () {
       return function () {
         if (getMainNamespace().jg().files[0] instanceof Blob) {
@@ -5054,7 +5057,7 @@ validate;
     this.jg().onchange = rm(Tl(), this.Yi);
     this.hg().onchange = rm(Tl(), this.Vi);
     // input#submit_solution
-    this.getSubmitSolutionInput().onclick = rm(Tl(), this.Pf);
+    this.getSubmitSolutionInput().onclick = rm(Tl(), this.drawOnCanvasOnTick);
     Sg(Tg()).onkeypress = function handleDocumentKeypress(a) {
       a: {
         getMainNamespace();
@@ -5072,10 +5075,10 @@ validate;
           case 115: // 'S' key (lowercase)
             a.preventDefault();
             a = getMainNamespace();
-            a.Hi = !a.Hi;
+            a.isPlaying = !a.isPlaying;
             break;
           case 114: // 'R' key (lowercase)
-            a = getMainNamespace().Pf.h(a);
+            a = getMainNamespace().drawOnCanvasOnTick.resetCanvas(a);
             break a;
           case 100: // 'D' key (lowercase)
             a.preventDefault();
@@ -7721,8 +7724,13 @@ validate;
   }
   C.prototype = new eo;
   C.prototype.constructor = C;
+  // resetCanvas
   C.prototype.h = function (a) {
     return (0, this.Gg) (a)
+  };
+  C.prototype.resetCanvas = function (event) {
+    // drawOnCanvasOnTick method
+    return this.Gg(event);
   };
   C.prototype.$classData = u({
     Aw: 0
@@ -25780,7 +25788,6 @@ validate;
     X().hl(!1)
   };
   render = function () {
-    debugger;
     // wtf is ug and tg ??
     ug || (ug = new tg);
     getMainNamespace().initVisualizerApp(!1)
