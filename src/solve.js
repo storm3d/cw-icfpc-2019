@@ -1,9 +1,8 @@
 // @flow
 
-import * as model from "./model/model";
-import {Solution} from "./model/solution.js";
+import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import { Coord } from "./model/model";
+import { State } from "./model/model";
 
 export default class Solver {
 
@@ -15,12 +14,12 @@ export default class Solver {
     this.solution = new Solution();
   }
 
-  solve() {
+  solve(): Solution {
 
     while(true) {
       let path = nearestFree(this.state.m, this.state.workerPos);
       if (path === undefined)
-        return this.solution.getString();
+        return this.solution;
 
       console.log(path);
 
@@ -30,7 +29,7 @@ export default class Solver {
       }
     }
 
-    return this.solution.getString();
+    return this.solution;
   }
 
 }
