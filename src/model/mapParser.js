@@ -1,7 +1,7 @@
 // @flow
 import fs from 'fs'
 
-import { State, OBSTACLE } from '../model/model'
+import { State, OBSTACLE, FREE } from '../model/model'
 
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g
 
@@ -21,21 +21,24 @@ export default class MapParser {
 
   getState(): State {
     const [contourClusters, initialWorkerPos, obstacles, boosters] = this.content.split('#')
-
-    this.fillObstacleCoords(contourClusters)
-
+    const map = this.formContoursMap(contourClusters)
     const [w, h] = this.getMatrixSize()
 
     this.state = new State(w, h)
-    this.fillWorkerStartPos(initialWorkerPos)
-    this.obstaclesCoords.map(([x, y]) => this.state.m.set(x, y, OBSTACLE))
+
+    for (let y = 0; y <= this.maxY; y++) {
+      let paint = OBSTACLE
+
+      for (let x = 0; x <= this.maxX; x++) {
+        if (map[x] && map[x].find(([startY, endY]) => startY <= y && y < endY)) {
+          paint = paint === OBSTACLE ? FREE : OBSTACLE
+        }
+
+        this.state.m.set(x, y, paint)
+      }
+    }
 
     return this.state
-  }
-
-  fillObstacleCoords(contourClusters: string): void {
-    contourClusters.split(';')
-      .map(contours => this.parseContourBoundaries(contours))
   }
 
   fillWorkerStartPos(initialWorkerPos: string): void {
@@ -47,9 +50,7 @@ export default class MapParser {
     this.state.workerPos.y = y
   }
 
-  parseContourBoundaries(contours: string): void {
-    const contoursCoords = []
-    const obstaclesCoords = []
+  formContoursMap(contours: string) {
     const matches = contours.match(COORDS_REGEXP)
 
     if (!matches) {
@@ -67,6 +68,8 @@ export default class MapParser {
     // Adds start coords in the end for closure
     coords.push(coords[0])
 
+    const map = {};
+
     for (let i = 0; i < coords.length; i++) {
       const currX = coords[i][0]
       const currY = coords[i][1]
@@ -75,70 +78,25 @@ export default class MapParser {
       this.maxY = currY > this.maxY ? currY : this.maxY
 
       if (i === 0) {
-        contoursCoords.push(coords[0])
         continue
       }
 
-      const prevX: number = coords[i - 1][0]
-      const prevY: number = coords[i - 1][1]
-      const dx: number = currX - prevX
-      const dy: number = currY - prevY
+      const prevX = coords[i - 1][0]
+      const prevY = coords[i - 1][1]
 
-      if (dx !== 0) {
-        const isGoingRight = dx > 0
-        const step = isGoingRight ? 1 : -1
-
-        for (let j = 0; j < Math.abs(dx); j++) {
-          const prevContourX = contoursCoords[contoursCoords.length - 1][0]
-          const prevContourY = coords[i][1]
-
-          contoursCoords.push([
-            prevContourX + step,
-            prevContourY
-          ])
-
-          if ((prevContourY - 1) < 0) {
-            continue
-          }
-
-          if (isGoingRight) {
-            obstaclesCoords.push([prevContourX + step, prevContourY - 1])
-          } else {
-            obstaclesCoords.push([prevContourX + step, prevContourY])
-          }
+      if (prevX === currX) {
+        if (!map[currX]) {
+          map[currX] = []
         }
-      }
 
-      if (dy !== 0) {
-        const isGoingUp = dy > 0
-        const step = isGoingUp ? 1 : -1
-
-        for (let j = 0; j < Math.abs(dy); j++) {
-          const prevContourX = coords[i][0]
-          const prevContourY = contoursCoords[contoursCoords.length - 1][1]
-
-          contoursCoords.push([
-            prevContourX,
-            prevContourY + step
-          ])
-
-          if ((prevContourX - 1) < 0) {
-            continue
-          }
-
-          if (isGoingUp) {
-            obstaclesCoords.push([prevContourX, prevContourY])
-          } else {
-            obstaclesCoords.push([prevContourX, prevContourY - 1])
-          }
-        }
+        map[currX].push([currY, prevY].sort((a, b) => a - b))
       }
     }
 
-    this.obstaclesCoords = this.obstaclesCoords.concat(obstaclesCoords)
+    return map
   }
 
   getMatrixSize(): Array<number> {
-    return [this.maxX + 1, this.maxY + 1]
+    return [this.maxX, this.maxY]
   }
 }

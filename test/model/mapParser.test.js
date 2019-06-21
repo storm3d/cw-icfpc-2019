@@ -4,13 +4,29 @@ import MapParser from '../../src/model/mapParser';
 describe("mapParser test", () => {
   test("draw contours boundaries map 'prob-001.desc'", () => {
     const expected = [
+      '| . . . . . . # # |',
+      '| . . . . . . . . |',
+      '| . . . . . . # # |',
+    ].join('\n')
+    const state = new MapParser('prob-001.desc').getState()
+
+    // console.log(state.dump())
+
+    assert.strictEqual(state.dump(), expected)
+
+  })
+
+  test("draw contours boundaries map 'prob-002.desc'", () => {
+    const expected = [
       '| # # # # # # . . . |',
       '| . . . . . . # # . |',
       '| . . . . . . . . # |',
-      '| W . . . . . # # # |',
+      '| W . . . . . # # . |',
       '',
     ].join('\n')
-    const state = new MapParser('prob-001.desc').getState()
+    const state = new MapParser('prob-002.desc').getState()
+
+    console.log(state.dump())
 
     assert.strictEqual(state.dump(), expected)
   })
