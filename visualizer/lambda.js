@@ -1662,6 +1662,7 @@ validate;
     }(l, n, m)));
     Ee(b, c, e, f, g, h, n.lb, a.Ve)
   }
+  // lambda.contest.checkers.TaskExecution
   function Fe(a, b, c, e, f) {
     this.Ff = this.ce = this.Bd = null;
     this.Ng = a;
@@ -1699,11 +1700,12 @@ validate;
     }(a))).kl();
     return c
   }
-  function Ke(a) {
+  var Ke = isAllMapWrapped;
+  function isAllMapWrapped(a) {
     var b = new Kb;
     try {
       var c = a.ej,
-      e = - 1 + c | 0;
+      e = - 1 + c | 0; // e = wtf??
       if (!(0 >= c)) for (c = 0; ; ) {
         var f = c,
         g = a.gj,
@@ -1741,9 +1743,9 @@ validate;
           }
         }(a, b)));
         if (c === e) break;
-        c = 1 + c | 0
+        c = 1 + c | 0 // c++
       }
-      return !0
+      return true
     } catch (K) {
       if (Me(K)) {
         a = K;
@@ -4468,14 +4470,23 @@ validate;
     return Nl
   }
   // run the wrapper
-  function Ul(a) {
+  // TODO: rename to stopWrapper
+  var Ul = runWrapper;
+  function runWrapper(a) {
     a.Qf.e() || (Sg(Tg()).clearInterval(a.Qf.Pa() | 0), a.Qf = A(), a.Dc = A(), a.isPlaying = true, Vl(a))
   }
   // toggle wrapper on Space/'S'
   function Wl() {
     var a = getMainNamespace();
-    a.Dc.e() || (0 === a.Dc.Pa().Ve ? Xl(a, a.fh, Gg().vg)  : Xl(a, a.eh, Gg().vg));
-    a.isPlaying || Yl(a)
+    if (a.Dc.Pa().Ve) {
+      // "Press SPACE (s) to begin execution"
+      renderTextToCanvas(a, a.fh, Gg().vg)
+    } else {
+      // "Press SPACE (s) to resume execution"
+      renderTextToCanvas(a, a.eh, Gg().vg)
+    }
+    // TODO: probably should be called isPaused
+    a.isPlaying || renderNextFrame(a)
   }
   function Zl(a, b, c, e, f, g, h, l, m) {
     var n = new $l(g),
@@ -4750,12 +4761,13 @@ validate;
     }(a, c)));
     Eg(c, b.Sf, Gg().Zj)
   }
-  function dm(a) {
+  function clearCanvas(a) {
     var b = em(a),
     c = Fg(Gg().Hf);
     b.fillStyle = c;
     em(a).fillRect(0, 0, fm(a).width | 0, (fm(a).height | 0) - a.aj | 0)
   }
+  // var dm = clearCanvas;
   function gm() {
     var a = getMainNamespace();
     a.re = '';
@@ -4798,15 +4810,17 @@ validate;
     this.Qf = A();
     this.gc = this.an = 50;
     this.isPlaying = true;
-    this.Pf = new C(function (a) {
-      return function () {
-        Ul(getMainNamespace());
+    this.Pf =  this.drawOnCanvasOnTick = new C(function triggerDrawingOnCanvas(a) {
+      return function closureTriggerDrawing() {
+        runWrapper(getMainNamespace());
         if (getMainNamespace().Qc.e() ? 0 : !getMainNamespace().vd.e()) {
           Xl(getMainNamespace(), getMainNamespace().rg, Gg().oj);
           var b = new F(function () {
             return function () {
               var a = getMainNamespace().Qc.Pa();
-              dm(getMainNamespace());
+              // this probably resets the canvas to empty state
+              clearCanvas(getMainNamespace());
+              // this draws the map to canvas
               cm(getMainNamespace(), a, getMainNamespace().kh.Pa());
               var b = getMainNamespace().pe;
               a: {
@@ -4835,6 +4849,7 @@ validate;
               getMainNamespace().Dc = new M(Oe(Ve(), f, b, h, a.Sf, getMainNamespace().vd.Pa(), getMainNamespace().oe));
               a = Sg(Tg()).setInterval(function () {
                 getMainNamespace();
+                // this thing draws "Press Space" message to canvas
                 Wl()
               }, Ma(1000, getMainNamespace().gc)) | 0;
               getMainNamespace().Qf = new M(a)
@@ -4844,7 +4859,6 @@ validate;
         }
       }
     }(this));
-    this.drawOnCanvasOnTick = this.Pf;
     this.Yi = new C(function () {
       return function () {
         if (getMainNamespace().jg().files[0] instanceof Blob) {
@@ -4855,7 +4869,7 @@ validate;
             }
           }(a);
           a.readAsText(getMainNamespace().jg().files[0])
-        } else dm(getMainNamespace()),
+        } else clearCanvas(getMainNamespace()),
         Xl(getMainNamespace(), getMainNamespace().qg, Gg().Kf),
         gm(),
         Vl(getMainNamespace())
@@ -5050,7 +5064,7 @@ validate;
     Gb(a, this.kf, this.ah);
     fm(this).width = qm(this).ob();
     fm(this).height = qm(this).Jb() + this.aj | 0;
-    dm(this);
+    clearCanvas(this);
     Xl(this, this.gh, Gg().vg);
     sm(this);
     Vl(this);
@@ -5123,7 +5137,9 @@ validate;
       a.Qf = new M(b)
     }
   }
-  function Yl(a) {
+  // this function probably render new frame on setInterval
+  var Yl = renderNextFrame;
+  function renderNextFrame(a) {
     if (jm(a)) {
       var b = a.kh.Pa(),
       c = a.Dc.Pa();
@@ -5165,7 +5181,7 @@ validate;
             return b.F(a)
           }
         }(Wa, lb, Xa)));
-        e(f, g, h, q, fa, lb.lb, c.Ve);
+        e(f, g, h, q, fa, lb.lb, c.Ve); // renders text `Runnning: ${x} rounds` to canvas
         for (var Ea = new te(c.Bd), qc = J().y, Hc = L(Ea, qc), rc = ue(), Ub = ig(Hc, rc); !Ub.e(); ) {
           var Sd = Ub.g() | 0;
           we(c, Sd);
@@ -5201,7 +5217,7 @@ validate;
             return b.F(a)
           }
         }(Ac, Zn, Yn)));
-        e(sc, df, Nb, Xn, Dk, Zn.lb, c.Ve)
+        e(sc, df, Nb, Xn, Dk, Zn.lb, c.Ve) // render next move of a wrapper
       } catch (Ck) {
         if (c = qe(Q(), Ck), null !== c) if (re(c)) b = c.Cd,
         c = c.Ae,
@@ -5213,12 +5229,15 @@ validate;
          else throw se(Q(), c);
          else throw Ck;
       } else Ul(a),
-      Ke(c) ? Xl(a, 'Success! Your getString took ' + c.Ve + ' time units.', Gg().Qm)  : Xl(a, 'Not all parts of the task were covered.', Gg().Kf),
+      // this branch runs when the solution is ended
+     isAllMapWrapped(c) ? renderTextToCanvas(a, 'Success! Your getString took ' + c.Ve + ' time units.', Gg().Qm)
+       : renderTextToCanvas(a, 'Not all parts of the task were covered.', Gg().Kf),
       Vl(a),
       a.Dc = A()
     } else a.Dc = A()
   }
-  function Xl(a, b, c) {
+  var Xl = renderTextToCanvas;
+  function renderTextToCanvas(a, b, c) {
     var e = em(a),
     f = Fg(Gg().Hf);
     e.fillStyle = f;
@@ -5245,7 +5264,7 @@ validate;
     a = new F(function (a, b) {
       return function () {
         try {
-          dm(getMainNamespace());
+          clearCanvas(getMainNamespace());
           gm();
           getMainNamespace();
           var a = wb(b);
@@ -22409,6 +22428,7 @@ validate;
   App.e = function () {
     return !0
   };
+  App.emitTrue = () => true;
   App.wj = function () {
     throw Wm('head of empty stream');
   };
