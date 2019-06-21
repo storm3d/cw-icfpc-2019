@@ -4,29 +4,20 @@ import {write} from './io/write'
 import {Matrix, WRAPPED} from "./model/model.js";
 import {Solution} from "./model/solution.js";
 import Solver from "./solve";
+import { parseMatrix } from "./model/model";
 
 const exec = () => {
-    console.log(2);
-    let m = new Matrix(10, 10);
-    m.set(0, 0, WRAPPED);
-    console.log(2.5);
+
+    const layout = `
+        | . # # |
+        | . # # |
+        | . . . |
+        | x . . |`;
+    let m = parseMatrix(layout);
     console.log(m.dump());
-    console.log(3);
 
+    let solver = new Solver();
 
-    let s = new Solution();
-    s.moveUp();
-    s.moveDown();
-    s.moveLeft();
-    s.moveRight();
-    s.doNothing();
-    s.turnManipulatorsClockwise();
-    s.turnManipulatorsCounterclockwise();
-    s.attachNewManipulatorWithRelativeCoordinates(2, 16);
-    s.attachFastWheels();
-    s.startUsingDrill();
-
-    console.log(s.solution());
 };
 
 if (process.send === undefined) {

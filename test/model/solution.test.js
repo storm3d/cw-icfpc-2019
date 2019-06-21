@@ -47,3 +47,4 @@ describe("Solution tests", () => {
         expect(sDrill.solution()).toEqual(drill);
     });
 });
+

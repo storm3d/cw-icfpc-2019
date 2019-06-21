@@ -71,7 +71,7 @@ export class Matrix {
   }
 
   isValidCoord(c: Coord) {
-    return c.x >= 0 && c.y >= 0 && c.z >= 0 && c.x < this.r && c.y < this.r && c.z < this.r
+    return c.x >= 0 && c.y >= 0 && c.x < this.w && c.y < this.h
   }
 
   dump() {
@@ -126,10 +126,51 @@ export const parseMatrix = (layer: string) : Matrix => {
 export class Booster {
   pos : Coord;
   type : String;
+
+  constructor(x: number, y: number, type: String) {
+    this.pos = new Coord(x, y);
+    this.type = type;
+  }
 }
 
 export class State {
-  field : Matrix;
+  m : Matrix;
   boosters : Array<Booster>;
   workerPos : Coord;
+
+  constructor(w: number, h: number) {
+    this.m = new Matrix(w, h);
+    this.boosters = new Array();
+    this. workerPos = new Coord(0, 0);
+  }
+
+  dump() {
+    let str = "";
+
+    for (let j = this.m.h - 1; j >= 0; j--) {
+      str += "| ";
+      for (let i = 0; i < this.m.w; i++) {
+        let c = this.m.get(i, j);
+        let char = ". ";
+
+        if (c === FREE)
+          char = ". ";
+        else if (c === OBSTACLE)
+          char = "# ";
+        else if (c === WRAPPED)
+          char = "x ";
+
+        if(this.workerPos.x === i && this.workerPos.y === j)
+          char = "W ";
+
+        for(let k =0; k < this.boosters.length; k++)
+          if(this.boosters[k].pos.x === i && this.boosters[k].pos.y === j)
+            char = this.boosters[k].type + " ";
+
+        str += char;
+      }
+      str += "|\n";
+    }
+    return str;
+  }
 }
