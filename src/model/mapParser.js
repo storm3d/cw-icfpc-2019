@@ -6,8 +6,6 @@ import { State, OBSTACLE, FREE } from '../model/model'
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g
 
 export default class MapParser {
-  maxX: number = 0
-  maxY: number = 0
   obstaclesCoords: Array<Array<number>> = []
   path: string
   state: State
@@ -21,15 +19,17 @@ export default class MapParser {
 
   getState(): State {
     const [contourClusters, initialWorkerPos, obstacles, boosters] = this.content.split('#')
-    const map = this.formContoursMap(contourClusters)
-    const [w, h] = this.getMatrixSize()
+    const { map, maxY, maxX } = this.formContoursMap(contourClusters)
+    // const { map: obstaclesMap } = this.formContoursMap(obstacles)
 
-    this.state = new State(w, h)
+    // console.log(obstaclesMap)
 
-    for (let y = 0; y <= this.maxY; y++) {
+    this.state = new State(maxX, maxY)
+
+    for (let y = 0; y <= maxY; y++) {
       let paint = OBSTACLE
 
-      for (let x = 0; x <= this.maxX; x++) {
+      for (let x = 0; x <= maxX; x++) {
         if (map[x] && map[x].find(([startY, endY]) => startY <= y && y < endY)) {
           paint = paint === OBSTACLE ? FREE : OBSTACLE
         }
@@ -48,11 +48,13 @@ export default class MapParser {
     const x = parseInt(t[0].slice(1), 10)
     const y = parseInt(t[1].slice(0, -1), 10)
 
-    this.state.workerPos.x = x
-    this.state.workerPos.y = y
+    this.state.worker.pos.x = x
+    this.state.worker.pos.y = y
   }
 
   formContoursMap(contours: string) {
+    let maxX = 0
+    let maxY = 0
     const matches = contours.match(COORDS_REGEXP)
 
     if (!matches) {
@@ -76,8 +78,8 @@ export default class MapParser {
       const currX = coords[i][0]
       const currY = coords[i][1]
 
-      this.maxX = currX > this.maxX ? currX : this.maxX
-      this.maxY = currY > this.maxY ? currY : this.maxY
+      maxX = currX > maxX ? currX : maxX
+      maxY = currY > maxY ? currY : maxY
 
       if (i === 0) {
         continue
@@ -95,10 +97,6 @@ export default class MapParser {
       }
     }
 
-    return map
-  }
-
-  getMatrixSize(): Array<number> {
-    return [this.maxX, this.maxY]
+    return { maxX, maxY, map }
   }
 }
