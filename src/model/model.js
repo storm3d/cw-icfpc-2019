@@ -33,6 +33,14 @@ export class Coord {
     return new Coord(this.x, this.y)
   }
 
+  rotCW(): Coord {
+    return new Coord(this.y, this.x == 0 ? 0 : -this.x);
+  }
+
+  rotCCW(): Coord {
+    return new Coord(this.y == 0 ? 0 : -this.y, this.x);
+  }
+
   isObstacleCrossed(to, testedCoord: Coord) {
     return this.getPointOfIntersection(this.getCenter(),
         to.getCenter(),
@@ -89,9 +97,8 @@ export class Matrix {
   }
 
   wrap(x: number, y: number) {
-    if (this.pixels[this.toIndex(x, y) === OBSTACLE])
-      throw `Trying to wrap pixel (${x}, ${y}) however it's an obstacle`;
-    this.pixels[this.toIndex(x, y)] = WRAPPED;
+    if (this.pixels[this.toIndex(x, y)] !== OBSTACLE)
+      this.pixels[this.toIndex(x, y)] = WRAPPED;
   }
 
   isWrapped(x: number, y: number) {
@@ -211,6 +218,25 @@ export const parseMatrix = (layer: string) : Matrix => {
   return matrix;
 };
 
+export class Rover {
+  pos: Coord;
+  manipulators: Array<Coord>;
+
+  constructor(pos: Coord, manipulators: Array<Coord>) {
+    this.pos = pos;
+    this.manipulators = manipulators;
+  }
+
+  rotCW() {
+    this.manipulators = this.manipulators
+      .map(c => c.rotCW());
+  }
+
+  rotCCW() {
+    this.manipulators = this.manipulators
+      .map(c => c.rotCCW());
+  }
+}
 
 export class Booster {
   pos : Coord;
@@ -225,7 +251,7 @@ export class Booster {
 export class State {
   m : Matrix;
   boosters : Array<Booster>;
-  workerPos : Coord;
+  worker : Rover;
   extensions : Number;
   fasts : Number;
   drills : Number;
@@ -234,7 +260,7 @@ export class State {
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = new Array();
-    this.workerPos = new Coord(-1, -1);
+    this.worker = new Rover(new Coord(-1, -1), [new Coord(1, -1), new Coord(1, 0), new Coord(1, 1)]);
     this.extensions = 0;
     this.fasts = 0;
     this.drills = 0;
@@ -242,8 +268,12 @@ export class State {
   }
 
   moveWorker(newPos : Coord) {
-    this.workerPos = newPos.getCopy();
-    this.m.wrap(this.workerPos.x, this.workerPos.y);
+    this.worker.pos = newPos.getCopy();
+
+    let wx = this.worker.pos.x;
+    let wy = this.worker.pos.y;
+    this.m.wrap(wx, wy);
+    // this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
 
     for(let i = this.boosters.length - 1; i >= 0; i--) {
       if(this.boosters[i].pos.isEqual(this.workerPos)) {
@@ -278,7 +308,7 @@ export class State {
         else if (c === WRAPPED)
           char = "* ";
 
-        if(this.workerPos.x === i && this.workerPos.y === j)
+        if(this.worker.pos.x === i && this.worker.pos.y === j)
           char = "W ";
 
         for(let k = 0; k < this.boosters.length; k++)
@@ -292,6 +322,18 @@ export class State {
     return str;
   }
 }
+
+export const parseCoords = (coords: string) : Array<Coord> => {
+  // (4, 5), (1, -1), (7, 0)
+
+  return coords.split(")") // split by closing brace
+    .map(c => c.replace(/ *\,? *\( */, "")) // remove opening brace with comma and spaces
+    .filter(c => c !== "")
+    .map(c => {
+      let xy = c.split(',');
+      return new Coord(parseInt(xy[0].trim()), parseInt(xy[1].trim()));
+    });
+};
 
 export const parseState = (layer: string) : State => {
 

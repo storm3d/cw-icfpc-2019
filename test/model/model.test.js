@@ -35,8 +35,8 @@ describe("Basic model", () => {
     s.m.set(0, 0, WRAPPED);
     s.m.set(1, 0, OBSTACLE);
 
-    s.workerPos.x = 0;
-    s.workerPos.y = 1;
+    s.worker.pos.x = 0;
+    s.worker.pos.y = 1;
 
     s.boosters.push(new Booster(1, 1, 'F'))
 
@@ -57,11 +57,16 @@ describe("Basic model", () => {
   });
 
   test("Cross Obstacle", () => {
-    let m = new Matrix(4, 4);
-    m.set(2, 2, OBSTACLE);
+    const layout = `| . . . . . |
+| . . . . . |
+| . . # . . |
+| . . . . . |
+| * . . . . |
+`;
 
-    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
-    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
+    let s = parseState(layout);
+    expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
+    expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
   });
 
   test("State parse empty", () => {

@@ -43,13 +43,13 @@ export default class MapParser {
     const x = parseInt(t[0].slice(1), 10)
     const y = parseInt(t[1].slice(0, -1), 10)
 
-    this.state.workerPos.x = x
-    this.state.workerPos.y = y
+    this.state.worker.pos.x = x;
+    this.state.worker.pos.y = y;
   }
 
   parseContourBoundaries(contours: string): void {
-    const contoursCoords = []
-    const obstaclesCoords = []
+    const contoursCoords = [];
+    const obstaclesCoords = [];
     const matches = contours.match(COORDS_REGEXP)
 
     if (!matches) {
