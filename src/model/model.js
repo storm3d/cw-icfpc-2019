@@ -85,14 +85,14 @@ export class Matrix {
   constructor(w: number, h: number) {
     this.w = w;
     this.h = h;
-    this.pixels = new Uint8Array(w * h);
+    this.pixels = new Uint16Array(w * h);
   }
 
   get(x: number, y: number) {
     return this.pixels[this.toIndex(x, y)];
   }
 
-  set(x: number, y: number, v: FREE | OBSTACLE | WRAPPED) {
+  set(x: number, y: number, v: number /*FREE | OBSTACLE | WRAPPED*/) {
     this.pixels[this.toIndex(x, y)] = v;
   }
 

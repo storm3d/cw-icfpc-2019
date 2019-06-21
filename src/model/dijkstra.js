@@ -153,7 +153,129 @@ function matrixToGraph(m: Matrix) {
   return graph;
 }
 
+function breadthSearch(m: Matrix, source: Coord) {
+
+  let lens = new Matrix(m.w, m.h);
+  let front = new Array(source.getCopy());
+  lens.set(source.x, source.y, 1)
+
+  let nearestFree : Coord = 0;
+
+  while(front.length) {
+    let c = front[0];
+    let curLen = lens.get(c.x, c.y);
+    front.shift();
+
+    let nx = c.x + 1;
+    let ny = c.y;
+
+    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
+      nearestFree = new Coord(nx, ny);
+      break;
+    }
+    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
+      front.push(new Coord(nx, ny));
+      lens.set(nx, ny, curLen + 1);
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+
+    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
+      nearestFree = new Coord(nx, ny);
+      break;
+    }
+    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
+      front.push(new Coord(nx, ny));
+      lens.set(nx, ny, curLen + 1);
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+
+    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
+      nearestFree = new Coord(nx, ny);
+      break;
+    }
+    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
+      front.push(new Coord(nx, ny));
+      lens.set(nx, ny, curLen + 1);
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+
+    if(m.isFree(nx, ny) && m.isValid(nx, ny)) {
+      nearestFree = new Coord(nx, ny);
+      break;
+    }
+    if(m.isWrapped(nx, ny) && m.isValid(nx, ny) && lens.get(nx, ny) === 0) {
+      front.push(new Coord(nx, ny));
+      lens.set(nx, ny, curLen + 1);
+    }
+  }
+
+  if(nearestFree === 0)
+    return undefined;
+
+  let path = [ nearestFree ];
+  while(true) {
+   //console.log(path);
+
+    let c = path[path.length - 1];
+    let minL = 999999;
+    let minC = 0;
+
+    let nx = c.x + 1;
+    let ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    if(!minC)
+      throw "Weird shit happened";
+
+    path.push(minC);
+  }
+
+  return path.reverse();
+}
+
 export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
+
+  return breadthSearch(m, source);
+
+  /*
 
   if (m.isValid(source.x + 1, source.y) && m.isFree(source.x + 1, source.y))
     return [new Coord(source.x + 1, source.y)];
@@ -187,4 +309,6 @@ export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
   }
 
   return shortestPath;
+
+   */
 }
