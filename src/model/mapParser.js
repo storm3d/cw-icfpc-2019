@@ -38,6 +38,8 @@ export default class MapParser {
       }
     }
 
+    this.fillWorkerStartPos(initialWorkerPos)
+
     return this.state
   }
 
