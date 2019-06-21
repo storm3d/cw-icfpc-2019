@@ -47,35 +47,51 @@ export class Matrix {
   }
 
   get(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)];
+    return this.pixels[this.toIndex(x, y)];
   }
 
-  set(x: number, y: number, v: number) {
-    this.pixels[this.coord2index(x, y)] = v;
+  set(x: number, y: number, v: FREE | OBSTACLE | WRAPPED) {
+    this.pixels[this.toIndex(x, y)] = v;
   }
 
   wrap(x: number, y: number) {
-    this.pixels[this.coord2index(x, y)] = 1;
+    if (this.pixels[this.toIndex(x, y) === OBSTACLE])
+      throw `Trying to wrap pixel (${x}, ${y}) however it's an obstacle`;
+    this.pixels[this.toIndex(x, y)] = WRAPPED;
   }
 
   isWrapped(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)] === WRAPPED;
+    return this.pixels[this.toIndex(x, y)] === WRAPPED;
   }
 
-  isObstacle(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)] === OBSTACLE;
+  isFree(x: number, y: number) {
+    return this.pixels[this.toIndex(x, y)] === FREE;
   }
 
-  isPassable(x: number, y: number) {
-    return this.pixels[this.coord2index(x, y)] === WRAPPED || this.pixels[this.coord2index(x, y)] === FREE;
+  isFreeIndex(index: number) {
+    return this.pixels[index] === FREE;
   }
 
-  coord2index(x: number, y: number) {
+  isObstacle(x: number, y: number): boolean {
+    return this.pixels[this.toIndex(x, y)] === OBSTACLE;
+  }
+
+  coord2index(c: Coord): number {
+    if (!c instanceof Coord)
+      throw `invalid argument ${c}`;
+    return c.x + this.w * c.y;
+  }
+
+  toIndex(x: number, y: number): number {
     return x + this.w * y;
   }
 
-  isValidCoord(c: Coord) {
-    return c.x >= 0 && c.y >= 0 && c.x < this.w && c.y < this.h
+  isValidCoord(c: Coord): boolean {
+    return c.x >= 0 && c.y >= 0 && c.x < this.w && c.y < this.h;
+  }
+
+  isValid(x: number, y: number): boolean {
+    return x >= 0 && y >= 0 && x < this.w && y < this.h;
   }
 
   dump() {
