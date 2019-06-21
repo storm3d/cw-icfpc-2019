@@ -1,7 +1,5 @@
 // @flow
 import {cpus} from "os";
-// eslint-disable-next-line camelcase
-import child_process from 'child_process'
 
 const {fork} = require('child_process');
 
