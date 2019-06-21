@@ -41,4 +41,22 @@ describe("mapParser test", () => {
     // assert.strictEqual(state.dump(), expected)
   })
 
+  test("draw contours boundaries map 'example-01.desc'", () => {
+    const expected = [
+      '| . . . . . . . . . . |',
+      '| . . . . . # . . . . |',
+      '| . . . . . . . . . . |',
+      '| . . . . # # . . . . |',
+      '| . . . . # # . . . . |',
+      '| . . . . # # . . . . |',
+      '| . . . . # # . . . . |',
+      '| . . . . # # . . . . |',
+      '| . . . . . . . . . . |',
+      '| W . . . . . . . . . |',
+      '',
+    ].join('\n')
+    const state = new MapParser('./part-1-examples/example-01.desc').getState()
+    assert.strictEqual(state.dump(), expected)
+  })
+
 })
