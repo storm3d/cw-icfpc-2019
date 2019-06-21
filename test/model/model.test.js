@@ -13,7 +13,7 @@ describe("Basic model", () => {
     m.set(0, 0, WRAPPED);
     m.set(1, 0, OBSTACLE);
     const one =
-      `| . . |\n| x # |\n`;
+      `| . . |\n| * # |\n`;
     expect(m.dump()).toEqual(one);
   });
 
@@ -21,7 +21,7 @@ describe("Basic model", () => {
     const layout = `| . # # |
 | . # # |
 | . . . |
-| x . . |
+| * . . |
 `;
     let m = parseMatrix(layout);
     expect(m.dump()).toEqual(layout);
@@ -40,7 +40,7 @@ describe("Basic model", () => {
     s.boosters.push(new Booster(1, 1, 'F'))
 
     const one =
-      `| W F |\n| x # |\n`;
+      `| W F |\n| * # |\n`;
     expect(s.dump()).toEqual(one);
   });
 
@@ -49,7 +49,7 @@ describe("Basic model", () => {
     const layout = `| B # # . |
 | W # # . |
 | . F . L |
-| x . X . |
+| * . X . |
 `;
     let s = parseState(layout);
     expect(s.dump()).toEqual(layout);
@@ -64,6 +64,26 @@ describe("Basic model", () => {
     let s = parseState(layout);
     expect(s.m.w).toEqual(4);
     expect(s.m.h).toEqual(2);
+  });
+
+  test("State occupancy test", () => {
+
+    const layout = `
+        | * * * . |
+        | . # . . |
+        `;
+    let s = parseState(layout);
+    expect(s.m.isWrapped(0, 1)).toEqual(true);
+    expect(s.m.isWrapped(3, 1)).toEqual(false);
+    expect(s.m.isWrapped(1, 0)).toEqual(false);
+
+    expect(s.m.isPassable(1, 0)).toEqual(false);
+    expect(s.m.isPassable(0, 0)).toEqual(true);
+    expect(s.m.isPassable(0, 1)).toEqual(true);
+
+    expect(s.m.isObstacle(0, 0)).toEqual(false);
+    expect(s.m.isObstacle(0, 1)).toEqual(false);
+    expect(s.m.isObstacle(1, 0)).toEqual(true);
   });
 
 });
