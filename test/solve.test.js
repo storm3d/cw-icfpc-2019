@@ -16,31 +16,31 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(9);
+    expect(solution.getString().length).toEqual(7);
   })
 
   test("gather boosters", () => {
     const layout = `
-        | . F B |
+        | R F B |
         | X # # |
         | L . F |
         | W B R |`;
     let s = parseState(layout);
-    expect(s.m.getFreeNum()).toEqual(9);
+    expect(s.m.getFreeNum()).toEqual(8);
 
     let solver = new Solver(s);
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(9);
+    expect(solution.getString().length).toEqual(7);
 
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
-| * * * |
-| * * * |
+| * * F |
+| * * R |
 `);
     expect(solver.state.extensions).toEqual(2);
-    expect(solver.state.fasts).toEqual(2);
+    expect(solver.state.fasts).toEqual(1);
     expect(solver.state.drills).toEqual(1);
     expect(solver.state.teleports).toEqual(1);
 
@@ -63,8 +63,8 @@ describe("solver", () => {
     let solver = new Solver(s);
     let solution = solver.solve();
 
-    console.log(solution.getString());
-    console.log(solution.getString().length);
+    //console.log(solution.getString());
+    //console.log(solution.getString().length);
   })
 
 });
