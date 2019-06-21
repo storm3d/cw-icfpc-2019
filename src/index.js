@@ -17,7 +17,7 @@ const exec = (model: string, callback: Function) => {
     // let s = parseState(layout);
     // console.log(s.dump());
 
-    let reader = new Reader('part-1-initial',model);
+    let reader = new Reader('problems',model);
     let s = reader.read();
 
     // console.log(s.dump());
