@@ -21,6 +21,7 @@
     "prettier/prettier": "off",
     "prefer-const": "off",
     "no-bitwise":"off",
-    "no-throw-literal":"off"
+    "no-throw-literal":"off",
+    "no-continue": "off"
   }
 }

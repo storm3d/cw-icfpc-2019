@@ -1,8 +1,10 @@
+// @flow
 import {Coord} from "./model.js";
-export class Solution {
-    result = "";
 
-    move(first, second: Coord) {
+export class Solution {
+    result: string = "";
+
+    move(first: Coord, second: Coord) {
         let diff = first.getDiff(second);
 
         if (diff.x === 1 && diff.y === 0) {
