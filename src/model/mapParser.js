@@ -56,8 +56,10 @@ export default class MapParser {
     this.fillWorkerStartPos(initialWorkerPos);
 
     let boostersArr = boosters.split(';');
+    //console.log(boostersArr);
     boostersArr.forEach(str => {
-      //console.log(str);
+      if(!str)
+        return;
 
       const type = str[0];
       str = str.substr(1);
