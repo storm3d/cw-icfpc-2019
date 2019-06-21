@@ -61,7 +61,7 @@ export class Solution {
         this.result += "L"
     }
 
-    solution() {
+    getString() {
         return this.result
     }
 }

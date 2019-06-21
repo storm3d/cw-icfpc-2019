@@ -365,19 +365,19 @@ validate;
     a.Kk('Prepare to Run');
     a.Hk('Cannot check: some parts of the input are missing or malformed');
     a.Pk('Pre-processing and validating the task...');
-    a.Ok('Validating the puzzle solution...');
+    a.Ok('Validating the puzzle getString...');
     a.Sk('Press SPACE (s) to begin execution');
     a.Rk('Press SPACE (s) to resume execution');
     a.Qk('Running');
-    a.Jk('Checking the solution...');
+    a.Jk('Checking the getString...');
     a.Lk('Failed to cover the full task');
-    a.Wk('Upload the task and solution files');
+    a.Wk('Upload the task and getString files');
     a.Nk('No task file provided');
-    a.Mk('No solution file provided');
+    a.Mk('No getString file provided');
     a.$k('Uploading task description...');
     a.Yk('Done uploading task description');
-    a.Zk('Uploading solution file...');
-    a.Xk('Done uploading solution');
+    a.Zk('Uploading getString file...');
+    a.Xk('Done uploading getString');
     a.pk('');
     a.mk('');
     a.hk('');
@@ -809,7 +809,7 @@ validate;
     this.Mp = 'Cannot perform this operation in location';
     this.Ep = 'Cannot use this boosters with arguments';
     this.Fp = 'Booster descriptor is malformed';
-    this.Hp = 'solution text is malformed';
+    this.Hp = 'getString text is malformed';
     this.Sp = 'the task description should contain no obstacles';
     this.$q = 'wrong booster configuration';
     this.Wq = 'some inside-points are not inside';
@@ -818,7 +818,7 @@ validate;
     this.dr = 'the task size is too small';
     this.er = 'the number of the vertices is not within the specified limits';
     this.br = 'the task area is too small';
-    this.Jf = 'No solution file for the team'
+    this.Jf = 'No getString file for the team'
   }
   Jc.prototype = new v;
   Jc.prototype.constructor = Jc;
@@ -5213,7 +5213,7 @@ validate;
          else throw se(Q(), c);
          else throw Ck;
       } else Ul(a),
-      Ke(c) ? Xl(a, 'Success! Your solution took ' + c.Ve + ' time units.', Gg().Qm)  : Xl(a, 'Not all parts of the task were covered.', Gg().Kf),
+      Ke(c) ? Xl(a, 'Success! Your getString took ' + c.Ve + ' time units.', Gg().Qm)  : Xl(a, 'Not all parts of the task were covered.', Gg().Kf),
       Vl(a),
       a.Dc = A()
     } else a.Dc = A()
@@ -5440,7 +5440,7 @@ validate;
                   Ae(b, m)
                 }
                 l = Ke(f) ? new M(f.Ve)  : A();
-                if (Vd(l)) var Wa = 'Success! \n' + ('Your solution took ' + (l.Xa | 0) + ' time units. \n');
+                if (Vd(l)) var Wa = 'Success! \n' + ('Your getString took ' + (l.Xa | 0) + ' time units. \n');
                  else {
                   if (A() !== l) throw new G(l);
                   Wa = a.bh

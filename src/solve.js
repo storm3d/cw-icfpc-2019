@@ -1,14 +1,36 @@
 // @flow
 
-import * as model from "./model/model";
+import {Solution} from "./model/solution";
+import nearestFree from "./model/dijkstra";
+import { State } from "./model/model";
 
 export default class Solver {
 
-  constructor() {
+  state : State;
+  solution : Solution;
+
+  constructor(state : State) {
+    this.state = state;
+    this.solution = new Solution();
   }
 
-  solve() {
-    return "hello"
+  solve(): Solution {
+
+    while(true) {
+      let path = nearestFree(this.state.m, this.state.worker.pos);
+      if (path === undefined)
+        return this.solution;
+
+      // console.log(path);
+
+      for (let i = 0; i < path.length; i++) {
+        this.solution.move(this.state.worker.pos, path[i]);
+        this.state.moveWorker(path[i]);
+        // console.log(this.state.dump());
+      }
+    }
+
+    return this.solution;
   }
 
 }
