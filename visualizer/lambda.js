@@ -4774,7 +4774,7 @@ validate;
     a.oe = B()
   }
   function Vl(a) {
-    jm(a) ? a.nh().disabled = !1 : a.nh().disabled = !0
+    jm(a) ? a.getSubmitSolutionInput().disabled = !1 : a.getSubmitSolutionInput().disabled = !0
   }
   function jm(a) {
     return (a.Qc.e() ? 0 : !a.vd.e()) ? !a.kh.e()  : !1
@@ -4905,7 +4905,7 @@ validate;
     0 === (128 & this.q) && 0 === (128 & this.q) && (this.hh = getDocument().getElementById(this.yf), this.q |= 128);
     return this.hh
   };
-  App.nh = function () {
+  App.getSubmitSolutionInput = function () {
     0 === (256 & this.q) && 0 === (256 & this.q) && (this.mh = getDocument().getElementById(this.kf), this.q |= 256);
     return this.mh
   };
@@ -5033,6 +5033,11 @@ validate;
     return a.bn
   }
   App.initVisualizerApp = function (a) {
+    /**
+     * What this method does?
+     * 1. Renders the file inputs and some other html elements.
+     * 2. Draws initial message to the canvas.
+     */
     var b = getAndAssignMainSectionEl(this);
     Ib(b, this.Af, this.ug);
     b = getAndAssignMainSectionEl(this);
@@ -5048,8 +5053,9 @@ validate;
     Vl(this);
     this.jg().onchange = rm(Tl(), this.Yi);
     this.hg().onchange = rm(Tl(), this.Vi);
-    this.nh().onclick = rm(Tl(), this.Pf);
-    Sg(Tg()).onkeypress = function (a) {
+    // input#submit_solution
+    this.getSubmitSolutionInput().onclick = rm(Tl(), this.Pf);
+    Sg(Tg()).onkeypress = function handleDocumentKeypress(a) {
       a: {
         getMainNamespace();
         var b = getMainNamespace();
@@ -5057,22 +5063,25 @@ validate;
         b.hg().blur();
         null !==
         b.me() && b.me().blur();
-        b.nh().blur();
+        b.getSubmitSolutionInput().blur();
         switch (a.keyCode | 0) {
-          case 32:
-          case 115:
+          /**
+           * key codes taken from https://www.w3.org/2002/09/tests/keys.html
+           */
+          case 32: // 'Space' key
+          case 115: // 'S' key (lowercase)
             a.preventDefault();
             a = getMainNamespace();
             a.Hi = !a.Hi;
             break;
-          case 114:
+          case 114: // 'R' key (lowercase)
             a = getMainNamespace().Pf.h(a);
             break a;
-          case 100:
+          case 100: // 'D' key (lowercase)
             a.preventDefault();
             tm();
             break;
-          case 97:
+          case 97: // 'A' key (lowercase)
             a.preventDefault(),
             um()
         }
