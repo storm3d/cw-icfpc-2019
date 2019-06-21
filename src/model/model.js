@@ -102,6 +102,16 @@ export class Matrix {
     return x >= 0 && y >= 0 && x < this.w && y < this.h;
   }
 
+  getFreeNum() : Number {
+    let freeNum = 0;
+    for (let j = this.h - 1; j >= 0; j--)
+      for (let i = 0; i < this.w; i++)
+        if(this.isFree(i, j))
+          freeNum++;
+
+    return freeNum;
+  }
+
   dump() {
     let str = "";
 
@@ -170,7 +180,12 @@ export class State {
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = new Array();
-    this. workerPos = new Coord(-1, -1);
+    this.workerPos = new Coord(-1, -1);
+  }
+
+  moveWorker(newPos : Coord) {
+    this.workerPos = newPos.getCopy();
+    this.m.wrap(this.workerPos.x, this.workerPos.y);
   }
 
   dump() {
@@ -230,10 +245,8 @@ export const parseState = (layer: string) : State => {
 
       s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "*" ? WRAPPED : FREE);
 
-      if(cols[i] === "W") {
-        s.workerPos.x = i;
-        s.workerPos.y = h - j - 1;
-      }
+      if(cols[i] === "W")
+        s.moveWorker(new Coord(i, h - j - 1));
 
       if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X") {
         s.boosters.push(new Booster(i, h - j - 1, cols[i]));

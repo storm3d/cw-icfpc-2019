@@ -16,7 +16,7 @@ function solve(graph, s) {
     let nearest = null;
     let dist = Infinity;
 
-    // for each existing solution
+    // for each existing getString
     for(let n in solutions) {
       if(!solutions[n])
         continue;
@@ -24,7 +24,7 @@ function solve(graph, s) {
       let adj = graph[n];
       // for each of its adjacent nodes...
       for(let a in adj) {
-        // without a solution already...
+        // without a getString already...
         if(solutions[a])
           continue;
         // choose nearest node with lowest *total* cost
@@ -43,7 +43,7 @@ function solve(graph, s) {
       break;
     }
 
-    // extend parent's solution path
+    // extend parent's getString path
     if (!solutions[nearest])
       solutions[nearest] = {};
 

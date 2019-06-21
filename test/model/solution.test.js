@@ -9,43 +9,43 @@ describe("Solution tests", () => {
         sMove.moveRight();
         sMove.moveDown();
         sMove.moveLeft();
-        expect(sMove.solution()).toEqual(move);
+        expect(sMove.getString()).toEqual(move);
     });
     test("Do nothing", () =>{
         const doN = "Z";
         let sDoNothing = new Solution();
         sDoNothing.doNothing();
-        expect(sDoNothing.solution()).toEqual(doN);
+        expect(sDoNothing.getString()).toEqual(doN);
     });
     test("Turn manipulators 90° clockwise", () => {
         const turn = "E";
         let sTurnCW = new Solution();
         sTurnCW.turnManipulatorsClockwise();
-        expect(sTurnCW.solution()).toEqual(turn);
+        expect(sTurnCW.getString()).toEqual(turn);
     });
     test("Turn manipulators 90° counterclockwise", () => {
         const turn = "Q";
         let sTurnCCW = new Solution();
         sTurnCCW.turnManipulatorsCounterclockwise();
-        expect(sTurnCCW.solution()).toEqual(turn);
+        expect(sTurnCCW.getString()).toEqual(turn);
     });
     test("Attach a new manipulator with relative coordinates (dx, dy)", () =>{
         const newManipulator = "B(1,2)";
         let sNewM = new Solution();
         sNewM.attachNewManipulatorWithRelativeCoordinates(1,2);
-        expect(sNewM.solution()).toEqual(newManipulator);
+        expect(sNewM.getString()).toEqual(newManipulator);
     });
     test("Attach fast wheels", () => {
         const wheels = "F";
         let sWheels = new Solution();
         sWheels.attachFastWheels();
-        expect(sWheels.solution()).toEqual(wheels);
+        expect(sWheels.getString()).toEqual(wheels);
     });
     test("Start using a drill", () => {
         const drill = "L";
         let sDrill = new Solution();
         sDrill.startUsingDrill();
-        expect(sDrill.solution()).toEqual(drill);
+        expect(sDrill.getString()).toEqual(drill);
     });
     test("Should move right", () => {
         const drill = "D";
@@ -53,7 +53,7 @@ describe("Solution tests", () => {
         let first = new Coord(0, 0)
         let second = new Coord(1, 0)
         solution.move(first, second)
-        expect(solution.solution()).toEqual(drill);
+        expect(solution.getString()).toEqual(drill);
     });
     test("Should move left", () => {
         const drill = "A";
@@ -61,7 +61,7 @@ describe("Solution tests", () => {
         let first = new Coord(1, 0)
         let second = new Coord(0, 0)
         solution.move(first, second)
-        expect(solution.solution()).toEqual(drill);
+        expect(solution.getString()).toEqual(drill);
     });
     test("Should move up", () => {
         const drill = "W";
@@ -69,7 +69,7 @@ describe("Solution tests", () => {
         let first = new Coord(0, 0)
         let second = new Coord(0, 1)
         solution.move(first, second)
-        expect(solution.solution()).toEqual(drill);
+        expect(solution.getString()).toEqual(drill);
     });
     test("Should move down", () => {
         const drill = "S";
@@ -77,7 +77,7 @@ describe("Solution tests", () => {
         let first = new Coord(0, 1)
         let second = new Coord(0, 0)
         solution.move(first, second)
-        expect(solution.solution()).toEqual(drill);
+        expect(solution.getString()).toEqual(drill);
     });
 });
 
