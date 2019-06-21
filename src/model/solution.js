@@ -38,7 +38,7 @@ export class Solution {
     }
 
     startUsingDrill() {
-        this.result += "Z"
+        this.result += "L"
     }
 
     solution() {
