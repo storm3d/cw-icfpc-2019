@@ -1,6 +1,6 @@
 import {  } from "../../src/model/model";
 import assert from 'assert';
-import { Matrix, parseMatrix, State, Booster } from "../../src/model/model";
+import { Matrix, parseMatrix, State, Booster, parseState } from "../../src/model/model";
 import { WRAPPED, OBSTACLE } from "../../src/model/model";
 
 describe("Basic model", () => {
@@ -42,6 +42,17 @@ describe("Basic model", () => {
     const one =
       `| W F |\n| x # |\n`;
     expect(s.dump()).toEqual(one);
+  });
+
+  test("State dump", () => {
+
+    const layout = `| B # # . |
+| W # # . |
+| . F . L |
+| x . X . |
+`;
+    let s = parseState(layout);
+    expect(s.dump()).toEqual(layout);
   });
 
 });

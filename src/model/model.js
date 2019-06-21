@@ -141,7 +141,7 @@ export class State {
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = new Array();
-    this. workerPos = new Coord(0, 0);
+    this. workerPos = new Coord(-1, -1);
   }
 
   dump() {
@@ -163,7 +163,7 @@ export class State {
         if(this.workerPos.x === i && this.workerPos.y === j)
           char = "W ";
 
-        for(let k =0; k < this.boosters.length; k++)
+        for(let k = 0; k < this.boosters.length; k++)
           if(this.boosters[k].pos.x === i && this.boosters[k].pos.y === j)
             char = this.boosters[k].type + " ";
 
@@ -174,3 +174,43 @@ export class State {
     return str;
   }
 }
+
+export const parseState = (layer: string) : State => {
+
+  const lines = layer.split("\n").filter((line) => (line));
+  const h = lines.length;
+  const w = lines[0].replace(/^ *\|? /, "")
+    .replace(/ \|?$/, "")
+    .split(" ").length;
+
+
+  const s = new State(w, h);
+
+  for(let j = 0; j < h; j++) {
+    const cols = lines[j].replace(/^ *\|? /, "")
+      .replace(/ \|?$/, "")
+      .split(" ");
+
+    if(cols.length !== w)
+      throw `Invalid dimensions (${w} and ${cols.length}) of matrix template`;
+
+    for (let i = 0; i < w; i++) {
+      if (cols[i] !== "." && cols[i] !== "x" && cols[i] !== "#" && cols[i] !== "W"
+        && cols[i] !== "B" && cols[i] !== "F" && cols[i] !== "L" && cols[i] !== "X")
+        throw `Invalid character ${cols[i]} in matrix template`;
+
+      s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "x" ? WRAPPED : FREE);
+
+      if(cols[i] === "W") {
+        s.workerPos.x = i;
+        s.workerPos.y = h - j - 1;
+      }
+
+      if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X") {
+        s.boosters.push(new Booster(i, h - j - 1, cols[i]));
+      }
+    }
+  }
+
+  return s;
+};
