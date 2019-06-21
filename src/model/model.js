@@ -64,6 +64,10 @@ export class Matrix {
     return this.pixels[this.toIndex(x, y)] === WRAPPED;
   }
 
+  isPassable(x: number, y: number) {
+    return this.pixels[this.toIndex(x, y)] !== OBSTACLE;
+  }
+
   isFree(x: number, y: number) {
     return this.pixels[this.toIndex(x, y)] === FREE;
   }
