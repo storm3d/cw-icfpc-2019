@@ -1,0 +1,7 @@
+How to use:
+
+```
+$ npm install -g http-server
+$ http-server .
+```
+
