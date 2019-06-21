@@ -86,7 +86,7 @@ export class Matrix {
         else if (c === OBSTACLE)
           str += "# ";
         else if (c === WRAPPED)
-          str += "x ";
+          str += "* ";
       }
       str += "|\n";
     }
@@ -113,10 +113,10 @@ export const parseMatrix = (layer: string) : Matrix => {
       throw `Invalid dimensions (${w} and ${cols.length}) of matrix template`;
 
     for (let i = 0; i < w; i++) {
-      if (cols[i] !== "." && cols[i] !== "x" && cols[i] !== "#")
+      if (cols[i] !== "." && cols[i] !== "*" && cols[i] !== "#")
         throw `Invalid character ${cols[i]} in matrix template`;
 
-      matrix.set(i, h - j - 1, cols[i] === "." ? FREE : cols[i] === "x" ? WRAPPED : OBSTACLE)
+      matrix.set(i, h - j - 1, cols[i] === "." ? FREE : cols[i] === "*" ? WRAPPED : OBSTACLE)
     }
   }
 
@@ -159,7 +159,7 @@ export class State {
         else if (c === OBSTACLE)
           char = "# ";
         else if (c === WRAPPED)
-          char = "x ";
+          char = "* ";
 
         if(this.workerPos.x === i && this.workerPos.y === j)
           char = "W ";
@@ -196,11 +196,11 @@ export const parseState = (layer: string) : State => {
       throw `Invalid dimensions (${w} and ${cols.length}) of matrix template`;
 
     for (let i = 0; i < w; i++) {
-      if (cols[i] !== "." && cols[i] !== "x" && cols[i] !== "#" && cols[i] !== "W"
+      if (cols[i] !== "." && cols[i] !== "*" && cols[i] !== "#" && cols[i] !== "W"
         && cols[i] !== "B" && cols[i] !== "F" && cols[i] !== "L" && cols[i] !== "X")
         throw `Invalid character ${cols[i]} in matrix template`;
 
-      s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "x" ? WRAPPED : FREE);
+      s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "*" ? WRAPPED : FREE);
 
       if(cols[i] === "W") {
         s.workerPos.x = i;

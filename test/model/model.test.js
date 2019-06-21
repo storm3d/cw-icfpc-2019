@@ -13,7 +13,7 @@ describe("Basic model", () => {
     m.set(0, 0, WRAPPED);
     m.set(1, 0, OBSTACLE);
     const one =
-      `| . . |\n| x # |\n`;
+      `| . . |\n| * # |\n`;
     expect(m.dump()).toEqual(one);
   });
 
@@ -21,7 +21,7 @@ describe("Basic model", () => {
     const layout = `| . # # |
 | . # # |
 | . . . |
-| x . . |
+| * . . |
 `;
     let m = parseMatrix(layout);
     expect(m.dump()).toEqual(layout);
@@ -40,7 +40,7 @@ describe("Basic model", () => {
     s.boosters.push(new Booster(1, 1, 'F'))
 
     const one =
-      `| W F |\n| x # |\n`;
+      `| W F |\n| * # |\n`;
     expect(s.dump()).toEqual(one);
   });
 
@@ -49,7 +49,7 @@ describe("Basic model", () => {
     const layout = `| B # # . |
 | W # # . |
 | . F . L |
-| x . X . |
+| * . X . |
 `;
     let s = parseState(layout);
     expect(s.dump()).toEqual(layout);
