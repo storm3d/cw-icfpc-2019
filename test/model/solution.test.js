@@ -79,5 +79,32 @@ describe("Solution tests", () => {
         solution.move(first, second)
         expect(solution.getString()).toEqual(drill);
     });
+
+    test("Cross Obstacle", () => {
+        let first = new Coord(2, 1);
+        let to = new Coord(0, 2);
+        let coordToCheck = new Coord(1, 2);
+        expect(first.isObstacleCrossed(to, coordToCheck)).toEqual(true);
+
+        first = new Coord(1, 1);
+        to = new Coord(3, 2);
+        coordToCheck = new Coord(2, 2);
+        expect(first.isObstacleCrossed(to, coordToCheck)).toEqual(true);
+
+        first = new Coord(2, 2);
+        to = new Coord(0, 1);
+        coordToCheck = new Coord(1, 1);
+        expect(first.isObstacleCrossed(to, coordToCheck)).toEqual(true);
+
+        first = new Coord(1, 1);
+        to = new Coord(3, 0);
+        coordToCheck = new Coord(2, 0);
+        expect(first.isObstacleCrossed(to, coordToCheck)).toEqual(true);
+
+        first = new Coord(1, 1);
+        to = new Coord(3, 0);
+        coordToCheck = new Coord(3, 3);
+        expect(first.isObstacleCrossed(to, coordToCheck)).toEqual(false);
+    });
 });
 

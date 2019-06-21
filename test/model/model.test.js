@@ -2,6 +2,7 @@ import {  } from "../../src/model/model";
 import assert from 'assert';
 import { Matrix, parseMatrix, State, Booster, parseState } from "../../src/model/model";
 import { WRAPPED, OBSTACLE } from "../../src/model/model";
+import {Coord} from "../../src/model/model";
 
 describe("Basic model", () => {
   test("Matrix dump", () => {
@@ -53,6 +54,14 @@ describe("Basic model", () => {
 `;
     let s = parseState(layout);
     expect(s.dump()).toEqual(layout);
+  });
+
+  test("Cross Obstacle", () => {
+    let m = new Matrix(4, 4);
+    m.set(2, 2, OBSTACLE);
+
+    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
+    expect(m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
   });
 
   test("State parse empty", () => {
