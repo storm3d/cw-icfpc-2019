@@ -6,15 +6,14 @@ import { State, OBSTACLE, FREE } from '../model/model'
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g
 
 export default class MapParser {
-  obstaclesCoords: Array<Array<number>> = []
-  path: string
-  state: State
-  content: string
-  modelsBasePath: string = `${__dirname}/../../part-1-initial`
+  obstaclesCoords: Array<Array<number>> = [];
+  path: string;
+  state: State;
+  content: string;
 
   constructor(filename: string) {
-    this.path = `${this.modelsBasePath}/${filename}`
-    this.content = fs.readFileSync(this.path).toString()
+      console.log('filename:', filename);
+    this.content = fs.readFileSync(filename).toString();
   }
 
   getState(): State {

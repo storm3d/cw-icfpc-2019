@@ -1,23 +1,30 @@
 // @flow
-import {read} from './io/read'
+import {read, Reader} from './io/read'
 import {write, Writer} from './io/write'
 import {Matrix, WRAPPED} from "./model/model.js";
 import {Solution} from "./model/solution.js";
 import Solver from "./solve";
 import {Coord, FREE, OBSTACLE, parseState, State} from "./model/model";
+import MapParser from "./model/mapParser";
 
 const exec = (model: string, callback: Function) => {
 
-    const layout = `
-        | . . . |
-        | . # # |
-        | . . . |
-        | W . . |`;
-    let s = parseState(layout);
+    // const layout = `
+    //     | . . . |
+    //     | . # # |
+    //     | . . . |
+    //     | W . . |`;
+    // let s = parseState(layout);
+    // console.log(s.dump());
+
+    let reader = new Reader('part-1-initial',model);
+    let s = reader.read();
+
     console.log(s.dump());
 
     let solver = new Solver(s);
     let solution = solver.solve();
+
     let writer = new Writer(solution);
     writer.write('solutions', model);
 
