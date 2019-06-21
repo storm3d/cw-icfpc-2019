@@ -1,5 +1,6 @@
+// @flow
 export class Solution {
-    result = "";
+    result: string = "";
 
     moveUp() {
         this.result += "W";

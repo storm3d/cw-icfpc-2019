@@ -3,7 +3,7 @@ import {exec} from "./index";
 
 if (process.send === undefined) {
     console.log('Single launch');
-    exec(() => 0);
+    exec('001',() => 0);
 } else {
     process.on('message', (msg) => {
             console.log(msg);
@@ -14,7 +14,7 @@ if (process.send === undefined) {
                 process.send({type: 'ask'});
             }
             if (msg.type === 'model') {
-                exec(() => {
+                exec(msg.model, () => {
                     process.send({type: 'ask'})
                 });
             }

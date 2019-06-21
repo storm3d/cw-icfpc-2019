@@ -17,10 +17,9 @@ const launch = () => {
     // eslint-disable-next-line no-console
     console.log('Before fork');
 
-    let models = Array.from({length: 150}, (v, k) => k + 1);
+    let models = Array.from({length: 3}, (v, k) => k + 1);
 
     for (let i = 0; i < numCPUs; i++) {
-        // let worker = child_process.fork("./dist/fork.js");
         const forked = fork('./dist/fork.js');
         forked.send({type: 'start'});
 
