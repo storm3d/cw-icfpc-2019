@@ -3,6 +3,8 @@ import {cpus} from "os";
 // eslint-disable-next-line camelcase
 import child_process from 'child_process'
 
+const {fork} = require('child_process');
+
 
 function formatNum(num: number, size: number): string {
     let s = String(num);
@@ -20,16 +22,20 @@ const launch = () => {
     let models = Array.from({length: 150}, (v, k) => k + 1);
 
     for (let i = 0; i < numCPUs; i++) {
-        let worker = child_process.fork("./dist/index.js");
-        worker.send('ask');
-        worker.on('message', (msg) => {
-            // eslint-disable-next-line no-console
-            console.log('Message from child', msg);
-            if (models.length > 0) {
-                let model = models.pop();
-                worker.send(formatNum(model, 3));
-            } else {
-                worker.send('kill');
+        // let worker = child_process.fork("./dist/fork.js");
+        const forked = fork('./dist/fork.js');
+        forked.send({type: 'start'});
+
+        forked.on('message', (msg) => {
+            console.log('Message from child:', msg);
+            console.log('Models length:', models.length);
+            if (msg.type === 'ask') {
+                if (models.length > 0) {
+                    let model = models.pop();
+                    forked.send({type: 'model', model: formatNum(model, 3)});
+                } else {
+                    forked.send({type: 'kill'})
+                }
             }
         });
     }

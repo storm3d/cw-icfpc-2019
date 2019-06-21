@@ -6,7 +6,7 @@ import {Solution} from "./model/solution.js";
 import Solver from "./solve";
 import { parseMatrix } from "./model/model";
 
-const exec = () => {
+const exec = (callback: Function) => {
 
     const layout = `
         | . # # |
@@ -18,13 +18,12 @@ const exec = () => {
 
     let solver = new Solver();
 
+    callback();
 };
 
 if (process.send === undefined) {
-
-    exec();
+    exec(() => 0);
 }
-
 
 module.exports = {
     exec
