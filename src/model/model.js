@@ -226,16 +226,40 @@ export class State {
   m : Matrix;
   boosters : Array<Booster>;
   workerPos : Coord;
+  extensions : Number;
+  fasts : Number;
+  drills : Number;
+  teleports : Number;
 
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = new Array();
     this.workerPos = new Coord(-1, -1);
+    this.extensions = 0;
+    this.fasts = 0;
+    this.drills = 0;
+    this.teleports = 0;
   }
 
   moveWorker(newPos : Coord) {
     this.workerPos = newPos.getCopy();
     this.m.wrap(this.workerPos.x, this.workerPos.y);
+
+    for(let i = this.boosters.length - 1; i >= 0; i--) {
+      if(this.boosters[i].pos.isEqual(this.workerPos)) {
+        if(this.boosters[i].type === 'B')
+          this.extensions++;
+        else if(this.boosters[i].type === 'F')
+          this.fasts++;
+        else if(this.boosters[i].type === 'L')
+          this.drills++;
+        else if(this.boosters[i].type === 'R')
+          this.teleports++;
+
+        if(this.boosters[i].type !== 'X')
+          this.boosters.splice(i,1);
+      }
+    }
   }
 
   dump() {
@@ -290,7 +314,8 @@ export const parseState = (layer: string) : State => {
 
     for (let i = 0; i < w; i++) {
       if (cols[i] !== "." && cols[i] !== "*" && cols[i] !== "#" && cols[i] !== "W"
-        && cols[i] !== "B" && cols[i] !== "F" && cols[i] !== "L" && cols[i] !== "X")
+        && cols[i] !== "B" && cols[i] !== "F" && cols[i] !== "L" && cols[i] !== "X"
+        && cols[i] !== "R")
         throw `Invalid character ${cols[i]} in matrix template`;
 
       s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "*" ? WRAPPED : FREE);
@@ -298,7 +323,7 @@ export const parseState = (layer: string) : State => {
       if(cols[i] === "W")
         s.moveWorker(new Coord(i, h - j - 1));
 
-      if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X") {
+      if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X" || cols[i] === "R") {
         s.boosters.push(new Booster(i, h - j - 1, cols[i]));
       }
     }

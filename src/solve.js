@@ -21,15 +21,13 @@ export default class Solver {
       if (path === undefined)
         return this.solution;
 
-      console.log(path);
+      //console.log(path);
 
       for (let i = 0; i < path.length; i++) {
         this.solution.move(this.state.workerPos, path[i]);
         this.state.moveWorker(path[i]);
       }
     }
-
-    return this.solution;
   }
 
 }
