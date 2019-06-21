@@ -7,4 +7,4 @@ describe("solver", () => {
 
   })
 
-})
+});

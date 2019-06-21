@@ -1,6 +1,12 @@
-import {cpus} from "os";
-// eslint-disable-next-line camelcase
-import child_process from 'child_process'
+'use strict';
+
+var _os = require('os');
+
+var _child_process = require('child_process');
+
+var _child_process2 = _interopRequireDefault(_child_process);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function formatNum(num, size = 2) {
     let s = String(num);
@@ -9,18 +15,20 @@ function formatNum(num, size = 2) {
     }
     return s;
 }
+// eslint-disable-next-line camelcase
+
 
 const launch = () => {
-    let numCPUs = cpus().length;
+    let numCPUs = (0, _os.cpus)().length;
     // eslint-disable-next-line no-console
     console.log('Before fork');
 
-    let models = Array.from({length: 150}, (v, k) => k + 1);
+    let models = Array.from({ length: 150 }, (v, k) => k + 1);
 
     for (let i = 0; i < numCPUs; i++) {
-        let worker = child_process.fork("./dist/index.js");
+        let worker = _child_process2.default.fork("./dist/index.js");
         worker.send('ask');
-        worker.on('message', (msg) => {
+        worker.on('message', msg => {
             // eslint-disable-next-line no-console
             console.log('Message from child', msg);
             if (models.length > 0) {
@@ -32,7 +40,7 @@ const launch = () => {
         });
     }
     // eslint-disable-next-line no-console
-    console.log('After fork')
+    console.log('After fork');
 };
 
 const launcher = () => {
