@@ -13,6 +13,10 @@ export class Coord {
     this.y = y;
   }
 
+  isEqual(c: Coord): boolean {
+    return this.x === c.x && this.y === c.y;
+  }
+
   getAdded(v: Coord) {
     return new Coord(this.x + v.x, this.y + v.y);
   }
@@ -324,30 +328,40 @@ export class State {
     }
   }
 
-  dump() {
+  dump(drawManipulators = false) {
     let str = "";
+
+    let mans = this.worker.getManipulators().map(m => m.getAdded(this.worker.pos));
 
     for (let j = this.m.h - 1; j >= 0; j--) {
       str += "| ";
+      let prevMan = false;
       for (let i = 0; i < this.m.w; i++) {
+        let currMan = mans.find(m => m.isEqual(new Coord(i, j)));
+
+        if (drawManipulators && (currMan || prevMan))
+          str = str.substring(0, str.length - 1) + 'I';
+
         let c = this.m.get(i, j);
-        let char = ". ";
+        let char = ".";
 
         if (c === FREE)
-          char = ". ";
+          char = ".";
         else if (c === OBSTACLE)
-          char = "# ";
+          char = "#";
         else if (c === WRAPPED)
-          char = "* ";
+          char = "*";
 
         if(this.worker.pos.x === i && this.worker.pos.y === j)
-          char = "W ";
+          char = "W";
 
         for(let k = 0; k < this.boosters.length; k++)
           if(this.boosters[k].pos.x === i && this.boosters[k].pos.y === j)
-            char = this.boosters[k].type + " ";
+            char = this.boosters[k].type;
 
         str += char;
+        str += drawManipulators && currMan ? 'I' : ' ';
+        prevMan = currMan;
       }
       str += "|\n";
     }
