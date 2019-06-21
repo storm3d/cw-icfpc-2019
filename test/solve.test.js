@@ -46,4 +46,25 @@ describe("solver", () => {
 
   })
 
+  test("test basic solve1", () => {
+    const layout = `
+        | . . . . . . . . . . |
+        | . . . . . # . . . . |
+        | . . . . . . . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . . . . . . . |
+        | W . . . . . . . . . |`;
+    let s = parseState(layout);
+
+    let solver = new Solver(s);
+    let solution = solver.solve();
+
+    console.log(solution.getString());
+    console.log(solution.getString().length);
+  })
+
 });

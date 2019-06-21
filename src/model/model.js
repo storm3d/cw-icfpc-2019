@@ -97,7 +97,7 @@ export class Matrix {
   }
 
   wrap(x: number, y: number) {
-    if (this.pixels[this.toIndex(x, y)] !== OBSTACLE)
+    if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE)
       this.pixels[this.toIndex(x, y)] = WRAPPED;
   }
 
@@ -273,6 +273,7 @@ export class State {
     let wx = this.worker.pos.x;
     let wy = this.worker.pos.y;
     this.m.wrap(wx, wy);
+    this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
     // this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
 
     for(let i = this.boosters.length - 1; i >= 0; i--) {
