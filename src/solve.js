@@ -23,7 +23,8 @@ export default class Solver {
 
       // console.log(path);
 
-      for (let i = 0; i < path.length; i++) {
+      let pathLen = path.length > 1 ? path.length - 1 : path.length;
+      for (let i = 0; i < pathLen; i++) {
         this.solution.move(this.state.worker.pos, path[i]);
         this.state.moveWorker(path[i]);
         // console.log(this.state.dump(true));
