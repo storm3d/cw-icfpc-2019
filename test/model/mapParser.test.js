@@ -9,7 +9,7 @@ describe("mapParser test", () => {
       '| W . . . . . # # |',
       ''
     ].join('\n')
-    const state = new MapParser('prob-001.desc').getState()
+    const state = new MapParser('./part-1-initial/prob-001.desc').getState();
 
     assert.strictEqual(state.dump(), expected)
   })
