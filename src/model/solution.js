@@ -1,5 +1,25 @@
+// @flow
+import {Coord} from "./model.js";
+
 export class Solution {
-    result = "";
+    result: string = "";
+
+    move(first: Coord, second: Coord) {
+        let diff = first.getDiff(second);
+
+        if (diff.x === 1 && diff.y === 0) {
+            this.moveRight()
+        }
+        if (diff.x === -1 && diff.y === 0) {
+            this.moveLeft()
+        }
+        if (diff.x === 0 && diff.y === 1) {
+            this.moveUp()
+        }
+        if (diff.x === 0 && diff.y === -1) {
+            this.moveDown()
+        }
+    }
 
     moveUp() {
         this.result += "W";
@@ -30,7 +50,7 @@ export class Solution {
     }
 
     attachNewManipulatorWithRelativeCoordinates(x: number, y: number) {
-        this.result += "B(" + x + ", " + y + ")"
+        this.result += "B(" + x + "," + y + ")"
     }
 
     attachFastWheels() {
@@ -38,10 +58,10 @@ export class Solution {
     }
 
     startUsingDrill() {
-        this.result += "Z"
+        this.result += "L"
     }
 
-    solution() {
+    getString() {
         return this.result
     }
 }
