@@ -24,4 +24,16 @@ describe("Nearest Free Neighbor", () => {
     expect(path).toEqual(["3", "4", "5", "2"]);
 
   });
+
+  test("no reachable free tiles", () => {
+    const layout = `
+       | * # * |
+       | * # . |`;
+    let m = parseMatrix(layout);
+
+    let path = nearestFree(m, new Coord(0, 0));
+
+    expect(path).toBeUndefined();
+
+  });
 });
