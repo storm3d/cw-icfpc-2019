@@ -33,6 +33,14 @@ export class Coord {
     return new Coord(this.x, this.y)
   }
 
+  rotCW(): Coord {
+    return new Coord(this.y, this.x == 0 ? 0 : -this.x);
+  }
+
+  rotCCW(): Coord {
+    return new Coord(this.y == 0 ? 0 : -this.y, this.x);
+  }
+
   isObstacleCrossed(to, testedCoord: Coord) {
     return this.getPointOfIntersection(this.getCenter(),
         to.getCenter(),
@@ -211,6 +219,25 @@ export const parseMatrix = (layer: string) : Matrix => {
   return matrix;
 };
 
+export class Rover {
+  pos: Coord;
+  manipulators: Array<Coord>;
+
+  constructor(pos: Coord, manipulators: Array<Coord>) {
+    this.pos = pos;
+    this.manipulators = manipulators;
+  }
+
+  rotCW() {
+    this.manipulators = this.manipulators
+      .map(c => c.rotCW());
+  }
+
+  rotCCW() {
+    this.manipulators = this.manipulators
+      .map(c => c.rotCCW());
+  }
+}
 
 export class Booster {
   pos : Coord;
@@ -268,6 +295,18 @@ export class State {
     return str;
   }
 }
+
+export const parseCoords = (coords: string) : Array<Coord> => {
+  // (4, 5), (1, -1), (7, 0)
+
+  return coords.split(")") // split by closing brace
+    .map(c => c.replace(/ *\,? *\( */, "")) // remove opening brace with comma and spaces
+    .filter(c => c !== "")
+    .map(c => {
+      let xy = c.split(',');
+      return new Coord(parseInt(xy[0].trim()), parseInt(xy[1].trim()));
+    });
+};
 
 export const parseState = (layer: string) : State => {
 
