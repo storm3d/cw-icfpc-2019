@@ -35,8 +35,8 @@ describe("Basic model", () => {
     s.m.set(0, 0, WRAPPED);
     s.m.set(1, 0, OBSTACLE);
 
-    s.workerPos.x = 0;
-    s.workerPos.y = 1;
+    s.worker.pos.x = 0;
+    s.worker.pos.y = 1;
 
     s.boosters.push(new Booster(1, 1, 'F'))
 
