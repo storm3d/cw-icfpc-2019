@@ -147,8 +147,8 @@ export class Matrix {
   }
 
   isCrossObstacle(from, to: Coord) {
-    for (let i = 0; i <= Math.max(from.y, to.y); i++) {
-      for (let j = 0; j <= Math.max(from.x, to.x); j++) {
+    for (let i = Math.min(from.y, to.y); i <= Math.max(from.y, to.y); i++) {
+      for (let j = Math.min(from.x, to.x); j <= Math.max(from.x, to.x); j++) {
         if ((from.x === j && from.y === i) || (to.x === j && to.y === i)) {
           continue;
         }
