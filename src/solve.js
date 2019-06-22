@@ -6,7 +6,7 @@ import {Coord, Matrix, State, Rover, DRILL_TIME} from "./model/model";
 
 const maxSearchLen = 15;
 
-function findPath(s: State, worker : Rover, isDrilling: boolean) {
+export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
   let source = worker.pos.getCopy();
   let lens = new Matrix(s.m.w, s.m.h);
@@ -66,7 +66,6 @@ function findPath(s: State, worker : Rover, isDrilling: boolean) {
       }
     }
     //console.log(dirs);
-
     let isFound = false;
     for (let dirsKey in dirs) {
       let nx = dirs[dirsKey].nx;
@@ -265,4 +264,23 @@ export default class Solver {
       return this.solution;
   }
 
+  cost(state: State): number {
+    let cost = 0;
+
+    for (let i = 0; i < state.m.w * state.m.h; i++) {
+      if (state.m.isFreeIndex(i)) {
+        let n = state.m.getNeighbors(i);
+        let blockedNeighbors = 4 - n.length;
+        let wrappedNeighbors = 0;
+
+        n.forEach(k => {
+          if (state.m.isObstacleIndex(k)) blockedNeighbors++;
+          if (state.m.isWrappedIndex(k)) wrappedNeighbors++;
+        });
+
+        cost += 1 + wrappedNeighbors * 0.1 + blockedNeighbors * 0.5;
+      }
+    }
+    return cost;
+  }
 }

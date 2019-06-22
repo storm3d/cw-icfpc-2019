@@ -87,19 +87,18 @@ export class Coord {
 export class Matrix {
   w: number;
   h: number;
-  pixels: Uint8Array;
+  pixels: Uint16Array;
   freeN: number;
 
-  constructor(w: number, h: number) {
+  constructor(w: number, h: number, pixels = undefined) {
     this.w = w;
     this.h = h;
-    this.pixels = new Uint16Array(w * h);
+    this.pixels = pixels ? pixels : new Uint16Array(w * h);
     this.freeN = -1;
   }
 
-  getCopy(){
-    let copy = new Matrix(this.w, this.h);
-    copy.pixels = new Uint16Array(this.pixels);
+  getCopy() {
+    let copy = new Matrix(this.w, this.h, new Uint16Array(this.pixels));
     copy.freeN = this.freeN;
     return copy;
   }
@@ -129,6 +128,10 @@ export class Matrix {
     return this.pixels[this.toIndex(x, y)] === WRAPPED;
   }
 
+  isWrappedIndex(index: number) {
+    return this.pixels[index] === WRAPPED;
+  }
+
   isPassable(x: number, y: number) {
     return this.pixels[this.toIndex(x, y)] !== OBSTACLE;
   }
@@ -143,6 +146,21 @@ export class Matrix {
 
   isObstacle(x: number, y: number): boolean {
     return this.pixels[this.toIndex(x, y)] === OBSTACLE;
+  }
+
+  isObstacleIndex(index: number): boolean {
+    return this.pixels[index] === OBSTACLE;
+  }
+
+  getNeighbors(index: number): Array<number> {
+    let neighbors = [];
+
+    if (index > 0) neighbors.push(index - 1);
+    if (index < this.w * this.h - 1) neighbors.push(index + 1);
+    if (index > this.w) neighbors.push(index - this.w);
+    if (index < (this.w - 1) * this.h) neighbors.push(index + this.w);
+
+    return neighbors;
   }
 
   coord2index(c: Coord): number {
@@ -256,9 +274,9 @@ export class Rover {
     this.widthRight = widthRight;
     this.rotation = rotation;
   }
-  
-  getCopy() {
-    return new Rover(this.pos.getCopy(), this.widthLeft, this.widthRight, this.rotation);
+
+  getCopy(): Rover {
+    return new Rover(this.pos, this.widthLeft, this.widthRight, this.rotation);
   }
 
   rotCW() {
@@ -324,8 +342,8 @@ export class State {
   drills : Number;
   teleports : Number;
 
-  constructor(w: number, h: number) {
-    this.m = new Matrix(w, h);
+  constructor(w: number, h: number, m: Matrix = undefined) {
+    this.m = m ? m : new Matrix(w, h);
     this.boosters = [];
     this.startingBoosters = [];
     this.worker = new Rover(new Coord(-1, -1), 1, 1);
@@ -334,10 +352,9 @@ export class State {
     this.drills = 0;
     this.teleports = 0;
   }
-  
+
   getCopy() {
-    let copy = new State(this.m.w, this.m.h);
-    copy.m = this.m.getCopy();// deep copy
+    let copy = new State(this.m.w, this.m.h, this.m.getCopy());
     copy.boosters = this.boosters.slice(0); // shallow copy
     copy.startingBoosters = this.startingBoosters; // copy ref
     copy.worker = this.worker.getCopy(); // deep copy

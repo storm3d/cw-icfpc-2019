@@ -32,17 +32,17 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(26);
+    expect(solution.getString().length).toEqual(24);
 
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
-| * * * |
-| * * * |
+| * * F |
+| * * R |
 `);
     expect(solver.state.extensions).toEqual(0);
-    expect(solver.state.fasts).toEqual(2);
+    expect(solver.state.fasts).toEqual(1);
     expect(solver.state.drills).toEqual(1);
-    expect(solver.state.teleports).toEqual(2);
+    expect(solver.state.teleports).toEqual(1);
 
   })
 
@@ -63,7 +63,7 @@ describe("solver", () => {
     let solver = new Solver(s);
     let solution = solver.solve();
 
-    console.log(solution);
+    // console.log(solution);
 
     //console.log(solution.getString());
     //console.log(solution.getString().length);

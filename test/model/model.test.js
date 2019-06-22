@@ -28,6 +28,17 @@ describe("Basic model", () => {
     expect(m.dump()).toEqual(layout);
   });
 
+  test("Matrix copy", () => {
+    const layout = `| . # # |
+| . # # |
+| . . . |
+| * . . |
+`;
+    let m = parseMatrix(layout);
+    let copy = m.getCopy();
+    expect(copy.dump()).toEqual(layout);
+  });
+
   test("State dump", () => {
 
     let s = new State(2, 2);
@@ -78,6 +89,18 @@ describe("Basic model", () => {
     let s = parseState(layout);
     expect(s.m.w).toEqual(4);
     expect(s.m.h).toEqual(2);
+  });
+
+  test("State copy", () => {
+
+    const layout = `| B # # . |
+| W # # . |
+| . F . L |
+| * . X . |
+`;
+    let s = parseState(layout);
+    let copy = s.getCopy();
+    expect(copy.dump()).toEqual(layout);
   });
 
   test("State occupancy test", () => {
