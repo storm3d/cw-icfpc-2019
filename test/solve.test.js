@@ -16,7 +16,7 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(6);
+    expect(solution.getString().length).toEqual(10);
   })
 
   test("gather boosters", () => {
@@ -32,7 +32,7 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(9);
+    expect(solution.getString().length).toEqual(13);
 
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |

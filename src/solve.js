@@ -25,6 +25,26 @@ export default class Solver {
 
       let pathLen = path.length > 1 ? path.length - 1 : path.length;
       for (let i = 0; i < pathLen; i++) {
+        let dx = -(this.state.worker.pos.x - path[i].x);
+        let dy = -(this.state.worker.pos.y - path[i].y);
+
+        if((this.state.worker.rotation === 0 && dx > 0)
+          || (this.state.worker.rotation === 3 && dy < 0)
+          || (this.state.worker.rotation === 6 && dx < 0)
+          || (this.state.worker.rotation === 9 && dy > 0)) {
+          this.solution.turnManipulatorsClockwise();
+          this.state.worker.rotCW();
+          this.state.moveWorker(this.state.worker.pos);
+        }
+        else if((this.state.worker.rotation === 0 && dx < 0)
+          || (this.state.worker.rotation === 3 && dy > 0)
+          || (this.state.worker.rotation === 6 && dx > 0)
+          || (this.state.worker.rotation === 9 && dy < 0)) {
+          this.solution.turnManipulatorsCounterclockwise();
+          this.state.worker.rotCCW();
+          this.state.moveWorker(this.state.worker.pos);
+        }
+
         this.solution.move(this.state.worker.pos, path[i]);
         this.state.moveWorker(path[i]);
         // console.log(this.state.dump(true));

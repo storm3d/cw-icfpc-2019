@@ -58,8 +58,8 @@ const highload = () => {
 };
 
 if (process.send === undefined) {
-    //for(let i = 1; i <= 150; i++)
-        exec((2+"").padStart(3, "0"), () => 0);
+    for(let i = 2; i <= 2; i++)
+        exec((i+"").padStart(3, "0"), () => 0);
     // highload()
 }
 
