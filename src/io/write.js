@@ -14,7 +14,7 @@ export class Writer {
         // eslint-disable-next-line no-console
         console.log(`Writing file ${filename}`);
         fs.writeFileSync(filename, this.solution.getString(), 'utf8');
-        let scoreStr = `${this.solution.getScore()};`;
+        let scoreStr = `${model}:${this.solution.getScore()};`;
         fs.appendFileSync('./current_result.txt', scoreStr)
         // eslint-disable-next-line no-console
         console.log(`The file ${filename} has been saved!`);

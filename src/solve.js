@@ -173,16 +173,20 @@ export default class Solver {
         return this.solution;
     
       // dumb greedy drills
-      if (this.state.drills > 0 && drillTurns == 0) {
+      //if (false) {
+      if (this.state.drills > 0 || drillTurns > 0) {
           drilling = false;
           let path1 = findPath(this.state, this.state.worker, true);
-          if ((path1.length + 1 < path.lengh) && 
-               path1.length < (drillTurns + this.state.drills * DRILL_TIME) ) {
+          if ((path1.length + 20 < path.length) && 
+               (path1.length < (drillTurns + this.state.drills * DRILL_TIME))) {
+              //console.log(`!!!!!!!!!!!!${path.length}, ${path1.length}`);
               path = path1;
-              this.state.drills--;
-              this.solution.startUsingDrill();
-              drillTurns = DRILL_TIME;
-              drilling = truel
+              if (drillTurns == 0) {
+                  this.state.drills--;
+                  this.solution.startUsingDrill();
+                  drillTurns = DRILL_TIME;
+              }
+              drilling = true;
           }
       }
       // console.log(path);
