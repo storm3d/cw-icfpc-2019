@@ -85,11 +85,20 @@ export class Matrix {
   w: number;
   h: number;
   pixels: Uint8Array;
+  freeN: number;
 
   constructor(w: number, h: number) {
     this.w = w;
     this.h = h;
     this.pixels = new Uint16Array(w * h);
+    this.freeN = -1;
+  }
+
+  getCopy(){
+    let copy = new Matrix(this.w, this.h);
+    copy.pixels = new Uint16Array(this.pixels);
+    copy.freeN = this.freeN;
+    return copy;
   }
 
   get(x: number, y: number) {
@@ -97,12 +106,20 @@ export class Matrix {
   }
 
   set(x: number, y: number, v: number /*FREE | OBSTACLE | WRAPPED*/) {
-    this.pixels[this.toIndex(x, y)] = v;
+    let idx = this.toIndex(x, y);
+    if (this.freeN > 0 && v === WRAPPED && this.pixels[idx] === FREE) {
+        this.freeN--;
+    }
+    this.pixels[idx] = v;
   }
 
   wrap(x: number, y: number) {
-    if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE)
+    if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE) {
       this.pixels[this.toIndex(x, y)] = WRAPPED;
+        if (this.freeN > 0) {
+            this.freeN--;
+        }
+    }
   }
 
   isWrapped(x: number, y: number) {
@@ -148,12 +165,14 @@ export class Matrix {
   }
 
   getFreeNum() : Number {
+    if (this.freeN >= 0) return this.freeN;
     let freeNum = 0;
     for (let j = this.h - 1; j >= 0; j--)
       for (let i = 0; i < this.w; i++)
         if(this.isFree(i, j))
           freeNum++;
 
+    this.freeN = freeNum;
     return freeNum;
   }
 
@@ -234,6 +253,10 @@ export class Rover {
     this.widthRight = widthRight;
     this.rotation = rotation;
   }
+  
+  getCopy() {
+    return new Rover(this.pos.getCopy(), this.widthLeft, this.widthRight, this.rotation);
+  }
 
   rotCW() {
     this.rotation += 3;
@@ -307,6 +330,18 @@ export class State {
     this.fasts = 0;
     this.drills = 0;
     this.teleports = 0;
+  }
+  
+  getCopy() {
+    let copy = new State(this.m.w, this.m.h);
+    copy.m = this.m.getCopy();// deep copy
+    copy.boosters = this.boosters.slice(0); // shallow copy
+    copy.worker = this.worker.getCopy(); // deep copy
+    copy.extensions = this.extensions;
+    copy.fasts = this.fasts;
+    copy.drills = this.drills;
+    copy.teleports = this.teleports;
+    return copy;
   }
 
   moveWorker(newPos : Coord) {
