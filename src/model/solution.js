@@ -81,6 +81,16 @@ export class Solution {
         this.score++;
     }
 
+    plantTeleport() {
+        this.result += "R";
+        this.score++;
+    }
+
+    activateTeleport(x: number, y: number) {
+        this.result += `T(${x},${y})`;
+        this.score++;
+    }
+
     getString() {
         return this.result;
     }

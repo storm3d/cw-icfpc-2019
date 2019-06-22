@@ -394,7 +394,7 @@ export class State {
     for(let i = 0; i < this.boosters.length; i++) {
       if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
         //if (this.boosters[i].type !== "X") {
-        if (this.boosters[i].type === "B" || this.boosters[i].type === "L") {
+        if (this.boosters[i].type === "B" || this.boosters[i].type === "L" || this.boosters[i].type === "R") {
           //console.log("booster!")
           return true;
         }

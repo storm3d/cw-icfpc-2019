@@ -218,6 +218,13 @@ export default class Solver {
 
     let wheelsTurns = 0;
     let wheelsAttached = false;
+    let hasActiveTeleport = false;
+    let teleportPos: Coord;
+    let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
+    let isNearCenter = (c: Coord) => {
+      let diff = c.getDiff(matrixCenter);
+      return (Math.abs(diff.x) + Math.abs(diff.y)) < 50;
+    };
 
     let stepActiveBoosters = () => {
         // if drill is ON
@@ -242,6 +249,18 @@ export default class Solver {
       if (path === undefined)
         return this.solution;
 
+      if (hasActiveTeleport) {
+        let workerT = this.state.worker.getCopy();
+        workerT.pos = teleportPos;
+        let pathT = findPath(this.state, workerT, false);
+        if (pathT.length + 5 < path.length) {
+          this.solution.activateTeleport(teleportPos.x, teleportPos.y);
+          this.state.moveWorker(teleportPos);
+          stepActiveBoosters();
+        }
+        path = findPath(this.state, this.state.worker, false);
+      }
+
       // dumb greedy drills
       //if (false) {
       if (this.state.drills > 0 || drillTurns > 0) {
@@ -260,6 +279,15 @@ export default class Solver {
           }
       }
       // console.log(path);
+      
+      // dumb greedy teleports
+      if (!hasActiveTeleport && (this.state.teleports > 0) ){ //&& isNearCenter(this.state.worker.pos) && matrixCenter.x > 50 && matrixCenter.y > 50) {
+        hasActiveTeleport = true;
+        this.state.teleports--;
+        this.solution.plantTeleport();
+        stepActiveBoosters();
+        teleportPos = this.state.worker.pos.getCopy();
+      }
 
       let pathLen = path.length > 1 ? path.length - 1 : path.length;
       for (let i = 0; i < pathLen; i++) {
