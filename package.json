@@ -35,6 +35,8 @@
     "postpublish": "git push origin master --follow-tags",
     "prestart": "babel src -d dist",
     "start": "node dist/index.js",
+    "pregenerate": "babel src -d dist",
+    "generate": "node dist/generate.js",
     "prelaunch": "babel src -d dist",
     "launch": "node dist/runner/launch.js && node dist/score.js",
     "show": "node visualizer/server.js"
