@@ -4,6 +4,17 @@ var logArgs = f => (...args) => {
   return f(...args);
 };
 var identity = x => x;
+// TODO: highlight current step as italic (handle batteries, extensions _somehow_, handle clones _later_) and highlight text before currentStep as green
+// TODO: if a mistake move, highlight it (and till end of line) as red error
+// TODO: make button controls: toggle visualizer keys, play, pause, next, back, forward play, forward back,
+// TODO: make textarea oninput rebuild the binary tree of moves
+// patching visualizer for interactivity
+function getTextarea() {
+  return document.querySelector('#log-steps');
+}
+function loadSolutionIntoTextArea(solutionText) {
+  return getTextarea().value = solutionText;
+}
 // pretty-printed visualizer from https://icfpcontest2019.github.io/solution_visualiser/
 var render,
 validate;
@@ -4868,7 +4879,7 @@ validate;
       }
     }(this));
     this.Yi = new C(function () {
-      return function () {
+      return function handleSubmitTask() { // draw task's map
         if (getMainNamespace().jg().files[0] instanceof Blob) {
           var a = new FileReader;
           a.onloadend = function (a) {
@@ -4878,23 +4889,25 @@ validate;
           }(a);
           a.readAsText(getMainNamespace().jg().files[0])
         } else clearCanvas(getMainNamespace()),
-        Xl(getMainNamespace(), getMainNamespace().qg, Gg().Kf),
+        renderTextToCanvas(getMainNamespace(), getMainNamespace().qg, Gg().Kf),
         gm(),
         Vl(getMainNamespace())
       }
     }(this));
     this.Vi = new C(function () {
-      return function () {
+      return function handleSubmitSolution() { // draw text "Done uploading..."
         Ul(getMainNamespace());
         if (getMainNamespace().hg().files[0] instanceof Blob) {
           var a = new FileReader;
           a.onloadend = function (a) {
             return function () {
+              var solutionText = a.result;
+              loadSolutionIntoTextArea(solutionText);
               return nm(getMainNamespace(), a)
             }
           }(a);
           a.readAsText(getMainNamespace().hg().files[0])
-        } else Xl(getMainNamespace(), getMainNamespace().Jf, Gg().Kf),
+        } else renderTextToCanvas(getMainNamespace(), getMainNamespace().Jf, Gg().Kf),
         hm(),
         Vl(getMainNamespace())
       }
