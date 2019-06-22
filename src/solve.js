@@ -103,7 +103,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
   while(true) {
     //console.log(path);
 
-    let c = path[path.length - 1];
+    let c = path[0];
     let minL = 999999;
     let minC = 0;
 
@@ -146,10 +146,10 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     if(!minC)
       throw "Weird shit happened";
 
-    path.push(minC);
+    path.unsift(minC);
   }
 
-  return path.reverse();
+  return path;
 }
 
 export default class Solver {
