@@ -2,7 +2,7 @@
 
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import { State } from "./model/model";
+import { State, DRILL_TIME } from "./model/model";
 
 export default class Solver {
 
@@ -16,11 +16,26 @@ export default class Solver {
 
   solve(): Solution {
 
+    let drillTurns = 0;
+    let drilling = false;
     while(true) {
-      let path = nearestFree(this.state, this.state.worker.pos);
+      let path = nearestFree(this.state, this.state.worker.pos, false);
       if (path === undefined)
         return this.solution;
-
+    
+      // dumb greedy drills
+      if (this.state.drills > 0 && drillTurns == 0) {
+          drilling = false;
+          let path1 = nearestFree(this.state, this.state.worker.pos, true);
+          if ((path1.length + 1 < path.lengh) && 
+               path1.length < (drillTurns + this.state.drills * DRILL_TIME) ) {
+              path = path1;
+              this.state.drills--;
+              this.solution.startUsingDrill();
+              drillTurns = DRILL_TIME;
+              drilling = truel
+          }
+      }
       // console.log(path);
 
       let pathLen = path.length > 1 ? path.length - 1 : path.length;
@@ -53,12 +68,48 @@ export default class Solver {
           let c = this.state.worker.extendManipulators();
           this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
         }
+        
+        // if drill is ON
+        if (drillTurns > 0) {
+            drillTurns--;
+            // continue if drilling
+            if (drillTurns == 0 && drilling && this.state.drills > 0){
+              this.state.drills--;
+              this.solution.startUsingDrill();
+              drillTurns = DRILL_TIME;
+            }
+            
+        }
 
         // console.log(this.state.dump(true));
       }
+      
+
     }
 
     return this.solution;
+  }
+  
+  solve_DFS_FreeNum(): Solution {
+      let front = new Map();
+      let solution = new Solution();
+      solution.state = this.state;
+      
+      let calcWeight = (s) => {return s.state.m.getFreeNum();}
+      let calcNewTop = (f) => {return Array.from(f.keys()).sort()[0]; }
+      let topKey = calcWeight(solution);
+      front.set(topKey, [solution]);
+
+      //console.log(calcNewTop(front), topKey);
+      
+      while(topKey > 0) {
+          let top = front.get(topKey);
+          //
+          let trySolution = top.shift();
+          
+          break;
+      }
+      return this.solution;
   }
 
 }

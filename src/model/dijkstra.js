@@ -166,7 +166,7 @@ function matrixToGraph(m: Matrix) {
   return graph;
 }
 
-function breadthSearch(s: State, source: Coord) {
+function breadthSearch(s: State, source: Coord, hasDrill: boolean) {
 
   let lens = new Matrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
@@ -316,9 +316,9 @@ function breadthSearch(s: State, source: Coord) {
   return path.reverse();
 }
 
-export default function pathToNearestFreePoint(s: State, source: Coord) {
+export default function pathToNearestFreePoint(s: State, source: Coord,hasDrill: boolean) {
 
-  return breadthSearch(s, source);
+  return breadthSearch(s, source, hasDrill);
 
   /*
 

@@ -4,6 +4,9 @@ export const FREE = 0;
 export const OBSTACLE = 1;
 export const WRAPPED = 2;
 
+export const FAST_TIME = 50;
+export const DRILL_TIME = 30;
+
 export class Coord {
   x: number;
   y: number;
@@ -336,6 +339,7 @@ export class State {
     let copy = new State(this.m.w, this.m.h);
     copy.m = this.m.getCopy();// deep copy
     copy.boosters = this.boosters.slice(0); // shallow copy
+    copy.startingBoosters = this.startingBoosters; // copy ref
     copy.worker = this.worker.getCopy(); // deep copy
     copy.extensions = this.extensions;
     copy.fasts = this.fasts;

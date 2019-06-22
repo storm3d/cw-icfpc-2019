@@ -69,4 +69,27 @@ describe("solver", () => {
     //console.log(solution.getString().length);
   })
 
+  test("test DFS FreeNum", () => {
+    const layout = `
+        | . . . . . . . . . . |
+        | . . . . . # . . . . |
+        | . . . . . . . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | . . . . # # . . . . |
+        | B . . . # # . . . . |
+        | . . . . . . . . . . |
+        | W . . . . . . . . . |`;
+    let s = parseState(layout);
+
+    let solver = new Solver(s);
+    let solution = solver.solve_DFS_FreeNum();
+
+    console.log(solution);
+
+    //console.log(solution.getString());
+    //console.log(solution.getString().length);
+  })
+
 });
