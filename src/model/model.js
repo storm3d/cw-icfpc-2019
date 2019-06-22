@@ -242,6 +242,23 @@ export class Matrix {
     }
     return str;
   }
+
+  isOnBorder(x: number, y: number) {
+    const coords = [
+      [x + 1, y], // Right middle
+      [x + 1, y + 1], // Right upper
+      [x, y + 1], // Upper middle
+      [x - 1, y + 1], // Left upper
+      [x - 1, y], // Middle left
+      [x - 1, y - 1], // Left bottom
+      [x, y - 1], // Middle bottom
+      [x + 1, y - 1], // Right bottom
+    ];
+
+    return coords.find(([currX, currY]) => (
+      !this.isValid(currX, currY)) || this.isObstacle(currX, currY)
+    );
+  }
 }
 
 export const parseMatrix = (layer: string) : Matrix => {
