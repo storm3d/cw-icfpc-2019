@@ -2,12 +2,30 @@
 
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import {Coord, Matrix, State, Rover, DRILL_TIME} from "./model/model";
+import {Coord, Matrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
 
 const maxSearchLen = 15;
 
+
+export function getTurnType(rotation : number, dx : number, dy : number) : number {
+  if((rotation === 0 && dx > 0)
+    || (rotation === 3 && dy < 0)
+    || (rotation === 6 && dx < 0)
+    || (rotation === 9 && dy > 0)) {
+      return 1;
+  }
+  else if((rotation === 0 && dx < 0)
+    || (rotation === 3 && dy > 0)
+    || (rotation === 6 && dx > 0)
+    || (rotation === 9 && dy < 0)) {
+      return 2;
+  }
+  return 0;
+}
+
 export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
+  let workerCopy = worker.getCopy();
   let source = worker.pos.getCopy();
   let lens = new Matrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
@@ -197,6 +215,28 @@ export default class Solver {
 
     let drillTurns = 0;
     let drilling = false;
+
+    let wheelsTurns = 0;
+    let wheelsAttached = false;
+
+    let stepActiveBoosters = () => {
+        // if drill is ON
+        if (drillTurns > 0) {
+            drillTurns--;
+            // continue if drilling
+            if (drillTurns == 0 && drilling && this.state.drills > 0){
+              this.state.drills--;
+              this.solution.startUsingDrill();
+              drillTurns = DRILL_TIME;
+            }
+        }
+        // if Fast is ON
+      if (wheelsTurns > 0) {
+        wheelsTurns--;
+      }
+    };
+
+
     while(true) {
       let path = findPath(this.state, this.state.worker, false);
       if (path === undefined)
@@ -226,43 +266,31 @@ export default class Solver {
         let dx = -(this.state.worker.pos.x - path[i].x);
         let dy = -(this.state.worker.pos.y - path[i].y);
 
-        if((this.state.worker.rotation === 0 && dx > 0)
-          || (this.state.worker.rotation === 3 && dy < 0)
-          || (this.state.worker.rotation === 6 && dx < 0)
-          || (this.state.worker.rotation === 9 && dy > 0)) {
+        let turnType = getTurnType(this.state.worker.rotation, dx, dy);
+        if (turnType === 1) { // CW
           this.solution.turnManipulatorsClockwise();
           this.state.worker.rotCW();
           this.state.moveWorker(this.state.worker.pos);
-        }
-        else if((this.state.worker.rotation === 0 && dx < 0)
-          || (this.state.worker.rotation === 3 && dy > 0)
-          || (this.state.worker.rotation === 6 && dx > 0)
-          || (this.state.worker.rotation === 9 && dy < 0)) {
+          stepActiveBoosters();
+        } else if (turnType === 2) { // CCW
           this.solution.turnManipulatorsCounterclockwise();
           this.state.worker.rotCCW();
           this.state.moveWorker(this.state.worker.pos);
+          stepActiveBoosters();
         }
 
         this.solution.move(this.state.worker.pos, path[i]);
         this.state.moveWorker(path[i]);
+        // if drill is ON
+        stepActiveBoosters();
 
         if (this.state.extensions > 0) {
           this.state.extensions--;
           let c = this.state.worker.extendManipulators();
           this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+          stepActiveBoosters();
         }
 
-        // if drill is ON
-        if (drillTurns > 0) {
-            drillTurns--;
-            // continue if drilling
-            if (drillTurns == 0 && drilling && this.state.drills > 0){
-              this.state.drills--;
-              this.solution.startUsingDrill();
-              drillTurns = DRILL_TIME;
-            }
-
-        }
 
         // console.log(this.state.dump(true));
       }
