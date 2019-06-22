@@ -1,8 +1,20 @@
 // @flow
-import { State, Coord } from '../model/model';
+import { State, Coord, FREE, OBSTACLE } from '../model/model';
 
 const HORIZONTAL_ORIENTATION = 'h';
 const VERTICAL_ORIENTATION = 'v';
+
+class Path {
+  start: Coord;
+  end: Coord;
+  orientation: string;
+
+  constructor(start: Coord, end: Coord, orientation: string = VERTICAL_ORIENTATION) {
+    this.start = start;
+    this.end = end;
+    this.orientation = orientation;
+  }
+}
 
 export default class MapSerializer {
   state: State;
@@ -12,86 +24,80 @@ export default class MapSerializer {
   }
 
   dump(): string {
-    let currCoord = this.findFirstFreeCell();
-    let counter = 0;
-    // let paths: Array<any> = [];
+    const verticalPaths = this.getVerticalPaths();
+    const horizontalPaths = this.getHorizontalPaths();
 
-    const iterationsLimit = 1000000000;
-    const allCoords: Array<Coord> = [currCoord];
-
-    while (true) {
-      if (counter >= iterationsLimit) {
-        throw new Error('Too many iterations in MapSerializer. Something wend wrong.');
-      }
-
-      const nextCoord = this.getNextCoord(currCoord, allCoords);
-
-      if (nextCoord === null) {
-        break;
-      }
-
-      allCoords.push(nextCoord);
-      currCoord = nextCoord;
-      counter++;
-    }
-
-    // paths.push({
-    //   start: allCoords[0],
-    //   end: null,
-    //   orientation: null
-    // });
-
-    // for (let i = 1; i < allCoords.length; i++) {
-    //   let orientation;
-    //
-    //   const currPathCoord = allCoords[i];
-    //   const prevPathCoord = allCoords[i - 1];
-    //   const endCoord = new Coord(currPathCoord.x, currPathCoord.y);
-    //   const lastPath = paths[paths.length - 1];
-    //
-    //   if (currPathCoord.y === prevPathCoord.y) {
-    //     orientation = HORIZONTAL_ORIENTATION;
-    //     endCoord.x = currPathCoord.x;
-    //   } else if (currPathCoord.x === prevPathCoord.x) {
-    //     orientation = VERTICAL_ORIENTATION;
-    //     endCoord.y = currPathCoord.y;
-    //   }
-    //
-    //   if (lastPath.orientation === null) {
-    //     lastPath.orientation = orientation;
-    //   }
-    //
-    //   if (lastPath.orientation === orientation) {
-    //     lastPath.end = endCoord;
-    //   } else {
-    //     paths.push({
-    //       start: prevPathCoord,
-    //       end: currPathCoord,
-    //       orientation
-    //     });
-    //   }
-    //
-    //   // if (paths[paths.length - 1].orientation === null) {
-    //   //   paths[paths.length - 1].orientation = orientation;
-    //   // }
-    //   //
-    //   // paths[paths.length - 1].end = endCoord;
-    //   //
-    //   // if (paths[paths.length - 1].orientation !== orientation) {
-    //   //   paths.push({
-    //   //     start: new Coord(currPathCoord.x, currPathCoord.y),
-    //   //     end: null,
-    //   //     orientation,
-    //   //   });
-    //   // }
-    // }
-
-    // paths = paths.filter(({ orientation }) => orientation === HORIZONTAL_ORIENTATION);
-
-    console.log(allCoords);
+    console.log('verticalPaths', verticalPaths);
+    console.log('horizontalPaths', horizontalPaths);
     // console.log(paths);
 
     return '';
+  }
+
+  getVerticalPaths(): Array<Path> {
+    const paths: Array<Path> = [];
+
+    for (let x = 0; x <= this.state.m.w; x++) {
+      let isNewPath = true;
+
+      for (let y = 0; y <= this.state.m.h; y++) {
+        const leftCellState = !this.state.m.isValid(x - 1, y) || this.state.m.isObstacle(x - 1, y) ?
+          OBSTACLE : FREE;
+        const currCellState = !this.state.m.isValid(x, y) || this.state.m.isObstacle(x, y) ? OBSTACLE : FREE;
+
+        // If neighbours are different
+        if (currCellState !== leftCellState)  {
+          if (isNewPath) {
+            paths.push(new Path(
+              new Coord(x, y),
+              new Coord(x, y + 1),
+              VERTICAL_ORIENTATION
+            ));
+            isNewPath = false;
+          } else {
+            paths[paths.length - 1].end = new Coord(x, y + 1);
+          }
+        } else {
+          // If neighbours are the same - end path
+          isNewPath = true;
+        }
+      }
+    }
+
+    return paths;
+  }
+
+  getHorizontalPaths(): Array<Path> {
+    const paths: Array<Path> = [];
+
+    for (let y = 0; y <= this.state.m.h; y++) {
+      let isNewPath = true;
+
+      for (let x = 0; x <= this.state.m.w; x++) {
+        const bottomCellState = !this.state.m.isValid(x, y - 1) || this.state.m.isObstacle(x, y - 1) ?
+          OBSTACLE : FREE;
+        const currCellState = !this.state.m.isValid(x, y) || this.state.m.isObstacle(x, y) ? OBSTACLE : FREE;
+
+        // If neighbours are different
+        if (currCellState !== bottomCellState)  {
+          if (isNewPath) {
+            paths.push(new Path(
+              new Coord(x, y),
+              new Coord(x + 1, y),
+              HORIZONTAL_ORIENTATION
+            ));
+            isNewPath = false;
+          } else {
+            paths[paths.length - 1].end = new Coord(x + 1, y);
+          }
+        } else {
+          // If neighbours are the same - end path
+          isNewPath = true;
+        }
+      }
+    }
+
+    return paths;
   }
 
   /** @private */
