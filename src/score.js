@@ -11,7 +11,7 @@ const countMoves = () => {
         scoresPerModel.set(score[0], scoreVal);
         totalScore += scoreVal;
     }
-    let current_result = `./current_result_${new Date().getTime().toString()}.txt`;
+    let current_result = `./scores/all_${new Date().getTime().toString()}.score`;
     for (let key of Array.from(scoresPerModel.keys()).sort()) {
         fs.appendFileSync(current_result, `${key} : ${scoresPerModel.get(key)}\n`);
     }

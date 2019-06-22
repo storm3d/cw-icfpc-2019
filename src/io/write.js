@@ -11,20 +11,22 @@ export class Writer {
 
     write(folder: string, model: string): number {
         let filename = `./${folder}/prob-${model}.sol`;
-        let scorefile = `./scores/prob-${model}.sol`;
+
+        let scorefile = `./scores/prob-${model}.score`;
 
         if (!fs.existsSync(scorefile)) {
             this.writeScore(scorefile);
 
-            return this.writeSolve(filename);
+            return this.writeSolve(filename, model);
         }
 
+        let DEBUG = true;
         let savedScore = parseInt(fs.readFileSync(scorefile).toString(), 10);
 
-        if (savedScore <= this.solution.getScore()) {
+        if (DEBUG || savedScore <= this.solution.getScore()) {
             this.writeScore(scorefile);
 
-            return this.writeSolve(filename);
+            return this.writeSolve(filename, model);
         }
         // eslint-disable-next-line no-console,no-console
         console.log('New solution get the worst results!');
@@ -34,10 +36,12 @@ export class Writer {
         return this.solution.getString().length;
     }
 
-    writeSolve(filename: string): number {
+    writeSolve(filename: string, model:string): number {
         // eslint-disable-next-line no-console
         console.log(`Writing file ${filename}`);
         fs.writeFileSync(filename, this.solution.getString(), 'utf8');
+        let scoreStr = `${model}:${this.solution.getScore()};`;
+        fs.appendFileSync('./current_result.txt', scoreStr)
         // eslint-disable-next-line no-console
         console.log(`The file ${filename} has been saved!`);
 

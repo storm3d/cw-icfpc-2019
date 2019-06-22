@@ -303,8 +303,8 @@ export default class Solver {
           }
       }
       // console.log(path);
-      
-      for (let i = 0; i < Math.ceil(path.length / 2); i++) {
+
+      for (let i = 0; i < Math.ceil(path.length /*/ 2*/); i++) {
         if (this.state.m.getFreeNeighborsNum(path[i].x, path[i].y, 1) > 0) {
           let dx = -(this.state.worker.pos.x - path[i].x);
           let dy = -(this.state.worker.pos.y - path[i].y);
