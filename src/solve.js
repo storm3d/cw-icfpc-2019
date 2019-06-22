@@ -66,7 +66,6 @@ export function findPath(s: State, worker : Rover) {
       }
     }
     //console.log(dirs);
-
     let isFound = false;
     for (let dirsKey in dirs) {
       let nx = dirs[dirsKey].nx;
