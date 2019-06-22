@@ -11,6 +11,10 @@ export class Writer {
 
     write(folder: string, model: string): number {
         let filename = `./${folder}/prob-${model}.sol`;
+
+        return this.writeSolve(filename);
+
+        /*
         let scorefile = `./scores/prob-${model}.sol`;
 
         if (!fs.existsSync(scorefile)) {
@@ -32,6 +36,7 @@ export class Writer {
         console.log(`SOLUTION ${model} WAS NOT UPDATED`);
 
         return this.solution.getString().length;
+        */
     }
 
     writeSolve(filename: string): number {
