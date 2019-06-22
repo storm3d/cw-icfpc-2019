@@ -157,7 +157,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     if(!minC)
       throw "Weird shit happened";
 
-    path.unsift(minC);
+    path.unshift(minC);
   }
 
   return path;
