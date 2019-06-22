@@ -1,6 +1,6 @@
 import {  } from "../../src/model/model";
 import assert from 'assert';
-import { Matrix, parseMatrix, State, Booster, parseState } from "../../src/model/model";
+import { Matrix, parseMatrix, State, Booster, parseState, parseCoords } from "../../src/model/model";
 import { WRAPPED, OBSTACLE } from "../../src/model/model";
 import {Coord} from "../../src/model/model";
 
@@ -135,9 +135,6 @@ describe("Basic model", () => {
 
     let m = parseMatrix(layout);
 
-    expect(m.getNeighbors(m.toIndex(0, 0))).toEqual([1, 4]);
-    expect(m.getNeighbors(m.toIndex(3, 0))).toEqual([2, 7]);
-    expect(m.getNeighbors(m.toIndex(1, 1))).toEqual([1, 4, 6, 9]);
-    expect(m.getNeighbors(m.toIndex(3, 3))).toEqual([11, 14]);
+    expect(m.getNeighbors(new Coord(0, 0))).toEqual(parseCoords("(-1,0),(0,-1),(0,1),(1,0)"));
   })
 });

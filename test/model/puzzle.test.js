@@ -11,6 +11,12 @@ describe("Parse Puzzle", () => {
         expect(puzzle.tSize).toEqual(150);
         expect(puzzle.vMin).toEqual(400);
         expect(puzzle.vMax).toEqual(1200);
+        expect(puzzle.mNum).toEqual(6);
+        expect(puzzle.fNum).toEqual(10);
+        expect(puzzle.dNum).toEqual(5);
+        expect(puzzle.rNum).toEqual(1);
+        expect(puzzle.cNum).toEqual(3);
+        expect(puzzle.xNum).toEqual(4);
         expect(puzzle.iSqs.length).toEqual(1);
         expect(puzzle.iSqs[0]).toEqual(new Coord(1,1));
     });

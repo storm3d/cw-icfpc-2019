@@ -66,29 +66,29 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     };
 
     // go this dir first
-    let nx = dirs[worker.rotation].nx;
-    let ny = dirs[worker.rotation].ny;
-
-    delete dirs[worker.rotation];
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-        let cost = pixelCost(s.m, nx, ny);
-
-        if(cost > bestPixelCost || nearestFree === 0) {
-          nearestFree = new Coord(nx, ny);
-          bestPixelCost = cost;
-        }
-      }
-      if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
+    // let nx = dirs[worker.rotation].nx;
+    // let ny = dirs[worker.rotation].ny;
+    //
+    // delete dirs[worker.rotation];
+    //
+    // if(s.m.isValid(nx, ny)) {
+    //   if (s.checkBooster(nx, ny)) {
+    //     nearestFree = new Coord(nx, ny);
+    //     break;
+    //   }
+    //   if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+    //     let cost = pixelCost(s.m, nx, ny);
+    //
+    //     if(cost > bestPixelCost || nearestFree === 0) {
+    //       nearestFree = new Coord(nx, ny);
+    //       bestPixelCost = cost;
+    //     }
+    //   }
+    //   if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
+    //     front.push(new Coord(nx, ny));
+    //     lens.set(nx, ny, curLen + 1);
+    //   }
+    // }
     //console.log(dirs);
     let isFound = false;
     for (let dirsKey in dirs) {
@@ -102,7 +102,8 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
           break;
         }
         if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-          let cost = pixelCost(s.m, nx, ny);
+          // let cost = pixelCost(s.m, nx, ny) / Math.pow(curLen, 1);
+          let cost = 1;
 
           if(cost > bestPixelCost || nearestFree === 0) {
             nearestFree = new Coord(nx, ny);
@@ -186,14 +187,15 @@ export function pixelCost(matrix: Matrix, x: number, y: number): number {
   let cost = 0;
 
   let i = matrix.toIndex(x, y);
+
   if (matrix.isFreeIndex(i)) {
-    let n = matrix.getNeighbors(i);
-    let blockedNeighbors = 4 - n.length;
+    let n = matrix.getNeighbors(new Coord(x, y), 2);
+    let blockedNeighbors = 0;
     let wrappedNeighbors = 0;
 
     n.forEach(k => {
-      if (matrix.isObstacleIndex(k)) blockedNeighbors++;
-      if (matrix.isWrappedIndex(k)) wrappedNeighbors++;
+      if (!matrix.isValid(k.x, k.y) || matrix.isObstacle(k.x, k.y)) blockedNeighbors++;
+      if (matrix.isValid(k.x, k.y) && matrix.isWrapped(k.x, k.y)) wrappedNeighbors++;
     });
 
     cost += 1 + wrappedNeighbors * 0.1 + blockedNeighbors * 0.5;
@@ -289,22 +291,23 @@ export default class Solver {
         teleportPos = this.state.worker.pos.getCopy();
       }
 
-      let pathLen = path.length > 1 ? path.length - 1 : path.length;
-      for (let i = 0; i < pathLen; i++) {
-        let dx = -(this.state.worker.pos.x - path[i].x);
-        let dy = -(this.state.worker.pos.y - path[i].y);
+      for (let i = 0; i < Math.ceil(path.length / 2); i++) {
+        if (this.state.m.getFreeNeighborsNum(path[i].x, path[i].y, 1) > 0) {
+          let dx = -(this.state.worker.pos.x - path[i].x);
+          let dy = -(this.state.worker.pos.y - path[i].y);
 
-        let turnType = getTurnType(this.state.worker.rotation, dx, dy);
-        if (turnType === 1) { // CW
-          this.solution.turnManipulatorsClockwise();
-          this.state.worker.rotCW();
-          this.state.moveWorker(this.state.worker.pos);
-          stepActiveBoosters();
-        } else if (turnType === 2) { // CCW
-          this.solution.turnManipulatorsCounterclockwise();
-          this.state.worker.rotCCW();
-          this.state.moveWorker(this.state.worker.pos);
-          stepActiveBoosters();
+          let turnType = getTurnType(this.state.worker.rotation, dx, dy);
+          if (turnType === 1) { // CW
+            this.solution.turnManipulatorsClockwise();
+            this.state.worker.rotCW();
+            this.state.moveWorker(this.state.worker.pos);
+            stepActiveBoosters();
+          } else if (turnType === 2) { // CCW
+            this.solution.turnManipulatorsCounterclockwise();
+            this.state.worker.rotCCW();
+            this.state.moveWorker(this.state.worker.pos);
+            stepActiveBoosters();
+          }
         }
 
         this.solution.move(this.state.worker.pos, path[i]);
