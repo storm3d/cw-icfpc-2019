@@ -1,5 +1,5 @@
-import Solver from "../src/solve";
-import { parseState } from "../src/model/model";
+import Solver, { pixelCost } from "../src/solve";
+import { parseState, parseMatrix } from "../src/model/model";
 
 describe("solver", () => {
 
@@ -86,10 +86,25 @@ describe("solver", () => {
     let solver = new Solver(s);
     let solution = solver.solve_DFS_FreeNum();
 
-    console.log(solution);
+    // console.log(solution);
 
     //console.log(solution.getString());
     //console.log(solution.getString().length);
   })
 
+  test("Cost function", () => {
+    let layout = `
+      | . . * . |
+      | . . * * |
+      | . . . . |
+      | * . # . |
+    `;
+
+    let m = parseMatrix(layout);
+
+    expect(pixelCost(m, 0, 0)).toEqual(0);
+    expect(pixelCost(m, 1, 1)).toEqual(1);
+    expect(pixelCost(m, 1, 0)).toEqual(1 + 0.5 * 2 + 0.1 * 1);
+    expect(pixelCost(m, 3, 0)).toEqual(1 + 0.5 * 3 + 0.1 * 0);
+  })
 });

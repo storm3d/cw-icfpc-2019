@@ -123,4 +123,19 @@ describe("Basic model", () => {
     expect(s.m.isObstacle(1, 0)).toEqual(true);
   });
 
+  test("get neighbors", () => {
+    let layout = `
+      | . . * . |
+      | . . * * |
+      | . . . . |
+      | * . # . |
+    `;
+
+    let m = parseMatrix(layout);
+
+    expect(m.getNeighbors(m.toIndex(0, 0))).toEqual([1, 4]);
+    expect(m.getNeighbors(m.toIndex(3, 0))).toEqual([2, 7]);
+    expect(m.getNeighbors(m.toIndex(1, 1))).toEqual([1, 4, 6, 9]);
+    expect(m.getNeighbors(m.toIndex(3, 3))).toEqual([11, 14]);
+  })
 });

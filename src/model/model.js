@@ -155,9 +155,9 @@ export class Matrix {
   getNeighbors(index: number): Array<number> {
     let neighbors = [];
 
-    if (index > 0) neighbors.push(index - 1);
-    if (index < this.w * this.h - 1) neighbors.push(index + 1);
     if (index > this.w) neighbors.push(index - this.w);
+    if (index > 0) neighbors.push(index - 1);
+    if (index % this.h < this.w - 1) neighbors.push(index + 1);
     if (index < (this.w - 1) * this.h) neighbors.push(index + this.w);
 
     return neighbors;
