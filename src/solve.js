@@ -14,6 +14,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
   lens.set(source.x, source.y, 1);
 
   let nearestFree : Coord = 0;
+  let bestPixelCost = 0;
 
   while(front.length) {
     let c = front[0];
@@ -57,8 +58,13 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
+      if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+        let cost = pixelCost(s.m, nx, ny);
+
+        if(cost > bestPixelCost || nearestFree === 0) {
+          nearestFree = new Coord(nx, ny);
+          bestPixelCost = cost;
+        }
       }
       if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
@@ -77,8 +83,13 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
           isFound = true;
           break;
         }
-        if (s.m.isFree(nx, ny) && nearestFree === 0) {
-          nearestFree = new Coord(nx, ny);
+        if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+          let cost = pixelCost(s.m, nx, ny);
+
+          if(cost > bestPixelCost || nearestFree === 0) {
+            nearestFree = new Coord(nx, ny);
+            bestPixelCost = cost;
+          }
         }
         if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
           front.push(new Coord(nx, ny));
@@ -152,6 +163,26 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
   return path;
 }
 
+
+export function pixelCost(matrix: Matrix, x: number, y: number): number {
+  let cost = 0;
+
+  let i = matrix.toIndex(x, y);
+  if (matrix.isFreeIndex(i)) {
+    let n = matrix.getNeighbors(i);
+    let blockedNeighbors = 4 - n.length;
+    let wrappedNeighbors = 0;
+
+    n.forEach(k => {
+      if (matrix.isObstacleIndex(k)) blockedNeighbors++;
+      if (matrix.isWrappedIndex(k)) wrappedNeighbors++;
+    });
+
+    cost += 1 + wrappedNeighbors * 0.1 + blockedNeighbors * 0.5;
+  }
+  return cost;
+}
+
 export default class Solver {
 
   state : State;
@@ -170,13 +201,13 @@ export default class Solver {
       let path = findPath(this.state, this.state.worker, false);
       if (path === undefined)
         return this.solution;
-    
+
       // dumb greedy drills
       //if (false) {
       if (this.state.drills > 0 || drillTurns > 0) {
           drilling = false;
           let path1 = findPath(this.state, this.state.worker, true);
-          if ((path1.length + 20 < path.length) && 
+          if ((path1.length + 20 < path.length) &&
                (path1.length < (drillTurns + this.state.drills * DRILL_TIME))) {
               //console.log(`!!!!!!!!!!!!${path.length}, ${path1.length}`);
               path = path1;
@@ -220,7 +251,7 @@ export default class Solver {
           let c = this.state.worker.extendManipulators();
           this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
         }
-        
+
         // if drill is ON
         if (drillTurns > 0) {
             drillTurns--;
@@ -230,57 +261,37 @@ export default class Solver {
               this.solution.startUsingDrill();
               drillTurns = DRILL_TIME;
             }
-            
+
         }
 
         // console.log(this.state.dump(true));
       }
-      
+
 
     }
 
     return this.solution;
   }
-  
+
   solve_DFS_FreeNum(): Solution {
       let front = new Map();
       let solution = new Solution();
       solution.state = this.state;
-      
+
       let calcWeight = (s) => {return s.state.m.getFreeNum();}
       let calcNewTop = (f) => {return Array.from(f.keys()).sort()[0]; }
       let topKey = calcWeight(solution);
       front.set(topKey, [solution]);
 
       //console.log(calcNewTop(front), topKey);
-      
+
       while(topKey > 0) {
           let top = front.get(topKey);
           //
           let trySolution = top.shift();
-          
+
           break;
       }
       return this.solution;
-  }
-
-  cost(state: State): number {
-    let cost = 0;
-
-    for (let i = 0; i < state.m.w * state.m.h; i++) {
-      if (state.m.isFreeIndex(i)) {
-        let n = state.m.getNeighbors(i);
-        let blockedNeighbors = 4 - n.length;
-        let wrappedNeighbors = 0;
-
-        n.forEach(k => {
-          if (state.m.isObstacleIndex(k)) blockedNeighbors++;
-          if (state.m.isWrappedIndex(k)) wrappedNeighbors++;
-        });
-
-        cost += 1 + wrappedNeighbors * 0.1 + blockedNeighbors * 0.5;
-      }
-    }
-    return cost;
   }
 }

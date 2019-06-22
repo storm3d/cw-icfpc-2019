@@ -87,7 +87,7 @@ export class Coord {
 export class Matrix {
   w: number;
   h: number;
-  pixels: Uint16Array;
+  pixels: Uint16Array; // don't change it to 8!
   freeN: number;
 
   constructor(w: number, h: number, pixels = undefined) {
@@ -155,9 +155,9 @@ export class Matrix {
   getNeighbors(index: number): Array<number> {
     let neighbors = [];
 
-    if (index > 0) neighbors.push(index - 1);
-    if (index < this.w * this.h - 1) neighbors.push(index + 1);
     if (index > this.w) neighbors.push(index - this.w);
+    if (index > 0) neighbors.push(index - 1);
+    if (index % this.h < this.w - 1) neighbors.push(index + 1);
     if (index < (this.w - 1) * this.h) neighbors.push(index + this.w);
 
     return neighbors;
@@ -397,7 +397,7 @@ export class State {
     for(let i = 0; i < this.boosters.length; i++) {
       if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
         //if (this.boosters[i].type !== "X") {
-        if (this.boosters[i].type === "B") {
+        if (this.boosters[i].type === "B" || this.boosters[i].type === "L") {
           //console.log("booster!")
           return true;
         }
