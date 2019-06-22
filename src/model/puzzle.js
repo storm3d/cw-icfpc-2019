@@ -3,6 +3,8 @@ import fs from 'fs'
 
 import { State, OBSTACLE, FREE, Coord } from '../model/model'
 
+const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g;
+
 export class Puzzle {
 
     bNum : number;
@@ -48,8 +50,36 @@ export class PuzzleParser {
         }
     }
 
+
     getPuzzle(): Puzzle {
+        let components = this.content.split('#')
+        // console.log(components)
+        const [bNum, eNum, tSize, vMin, vMax, mNum, fNum, dNum,rNum,cNum, xNum] = components[0].split(",")
         this.puzzle = new Puzzle();
+        this.puzzle.bNum = parseInt(bNum,10);
+        this.puzzle.eNum = parseInt(eNum,10);
+        this.puzzle.tSize = parseInt(tSize,10);
+        this.puzzle.vMin = parseInt(vMin,10);
+        this.puzzle.vMax = parseInt(vMax,10);
+        this.puzzle.mNum = parseInt(mNum,10);
+        this.puzzle.fNum = parseInt(fNum,10);
+        this.puzzle.dNum = parseInt(dNum,10);
+        this.puzzle.rNum = parseInt(rNum,10);
+        this.puzzle.cNum = parseInt(cNum,10);
+        this.puzzle.xNum = parseInt(xNum,10);
+        this.puzzle.iSqs = components[1].match(COORDS_REGEXP).map((str) => {
+            const t = str.split(',');
+            const x = parseInt(t[0].slice(1), 10);
+            const y = parseInt(t[1].slice(0, -1), 10);
+            return new Coord(x,y)
+        });
+        this.puzzle.oSqs = components[2].match(COORDS_REGEXP).map((str) => {
+            const t = str.split(',');
+            const x = parseInt(t[0].slice(1), 10);
+            const y = parseInt(t[1].slice(0, -1), 10);
+            return new Coord(x,y)
+        });
+
         return this.puzzle;
     }
 }
