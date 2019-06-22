@@ -14,6 +14,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
   lens.set(source.x, source.y, 1);
 
   let nearestFree : Coord = 0;
+  let bestPixelCost = 0;
 
   while(front.length) {
     let c = front[0];
@@ -57,8 +58,13 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
+      if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+        let cost = pixelCost(s.m, nx, ny);
+
+        if(cost > bestPixelCost || nearestFree === 0) {
+          nearestFree = new Coord(nx, ny);
+          bestPixelCost = cost;
+        }
       }
       if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
@@ -77,8 +83,13 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
           isFound = true;
           break;
         }
-        if (s.m.isFree(nx, ny) && nearestFree === 0) {
-          nearestFree = new Coord(nx, ny);
+        if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+          let cost = pixelCost(s.m, nx, ny);
+
+          if(cost > bestPixelCost || nearestFree === 0) {
+            nearestFree = new Coord(nx, ny);
+            bestPixelCost = cost;
+          }
         }
         if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
           front.push(new Coord(nx, ny));

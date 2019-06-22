@@ -37,7 +37,7 @@ const exec = (model: string, callback: Function) => {
 
 if (process.send === undefined) {
 
-    let mapsNum = 50;
+    let mapsNum = 100;
     for(let i = 1; i <= mapsNum; i++) {
         exec((i + "").padStart(3, "0"), () => 0);
 
