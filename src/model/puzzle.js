@@ -45,7 +45,7 @@ export class Puzzle {
             let c = front[0];
             let curLen = lens.get(c.x, c.y);
 
-            console.log(front);
+            //console.log(front);
 
             front.shift();
 
