@@ -1,61 +1,42 @@
 // @flow
-import { State, Coord, FREE, OBSTACLE } from '../model/model';
+import Path from '../model/path';
+import { Coord, FREE, OBSTACLE, Matrix, Rover } from '../model/model';
 
 const HORIZONTAL_ORIENTATION = 'h';
 const VERTICAL_ORIENTATION = 'v';
 
-class Path {
-  start: Coord;
-  end: Coord;
-  orientation: string;
-
-  constructor(start: Coord, end: Coord, orientation: string = VERTICAL_ORIENTATION) {
-    this.start = start;
-    this.end = end;
-    this.orientation = orientation;
-  }
-
-  flipStartEnd(): Path {
-    const tempX = this.start.x;
-    const tempY = this.start.y;
-
-    this.start.x = this.end.x;
-    this.start.y = this.end.y;
-    this.end.x = tempX;
-    this.end.y = tempY;
-
-    return this;
-  }
-}
-
 export default class MapSerializer {
-  state: State;
+  matrix: Matrix;
+  worker: Rover;
 
-  constructor(state: State) {
-    this.state = state;
+  constructor(matrix: Matrix, worker: Rover) {
+    this.matrix = matrix;
+    this.worker = worker;
   }
 
   dump(): string {
     const verticalPaths = this.getVerticalPaths();
     const horizontalPaths = this.getHorizontalPaths();
     const paths = this.sortHorizontalPaths(verticalPaths, horizontalPaths);
-    const dump = paths.map(path => `(${path.start.x},${path.start.y}),(${path.end.x},${path.end.y})`)
+    const contours = paths.map(path => `(${path.start.x},${path.start.y}),(${path.end.x},${path.end.y})`)
       .join(',');
+    const workerCoord = this.worker.pos;
+    const boostersStr = ''; // @TODO
 
-    return dump;
+    return `${contours}#(${workerCoord.x},${workerCoord.y})##${boostersStr}`;
   }
 
   /** @private */
   getVerticalPaths(): Array<Path> {
     const paths: Array<Path> = [];
 
-    for (let x = 0; x <= this.state.m.w; x++) {
+    for (let x = 0; x <= this.matrix.w; x++) {
       let isNewPath = true;
 
-      for (let y = 0; y <= this.state.m.h; y++) {
-        const leftCellState = !this.state.m.isValid(x - 1, y) || this.state.m.isObstacle(x - 1, y) ?
+      for (let y = 0; y <= this.matrix.h; y++) {
+        const leftCellState = !this.matrix.isValid(x - 1, y) || this.matrix.isObstacle(x - 1, y) ?
           OBSTACLE : FREE;
-        const currCellState = !this.state.m.isValid(x, y) || this.state.m.isObstacle(x, y) ? OBSTACLE : FREE;
+        const currCellState = !this.matrix.isValid(x, y) || this.matrix.isObstacle(x, y) ? OBSTACLE : FREE;
 
         // If neighbours are different
         if (currCellState !== leftCellState)  {
@@ -83,13 +64,13 @@ export default class MapSerializer {
   getHorizontalPaths(): Array<Path> {
     const paths: Array<Path> = [];
 
-    for (let y = 0; y <= this.state.m.h; y++) {
+    for (let y = 0; y <= this.matrix.h; y++) {
       let isNewPath = true;
 
-      for (let x = 0; x <= this.state.m.w; x++) {
-        const bottomCellState = !this.state.m.isValid(x, y - 1) || this.state.m.isObstacle(x, y - 1) ?
+      for (let x = 0; x <= this.matrix.w; x++) {
+        const bottomCellState = !this.matrix.isValid(x, y - 1) || this.matrix.isObstacle(x, y - 1) ?
           OBSTACLE : FREE;
-        const currCellState = !this.state.m.isValid(x, y) || this.state.m.isObstacle(x, y) ? OBSTACLE : FREE;
+        const currCellState = !this.matrix.isValid(x, y) || this.matrix.isObstacle(x, y) ? OBSTACLE : FREE;
 
         // If neighbours are different
         if (currCellState !== bottomCellState)  {
@@ -119,11 +100,15 @@ export default class MapSerializer {
 
     const paths: Array<Path> = verticalPaths.concat(horizontalPaths);
     const currPathIndex = this.findStartPathIndex(paths);
+    const joinedPaths: Array<Path> = [];
 
     currPath = paths[currPathIndex];
-    paths.splice(currPathIndex, 1);
 
-    const joinedPaths: Array<Path> = [currPath];
+    if (currPath.orientation === HORIZONTAL_ORIENTATION) {
+      joinedPaths.push(currPath);
+    }
+
+    paths.splice(currPathIndex, 1);
 
     for (let i = 0; i < 10000; i++) {
       const nextPathIndex = this.findNextPathIndex(currPath, paths);
@@ -147,7 +132,7 @@ export default class MapSerializer {
   /** @private */
   findStartPathIndex(paths: Array<Path>): number {
     let neededIndex = 0;
-    let minY = paths[0].start.y;
+    let minY = Infinity;
 
     for (let i = 0; i < paths.length; i++) {
       // First path should be horizontal
@@ -155,9 +140,9 @@ export default class MapSerializer {
         continue;
       }
 
-      if (paths[i].start.y < minY || paths[i].end.y < minY) {
+      if (paths[i].start.y < minY) {
         neededIndex = i;
-        minY = Math.min(paths[i].start.y, paths[i].end.y);
+        minY = paths[i].start.y;
       }
     }
 
