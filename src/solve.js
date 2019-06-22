@@ -276,6 +276,7 @@ export default class Solver {
         }
       }
       // dumb greedy teleports
+      //if (false) {
       if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) ){ //&& matrixCenter.x > 50 && matrixCenter.y > 50) {
         hasActiveTeleport = true;
         this.state.teleports--;
@@ -286,8 +287,8 @@ export default class Solver {
       }
 
       // dumb greedy drills
-      if (false) {
-      //if (this.state.drills > 0 || drillTurns > 0) {
+      //if (false) {
+      if (this.state.drills > 0 || drillTurns > 0) {
           drilling = false;
           let path1 = findPath(this.state, this.state.worker, true);
           if ((path1.length + 20 < path.length) &&
