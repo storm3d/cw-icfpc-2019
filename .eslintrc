@@ -16,7 +16,7 @@
   "rules": {
     "flowtype-errors/show-errors": "error",
     "linebreak-style": "off",
-    "semi": "off",
+    "semi": "error",
     "no-plusplus": "off",
     "prettier/prettier": "off",
     "prefer-const": "off",
