@@ -58,7 +58,7 @@ const highload = () => {
 };
 
 if (process.send === undefined) {
-    for(let i = 2; i <= 2; i++)
+    for(let i = 1; i <= 220; i++)
         exec((i+"").padStart(3, "0"), () => 0);
     // highload()
 }

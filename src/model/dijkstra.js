@@ -171,21 +171,32 @@ function breadthSearch(s: State, source: Coord) {
   lens.set(source.x, source.y, 1)
 
   let nearestFree : Coord = 0;
+  const maxSearchLen = 40;
 
   while(front.length) {
     let c = front[0];
     let curLen = lens.get(c.x, c.y);
+
+    // exceeded the search radius - go to just a free cell
+    if(curLen >= maxSearchLen && nearestFree !== 0) {
+      //console.log("exceeded range");
+      break;
+    }
+
     front.shift();
 
     let nx = c.x + 1;
     let ny = c.y;
 
     if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
         lens.set(nx, ny, curLen + 1);
       }
@@ -195,11 +206,14 @@ function breadthSearch(s: State, source: Coord) {
     ny = c.y + 1;
 
     if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
         lens.set(nx, ny, curLen + 1);
       }
@@ -209,11 +223,14 @@ function breadthSearch(s: State, source: Coord) {
     ny = c.y;
 
     if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
         lens.set(nx, ny, curLen + 1);
       }
@@ -223,16 +240,24 @@ function breadthSearch(s: State, source: Coord) {
     ny = c.y - 1;
 
     if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny) || s.m.isFree(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
         nearestFree = new Coord(nx, ny);
         break;
       }
-      if (s.m.isWrapped(nx, ny) && lens.get(nx, ny) === 0) {
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
         front.push(new Coord(nx, ny));
         lens.set(nx, ny, curLen + 1);
       }
     }
+
+    //console.log("front");
+    //console.log(front);
   }
+
+  //console.log(nearestFree);
 
   if(nearestFree === 0)
     return undefined;

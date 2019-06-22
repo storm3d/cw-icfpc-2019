@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a9204ddb-6164-4ecb-bb61-2f8a8f377c0c" name="Default Changelist" comment="optimize dijkstra">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="6cbc51dc-d562-43dd-a905-3032ba7962f5" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dijkstra.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/dijkstra.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solve.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/solve.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/model/rover.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/model/rover.test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/solve.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/solve.test.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,41 +21,62 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/model/model.js">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="517">
-              <caret line="277" column="5" lean-forward="true" selection-start-line="277" selection-start-column="5" selection-end-line="277" selection-end-column="5" />
+            <state relative-caret-position="-424">
+              <caret line="31" column="33" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/model/rover.test.js">
+        <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="419">
-              <caret line="70" column="3" selection-start-line="70" selection-start-column="3" selection-end-line="70" selection-end-column="3" />
+            <state relative-caret-position="104">
+              <caret line="62" column="17" selection-start-line="62" selection-start-column="17" selection-end-line="62" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/model/dijkstra.test.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="196">
+              <caret line="32" column="28" selection-start-line="32" selection-start-column="28" selection-end-line="32" selection-end-column="28" />
               <folding>
-                <element signature="e#0#28#0" expanded="true" />
+                <element signature="e#0#67#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/solve.js">
+        <entry file="file://$PROJECT_DIR$/src/model/dijkstra.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="196">
-              <caret line="37" column="7" selection-start-line="37" selection-start-column="7" selection-end-line="37" selection-end-column="7" />
+            <state relative-caret-position="292">
+              <caret line="187" column="21" lean-forward="true" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/model/model.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="173">
+              <caret line="342" column="40" selection-start-line="342" selection-start-column="40" selection-end-line="342" selection-end-column="40" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/runner/launch.js">
+        <entry file="file://$PROJECT_DIR$/src/model/mapParser.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="27" selection-start-line="17" selection-start-column="27" selection-end-line="17" selection-end-column="27" />
+            <state relative-caret-position="85">
+              <caret line="58" column="6" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
+              <folding>
+                <element signature="e#9#28#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -63,8 +84,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/model/mapParser.test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="52" column="32" lean-forward="true" selection-start-line="52" selection-start-column="32" selection-end-line="52" selection-end-column="32" />
+            <state relative-caret-position="56">
+              <caret line="61" column="2" selection-start-line="61" selection-start-column="2" selection-end-line="61" selection-end-column="2" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -75,8 +96,23 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/solve.test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="293">
-              <caret line="49" column="20" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
+            <state relative-caret-position="136">
+              <caret line="59" column="13" selection-start-line="59" selection-start-column="12" selection-end-line="59" selection-end-column="13" />
+              <folding>
+                <element signature="e#0#34#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/solve.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+              <folding>
+                <element signature="e#10#52#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -84,8 +120,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/model/solution.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="51" column="47" selection-start-line="51" selection-start-column="4" selection-end-line="51" selection-end-column="47" />
+            <state relative-caret-position="617">
+              <caret line="60" column="26" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -134,14 +170,14 @@
         <option value="$PROJECT_DIR$/src/model/mapParser.js" />
         <option value="$PROJECT_DIR$/dist/model/model.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/src/model/dijkstra.js" />
-        <option value="$PROJECT_DIR$/src/index.js" />
         <option value="$PROJECT_DIR$/solution_len.sh" />
         <option value="$PROJECT_DIR$/src/runner/launch.js" />
         <option value="$PROJECT_DIR$/test/model/rover.test.js" />
-        <option value="$PROJECT_DIR$/src/model/model.js" />
-        <option value="$PROJECT_DIR$/test/solve.test.js" />
         <option value="$PROJECT_DIR$/src/solve.js" />
+        <option value="$PROJECT_DIR$/src/index.js" />
+        <option value="$PROJECT_DIR$/test/solve.test.js" />
+        <option value="$PROJECT_DIR$/src/model/dijkstra.js" />
+        <option value="$PROJECT_DIR$/src/model/model.js" />
       </list>
     </option>
   </component>
@@ -174,17 +210,13 @@
             <path>
               <item name="cw-icfpc-2019" type="b2602c69:ProjectViewProjectNode" />
               <item name="cw-icfpc-2019" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="cw-icfpc-2019" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cw-icfpc-2019" type="462c0819:PsiDirectoryNode" />
-              <item name="problems" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="cw-icfpc-2019" type="b2602c69:ProjectViewProjectNode" />
               <item name="cw-icfpc-2019" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="io" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="cw-icfpc-2019" type="b2602c69:ProjectViewProjectNode" />
@@ -254,7 +286,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Jest.solution.test.js">
+  <component name="RunManager" selected="npm.start">
     <configuration name="solution.test.js" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
       <node-interpreter value="project" />
       <node-options value="" />
@@ -263,16 +295,6 @@
       <envs />
       <scope-kind value="TEST_FILE" />
       <test-file value="$PROJECT_DIR$/test/model/solution.test.js" />
-      <method v="2" />
-    </configuration>
-    <configuration name="solve.test.js" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
-      <node-interpreter value="project" />
-      <node-options value="" />
-      <jest-package value="$PROJECT_DIR$/node_modules/jest-cli" />
-      <working-dir value="$PROJECT_DIR$" />
-      <envs />
-      <scope-kind value="TEST_FILE" />
-      <test-file value="$PROJECT_DIR$/test/solve.test.js" />
       <method v="2" />
     </configuration>
     <configuration name="solver.test basic solve1" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
@@ -292,11 +314,21 @@
     <configuration name="launch.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/src/runner/launch.js" working-dir="$PROJECT_DIR$">
       <method v="2" />
     </configuration>
-    <configuration name="launch" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+    <configuration name="start" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
       <scripts>
-        <script value="launch" />
+        <script value="start" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test" />
       </scripts>
       <node-interpreter value="project" />
       <envs />
@@ -304,11 +336,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.launch.js" />
-        <item itemvalue="Jest.solve.test.js" />
-        <item itemvalue="npm.launch" />
+        <item itemvalue="npm.start" />
         <item itemvalue="Jest.solver.test basic solve1" />
+        <item itemvalue="npm.test" />
         <item itemvalue="Jest.solution.test.js" />
+        <item itemvalue="Node.js.launch.js" />
       </list>
     </recent_temporary>
   </component>
@@ -398,50 +430,50 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 00h 47m 17s.xml">
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 10m 38s.xml">
       <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 00h 47m 54s.xml">
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 10m 49s.xml">
       <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 00h 48m 56s.xml">
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 12m 09s.xml">
       <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 00h 49m 07s.xml">
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 13m 10s.xml">
       <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 00h 49m 18s.xml">
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 13m 49s.xml">
       <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solve_test_js - 2019.06.22 at 02h 23m 23s.xml">
-      <configuration name="solve.test.js" configurationId="JavaScriptTestRunnerJest" />
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 15m 44s.xml">
+      <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solve_test_js - 2019.06.22 at 02h 25m 15s.xml">
-      <configuration name="solve.test.js" configurationId="JavaScriptTestRunnerJest" />
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 16m 49s.xml">
+      <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solve_test_js - 2019.06.22 at 02h 28m 15s.xml">
-      <configuration name="solve.test.js" configurationId="JavaScriptTestRunnerJest" />
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 18m 43s.xml">
+      <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solve_test_js - 2019.06.22 at 02h 30m 03s.xml">
-      <configuration name="solve.test.js" configurationId="JavaScriptTestRunnerJest" />
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 19m 30s.xml">
+      <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
-    <history-entry file="solve_test_js - 2019.06.22 at 02h 30m 45s.xml">
-      <configuration name="solve.test.js" configurationId="JavaScriptTestRunnerJest" />
+    <history-entry file="solver_test_basic_solve1 - 2019.06.22 at 04h 19m 55s.xml">
+      <configuration name="solver.test basic solve1" configurationId="JavaScriptTestRunnerJest" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37762000" />
+    <option name="totallyTimeSpent" value="40132000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20969023" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24960254" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32987553" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.4" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.22380106" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -449,7 +481,7 @@
       <window_info anchor="bottom" id="Docker" order="7" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32876712" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.28630137" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.28630137" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="TypeScript" order="12" />
       <window_info anchor="bottom" id="Messages" order="13" />
@@ -568,13 +600,7 @@
     </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/javascript/nodejs/8.10.0/node-typings/node_modules/@types/node/assert.d.ts" />
     <entry file="file://$APPLICATION_CONFIG_DIR$/javascript/nodejs/8.10.0/node-typings/node_modules/@types/node/fs.d.ts" />
-    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-003.desc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="28" selection-start-column="28" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-003.desc" />
     <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external/lib.es2015.symbol.wellknown.d.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="429">
@@ -608,9 +634,7 @@
         <state relative-caret-position="-97673" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/part-1-initial/part-1-legend.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/part-1-initial/part-1-legend.txt" />
     <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/flow/core.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="147">
@@ -618,24 +642,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-001.desc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="9" lean-forward="true" selection-start-column="9" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-002.desc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="202" selection-start-column="202" selection-end-column="202" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-001.desc" />
+    <entry file="file://$PROJECT_DIR$/part-1-initial/prob-002.desc" />
     <entry file="file://$PROJECT_DIR$/src/model/mapParser.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="56" column="42" selection-start-line="56" selection-start-column="42" selection-end-line="56" selection-end-column="42" />
+        <state relative-caret-position="85">
+          <caret line="58" column="6" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
+          <folding>
+            <element signature="e#9#28#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -653,31 +668,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/model/dijkstra.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="281">
-          <caret line="171" column="50" selection-start-line="171" selection-start-column="50" selection-end-line="171" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dist/model/model.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="197">
           <caret line="254" column="16" selection-start-line="254" selection-start-column="16" selection-end-line="254" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="31" column="33" lean-forward="true" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/index.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="298">
-          <caret line="28" column="22" selection-start-line="28" selection-start-column="22" selection-end-line="28" selection-end-column="22" />
         </state>
       </provider>
     </entry>
@@ -728,8 +722,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/model/solution.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="51" column="47" selection-start-line="51" selection-start-column="4" selection-end-line="51" selection-end-column="47" />
+        <state relative-caret-position="617">
+          <caret line="60" column="26" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
         </state>
       </provider>
     </entry>
@@ -743,20 +737,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/solve.test.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="293">
-          <caret line="49" column="20" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/solve.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="37" column="7" selection-start-line="37" selection-start-column="7" selection-end-line="37" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/runner/launch.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
@@ -766,18 +746,59 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/model/mapParser.test.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="52" column="32" lean-forward="true" selection-start-line="52" selection-start-column="32" selection-end-line="52" selection-end-column="32" />
+        <state relative-caret-position="56">
+          <caret line="61" column="2" selection-start-line="61" selection-start-column="2" selection-end-line="61" selection-end-column="2" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/index.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="104">
+          <caret line="62" column="17" selection-start-line="62" selection-start-column="17" selection-end-line="62" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-424">
+          <caret line="31" column="33" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/solve.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+          <folding>
+            <element signature="e#10#52#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/solve.test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="59" column="13" selection-start-line="59" selection-start-column="12" selection-end-line="59" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/model/dijkstra.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="187" column="21" lean-forward="true" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/model/model.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="517">
-          <caret line="277" column="5" lean-forward="true" selection-start-line="277" selection-start-column="5" selection-end-line="277" selection-end-column="5" />
+        <state relative-caret-position="173">
+          <caret line="342" column="40" selection-start-line="342" selection-start-column="40" selection-end-line="342" selection-end-column="40" />
         </state>
       </provider>
     </entry>
