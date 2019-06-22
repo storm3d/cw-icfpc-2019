@@ -1,5 +1,5 @@
 // @flow
-import {Coord} from "./model.js";
+import {Coord} from "./model";
 
 export class Solution {
     result: string;
@@ -57,35 +57,35 @@ export class Solution {
     }
 
     turnManipulatorsClockwise() {
-        this.result += "E"
+        this.result += "E";
         this.score++;
     }
 
     turnManipulatorsCounterclockwise() {
-        this.result += "Q"
+        this.result += "Q";
         this.score++;
     }
 
     attachNewManipulatorWithRelativeCoordinates(x: number, y: number) {
-        this.result += "B(" + x + "," + y + ")"
+        this.result += `B(${x},${y})`;
         this.score++;
     }
 
     attachFastWheels() {
-        this.result += "F"
+        this.result += "F";
         this.score++;
     }
 
     startUsingDrill() {
-        this.result += "L"
+        this.result += "L";
         this.score++;
     }
 
     getString() {
-        return this.result
+        return this.result;
     }
 
     getScore() {
-        return this.score
+        return this.score;
     }
 }

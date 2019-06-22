@@ -77,6 +77,8 @@ describe("Basic model", () => {
 
     let s = parseState(layout);
     expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
+    expect(s.m.isCrossObstacle(new Coord(2, 1), new Coord(1, 2))).toEqual(false);
+    expect(s.m.isCrossObstacle(new Coord(1, 2), new Coord(2, 1))).toEqual(false);
     expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
   });
 

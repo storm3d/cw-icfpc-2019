@@ -24,7 +24,9 @@ const launch = () => {
         forked.send({type: 'start'});
 
         forked.on('message', (msg) => {
+            // eslint-disable-next-line no-console
             console.log('Message from child:', msg);
+            // eslint-disable-next-line no-console
             console.log('Models length:', models.length);
             if (msg.type === 'ask') {
                 if (models.length > 0) {
