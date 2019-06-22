@@ -1,3 +1,9 @@
+// fp debug utils
+var logArgs = f => (...args) => {
+  console.log(Object(f).name || 'anonymous function', args);
+  return f(...args);
+};
+var identity = x => x;
 // pretty-printed visualizer from https://icfpcontest2019.github.io/solution_visualiser/
 var render,
 validate;
@@ -2600,7 +2606,8 @@ validate;
     }
     throw new G(b);
   }
-  function Eg(a, b, c) {
+  var drawCircle = drawCircle;
+  function drawCircle(a, b, c) {
     var e = a.ac;
     c = Fg(c);
     e.fillStyle = c;
@@ -4488,96 +4495,97 @@ validate;
     // TODO: probably should be called isPaused
     a.isPlaying || renderNextFrame(a)
   }
-  function Zl(a, b, c, e, f, g, h, l, m) {
-    var n = new $l(g),
+  var Zl = drawState;
+  function drawState(MainNamespace, canvasEl, mapMatrix, height, width, unknownMap1, unknownMap2, unknownMap3, timeSteps) {
+    var n = new $l(unknownMap1),
     q = J().y;
     n = L(n, q);
     n = new Id(n, new C(function (a, b) {
       return function (a) {
         return b.Y(a | 0)
       }
-    }(a, h)));
-    h = new C(function (a, b, c) {
+    }(MainNamespace, unknownMap2)));
+    unknownMap2 = new C(function (a, b, c) {
       return function (a) {
         a |= 0;
         var e = b.h(a),
         f = c.h(a);
         return new Jd(a, e, f)
       }
-    }(a, h, g));
+    }(MainNamespace, unknownMap2, unknownMap1));
     q = J();
-    n = n.Da(h, q.y);
-    h = function () {
+    n = n.Da(unknownMap2, q.y); // seems coordinates of in terms of vertices (.Le.Ma = { k: 0, l: 1 } where k is x and l is y, moveUp) and prev + next coordinates of wrapper's manipulators in the form of 32-length array
+    unknownMap2 = function () {
       return function (a) {
         if (null !== a) return N(new O, a.sc, a.Ma);
         throw new G(a);
       }
-    }(a);
+    }(MainNamespace);
     q = J().y;
-    if (q === J().y) if (n === B()) h = B();
+    if (q === J().y) if (n === emitEmptyObject()) unknownMap2 = emitEmptyObject();
      else {
       q = n.g();
-      var r = q = new H(h(q), B());
-      for (n = n.i(); n !== B(); ) {
+      var r = q = new H(unknownMap2(q), emitEmptyObject());
+      for (n = n.i(); n !== emitEmptyObject(); ) {
         var D = n.g();
-        D = new H(h(D), B());
+        D = new H(unknownMap2(D), emitEmptyObject());
         r = r.cb = D;
         n = n.i()
       }
-      h = q
+      unknownMap2 = q
     } else {
       for (q = Mc(n, q); !n.e(); ) r = n.g(),
-      q.F(h(r)),
+      q.F(unknownMap2(r)),
       n = n.i();
-      h = q.H()
+      unknownMap2 = q.H()
     }
-    n = new $l(g);
+    n = new $l(unknownMap1);
     q = J().y;
     n = L(n, q);
     n = new Id(n, new C(function (a, b) {
       return function (a) {
         return b.Y(a | 0)
       }
-    }(a, l)));
-    g = new C(function (a, b, c) {
+    }(MainNamespace, unknownMap3)));
+    unknownMap1 = new C(function (a, b, c) {
       return function (a) {
         a |= 0;
         var e = b.h(a),
         f = c.h(a);
         return new Jd(a, e, f)
       }
-    }(a, l, g));
-    l = J();
-    l = n.Da(g, l.y);
-    g = function () {
+    }(MainNamespace, unknownMap3, unknownMap1));
+    unknownMap3 = J();
+    unknownMap3 = n.Da(unknownMap1, unknownMap3.y);
+    unknownMap1 = function () {
       return function (a) {
         if (null !== a) return N(new O, a.sc, a.Ma);
         throw new G(a);
       }
-    }(a);
+    }(MainNamespace);
     n = J().y;
-    if (n === J().y) if (l === B()) g = B();
+    if (n === J().y) if (unknownMap3 === emitEmptyObject()) unknownMap1 = emitEmptyObject();
      else {
-      n = l.g();
-      q = n = new H(g(n), B());
-      for (l = l.i(); l !== B(); ) r = l.g(),
-      r = new H(g(r), B()),
+      n = unknownMap3.g();
+      q = n = new H(unknownMap1(n), emitEmptyObject());
+      for (unknownMap3 = unknownMap3.i(); unknownMap3 !== emitEmptyObject(); ) r = unknownMap3.g(),
+      r = new H(unknownMap1(r), emitEmptyObject()),
       q = q.cb = r,
-      l = l.i();
-      g = n
+      unknownMap3 = unknownMap3.i();
+      unknownMap1 = n
     } else {
-      for (n = Mc(l, n); !l.e(); ) q = l.g(),
-      n.F(g(q)),
-      l = l.i();
-      g = n.H()
+      for (n = Mc(unknownMap3, n); !unknownMap3.e(); ) q = unknownMap3.g(),
+      n.F(unknownMap1(q)),
+      unknownMap3 = unknownMap3.i();
+      unknownMap1 = n.H()
     }
-    l = Jf();
-    g = h.Zb(g, l.y).nc(new C(function () {
+    unknownMap3 = Jf();
+    unknownMap1 = unknownMap2.Zb(unknownMap1, unknownMap3.y).nc(new C(function () {
       return function (a) {
         return null !== a
       }
-    }(a)));
-    l = new C(function (a, b, c, e, f) {
+    }(MainNamespace)));
+    unknownMap3 = new C(function (a, b, c, e, f) {
       return function (g) {
         if (null !== g) {
           var h = g.X();
@@ -4594,11 +4602,11 @@ validate;
         }
         throw new G(g);
       }
-    }(a, c, e, f, b));
+    }(MainNamespace, mapMatrix, height, width, canvasEl));
     n = Jf();
-    g = g.hc(l, n.y).Pb();
-    g.v(new C(function (a, b) {
-      return function (a) {
+    unknownMap1 = unknownMap1.hc(unknownMap3, n.y).Pb();
+    unknownMap1.v(new C(function (a, b) {
+      return function drawGround(a) { // wrapped yellow, unwrapped grey, obstacles black; redraws only a portion of screen I think, not the whole map
         if (null !== a) {
           var c = a.X();
           a = a.R();
@@ -4608,13 +4616,13 @@ validate;
           0 > f || f > b.zp || 0 > e || e > b.Bp || (a = a.oc ? a.Me ? Gg().rm : Gg().Vj : Gg().Hf, f = b.ac, e = Fg(a), f.fillStyle = e, Hg(b, Wc(c), a), c = b.ac, a = Fg(Gg().kj), c.fillStyle = a)
         } else throw new G(a);
       }
-    }(a, b)));
-    h.nc(new C(function () {
+    }(MainNamespace, canvasEl)));
+    unknownMap2.nc(new C(function () {
       return function (a) {
         return null !== a
       }
-    }(a))).v(new C(function (a, b, c, e, f, g) {
-      return function (e) {
+    }(MainNamespace))).v(new C(function (a, b, c, e, f, g) {
+      return function drawManipulators(e) { // in orange
         if (null !== e) {
           var h = e.R();
           for (e = Qc(e.X(), h); !e.e(); ) {
@@ -4634,9 +4642,9 @@ validate;
           }
         } else throw new G(e);
       }
-    }(a, g, c, e, f, b)));
-    c = new C(function (a, b, c, e, f) {
-      return function (a) {
+    }(MainNamespace, unknownMap1, mapMatrix, height, width, canvasEl)));
+    var mapMatrixForBoosters = new C(function (a, b, c, e, f) {
+      return function recalculateMapMatrix(a) {
         if (null !== a) {
           var g = a.X();
           Gg();
@@ -4702,33 +4710,33 @@ validate;
         }
         throw new G(a);
       }
-    }(a, b, c, e, f));
-    e = Pg();
-    e = new Qg(e);
-    bm(g, c, e).v(new C(function (a, b) {
-      return function (a) {
+    }(MainNamespace, canvasEl, mapMatrix, height, width));
+    height = Pg();
+    height = new Qg(height);
+    bm(unknownMap1, mapMatrixForBoosters, height).v(new C(function (a, b) {
+      return function drawBooster(a) { // render boosters, imho
         if (null !== a) {
           var c = a.X();
           a = a.R();
           var e = a.xe;
           if (Vd(e)) e = e.Xa,
-          Eg(b, c, Mg(Gg(), e));
+          drawCircle(b, c, Mg(Gg(), e));
            else if (A() !== e) throw new G(e);
-          a.ye ? Eg(b, c, Mg(Gg(), Cc().$g))  : a.ze && Eg(b, c, Gg().qm)
+          a.ye ? drawCircle(b, c, Mg(Gg(), Cc().$g))  : a.ze && drawCircle(b, c, Gg().qm)
         } else throw new G(a);
       }
-    }(a, b)));
-    h.nc(new C(function () {
+    }(MainNamespace, canvasEl)));
+    unknownMap2.nc(new C(function () {
       return function (a) {
         return null !== a
       }
-    }(a))).v(new C(function (a, b) {
-      return function (a) {
-        if (null !== a) Eg(b, a.R(), Gg().Zj);
+    }(MainNamespace))).v(new C(function (_, b) {
+      return function drawWrappersHead(a) {
+        if (null !== a) drawCircle(b, a.R(), Gg().Zj);
          else throw new G(a);
       }
-    }(a, b)));
-    Xl(a, a.dh + ': ' + m + ' rounds', Gg().vg)
+    }(MainNamespace, canvasEl)));
+    renderTextToCanvas(MainNamespace, MainNamespace.dh + ': ' + timeSteps + ' rounds', Gg().vg)
   }
   function am(a, b, c, e, f) {
     a = c.k;
@@ -4755,11 +4763,11 @@ validate;
       return function (a) {
         if (null !== a) {
           var c = a.X();
-          Eg(b, a.R(), Mg(Gg(), c))
+          drawCircle(b, a.R(), Mg(Gg(), c))
         } else throw new G(a);
       }
     }(a, c)));
-    Eg(c, b.Sf, Gg().Zj)
+    drawCircle(c, b.Sf, Gg().Zj)
   }
   function clearCanvas(a) {
     var b = em(a),
@@ -5141,16 +5149,25 @@ validate;
   var Yl = renderNextFrame;
   function renderNextFrame(a) {
     if (jm(a)) {
-      var b = a.kh.Pa(),
-      c = a.Dc.Pa();
+      var b = a.kh.Pa(), 
+      c = a.Dc.Pa(); 
       if (Je(c)) try {
-        var e = function (a, b) {
-          return function (a, c, e, f, g, h, l) {
-            c |= 0;
-            e |= 0;
-            l |= 0;
-            Zl(getMainNamespace(), b, a, c, e, f, g, h, l)
-          }
+        var e = function (_, canvasEl) {
+          return identity(function renderStuffToCanvas (mapMatrix, height, width, f, g, h, timeSteps) {
+            height |= 0; // of map
+            width |= 0; // of map
+            timeSteps |= 0;
+            /**
+             * In first param:
+             * 1. re == map string. task. level.
+             * 2. vd == a deep object, IMHO a tree of moves.
+             */
+            // "f" param is an object with what seems to be a previous move (in form of 32-length array)
+            // "g" param seems to be the current move. 
+            // "h" a move too. moves are represented very unstable, so maybe they're something else
+            console.log('getMainNamespace().vd :', getMainNamespace().vd)
+            identity(Zl)(getMainNamespace(), canvasEl, mapMatrix, height, width, f, g, h, timeSteps)
+          })
         }(a, b),
         f = c.Ng,
         g = c.ej,
@@ -23300,7 +23317,8 @@ validate;
     c: 1
   });
   var hA = void 0;
-  function B() {
+  var B = emitEmptyObject;
+  function emitEmptyObject() {
     hA || (hA = new gA);
     return hA
   }
