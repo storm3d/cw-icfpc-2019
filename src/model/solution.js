@@ -2,8 +2,17 @@
 import {Coord} from "./model.js";
 
 export class Solution {
-    result: string = "";
-    score: number = 0;
+    result: string;
+    score: number;
+
+    constructor(result: String = undefined, score?: number) {
+        this.result = result ? result : "";
+        this.score = score ? score : 0;
+    }
+
+    getCopy() {
+        new Solution(this.result);
+    }
 
     move(first: Coord, second: Coord) {
         let diff = first.getDiff(second);
