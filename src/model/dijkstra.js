@@ -2,8 +2,6 @@
 
 import {Matrix, Coord, State} from "./model";
 
-const maxSearchLen = 25;
-
 // dijkstra solve graph starting at s
 // from https://gist.github.com/jpillora/7382441
 function solve(graph, s) {
@@ -166,159 +164,10 @@ function matrixToGraph(m: Matrix) {
   return graph;
 }
 
-function breadthSearch(s: State, source: Coord, hasDrill: boolean) {
 
-  let lens = new Matrix(s.m.w, s.m.h);
-  let front = new Array(source.getCopy());
-  lens.set(source.x, source.y, 1)
+export default function pathToNearestFreePoint(s: State, source: Coord) {
 
-  let nearestFree : Coord = 0;
-
-  while(front.length) {
-    let c = front[0];
-    let curLen = lens.get(c.x, c.y);
-
-    // exceeded the search radius - go to just a free cell
-    if(curLen >= maxSearchLen && nearestFree !== 0) {
-      //console.log("exceeded range");
-      break;
-    }
-
-    front.shift();
-
-    let nx = c.x + 1;
-    let ny = c.y;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
-
-    nx = c.x;
-    ny = c.y + 1;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
-
-    nx = c.x - 1;
-    ny = c.y;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
-
-    nx = c.x;
-    ny = c.y - 1;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
-
-    //console.log("front");
-    //console.log(front);
-  }
-
-  //console.log(nearestFree);
-
-  if(nearestFree === 0)
-    return undefined;
-
-  let path = [ nearestFree ];
-  while(true) {
-   //console.log(path);
-
-    let c = path[path.length - 1];
-    let minL = 999999;
-    let minC = 0;
-
-    let nx = c.x + 1;
-    let ny = c.y;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
-
-    nx = c.x;
-    ny = c.y + 1;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
-
-    nx = c.x - 1;
-    ny = c.y;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
-
-    nx = c.x;
-    ny = c.y - 1;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
-
-    if(!minC)
-      throw "Weird shit happened";
-
-    path.push(minC);
-  }
-
-  return path.reverse();
-}
-
-export default function pathToNearestFreePoint(s: State, source: Coord,hasDrill: boolean) {
-
-  return breadthSearch(s, source, hasDrill);
+  //return breadthSearch(s, source);
 
   /*
 
