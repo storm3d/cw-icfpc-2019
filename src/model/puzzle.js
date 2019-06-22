@@ -67,18 +67,22 @@ export class PuzzleParser {
         this.puzzle.rNum = parseInt(rNum,10);
         this.puzzle.cNum = parseInt(cNum,10);
         this.puzzle.xNum = parseInt(xNum,10);
-        this.puzzle.iSqs = components[1].match(COORDS_REGEXP).map((str) => {
-            const t = str.split(',');
-            const x = parseInt(t[0].slice(1), 10);
-            const y = parseInt(t[1].slice(0, -1), 10);
-            return new Coord(x,y)
-        });
-        this.puzzle.oSqs = components[2].match(COORDS_REGEXP).map((str) => {
-            const t = str.split(',');
-            const x = parseInt(t[0].slice(1), 10);
-            const y = parseInt(t[1].slice(0, -1), 10);
-            return new Coord(x,y)
-        });
+        if (components[1] && components[1].match(COORDS_REGEXP) && components[1].match(COORDS_REGEXP).length) {
+            this.puzzle.iSqs = components[1].match(COORDS_REGEXP).map((str) => {
+                const t = str.split(',');
+                const x = parseInt(t[0].slice(1), 10);
+                const y = parseInt(t[1].slice(0, -1), 10);
+                return new Coord(x,y)
+            });
+        }
+        if (components[2] && components[2].match(COORDS_REGEXP) && components[1].match(COORDS_REGEXP).length) {
+            this.puzzle.oSqs = components[2].match(COORDS_REGEXP).map((str) => {
+                const t = str.split(',');
+                const x = parseInt(t[0].slice(1), 10);
+                const y = parseInt(t[1].slice(0, -1), 10);
+                return new Coord(x,y)
+            });
+        }
 
         return this.puzzle;
     }
