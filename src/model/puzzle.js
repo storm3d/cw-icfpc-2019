@@ -1,8 +1,8 @@
 // @flow
-import fs from 'fs'
+import fs from 'fs';
 
-import {State, OBSTACLE, FREE, Coord, Matrix} from '../model/model'
-import {pixelCost} from "../solve";
+import {State, OBSTACLE, FREE, Coord, Matrix, Booster} from '../model/model';
+import { MapSerializer } from "./mapSerializer";
 
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g;
 
@@ -19,6 +19,8 @@ export class Puzzle {
     rNum : number;
     cNum : number;
     xNum : number;
+    boosters: Array<Booster>;
+    boostersStr: string;
 
     iSqs : Array<Coord>;
     oSqs : Array<Coord>;
@@ -31,6 +33,8 @@ export class Puzzle {
 
         this.iSqs = [];
         this.oSqs = [];
+        this.boosters = [];
+        this.boostersStr = "";
     }
 
     static connectToBorder(s : State, source : Coord) {
@@ -162,6 +166,45 @@ export class Puzzle {
         this.oSqs.forEach(c => {
             Puzzle.connectToBorder(state, c);
         });
+
+        const getFreePoint = function () {
+            let result = [];
+            for (let h = state.m.h - 1; h >= 0; h--) {
+                for (let w = 0; w < state.m.w; w++) {
+                    let c = state.m.get(w, h);
+                    if (c === FREE) {
+                        result = [w,h];
+                        return result;
+                    }
+                }
+            }
+            return result;
+        };
+
+        // • mNum manipulator extensions
+        // • fNum fast wheels,
+        // • dNum drills,
+        // • rNum teleports,
+        // • cNum cloning boosters,
+        // • xNum spawn points.
+
+        [this.mNum, this.fNum, this.dNum, this.rNum, this.cNum, this.xNum].forEach((boosters, i) => {
+            let types = ['B', 'F', 'L','R','C', 'X'];
+            for (let b = 0; b < boosters; b++) {
+                let freePoint = getFreePoint();
+                const type = types[i];
+                let booster = new Booster(freePoint[0], freePoint[1], type);
+                state.m.set(freePoint[0], freePoint[1], i+3);
+                this.boosters.push(booster);
+                this.boostersStr += `${type}(${freePoint[0]},${freePoint[1]});`;
+            }
+        });
+
+        let initialPoint = getFreePoint();
+        state.worker.pos.x = initialPoint[0];
+        state.worker.pos.y = initialPoint[1];
+
+
 
         return state;
     }

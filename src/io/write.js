@@ -1,5 +1,5 @@
 // @flow
-import fs from 'fs'
+import fs from 'fs';
 import {Solution} from "../model/solution";
 
 export class Writer {
