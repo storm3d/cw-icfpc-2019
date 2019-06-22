@@ -17,3 +17,4 @@ yarn-error.log*
 *.sw*
 
 dist
+/all_results.txt

@@ -3,6 +3,7 @@ import {Coord} from "./model.js";
 
 export class Solution {
     result: string = "";
+    score: number = 0;
 
     move(first: Coord, second: Coord) {
         let diff = first.getDiff(second);
@@ -23,45 +24,59 @@ export class Solution {
 
     moveUp() {
         this.result += "W";
+        this.score++;
     }
 
     moveDown() {
         this.result += "S";
+        this.score++;
     }
 
     moveLeft() {
         this.result += "A";
+        this.score++;
     }
 
     moveRight() {
         this.result += "D";
+        this.score++;
     }
 
     doNothing() {
-        this.result += "Z"
+        this.result += "Z";
+        this.score++;
     }
 
     turnManipulatorsClockwise() {
         this.result += "E"
+        this.score++;
     }
 
     turnManipulatorsCounterclockwise() {
         this.result += "Q"
+        this.score++;
     }
 
     attachNewManipulatorWithRelativeCoordinates(x: number, y: number) {
         this.result += "B(" + x + "," + y + ")"
+        this.score++;
     }
 
     attachFastWheels() {
         this.result += "F"
+        this.score++;
     }
 
     startUsingDrill() {
         this.result += "L"
+        this.score++;
     }
 
     getString() {
         return this.result
+    }
+
+    getScore() {
+        return this.score
     }
 }
