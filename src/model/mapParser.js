@@ -70,6 +70,9 @@ export default class MapParser {
 
       //console.log(type + " " + x + " " + y);
       this.state.boosters.push(new Booster(x, y, type));
+
+      // bookkeeping
+      this.state.startingBoosters.push(new Booster(x, y, type));
     });
 
 

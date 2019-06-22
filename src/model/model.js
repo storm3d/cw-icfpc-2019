@@ -301,6 +301,7 @@ export class State {
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
     this.boosters = [];
+    this.startingBoosters = [];
     this.worker = new Rover(new Coord(-1, -1), 1, 1);
     this.extensions = 0;
     this.fasts = 0;

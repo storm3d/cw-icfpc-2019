@@ -2,6 +2,8 @@
 
 import {Matrix, Coord, State} from "./model";
 
+const maxSearchLen = 25;
+
 // dijkstra solve graph starting at s
 // from https://gist.github.com/jpillora/7382441
 function solve(graph, s) {
@@ -171,7 +173,6 @@ function breadthSearch(s: State, source: Coord) {
   lens.set(source.x, source.y, 1)
 
   let nearestFree : Coord = 0;
-  const maxSearchLen = 40;
 
   while(front.length) {
     let c = front[0];
