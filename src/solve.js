@@ -47,6 +47,13 @@ export default class Solver {
 
         this.solution.move(this.state.worker.pos, path[i]);
         this.state.moveWorker(path[i]);
+
+        if (this.state.extensions > 0) {
+          this.state.extensions--;
+          let c = this.state.worker.extendManipulators();
+          this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+        }
+
         // console.log(this.state.dump(true));
       }
     }

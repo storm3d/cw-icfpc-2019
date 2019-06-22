@@ -42,14 +42,30 @@ describe("Rover model", () => {
 
     expect(rover.getManipulators()).toEqual(parseCoords("(1, 1),(1, 0),(1, -1)"));
 
-    rover.extendManipulators();
+    let relationPos = rover.extendManipulators();
+    expect(relationPos).toEqual(new Coord(1, 2));
     expect(rover.getManipulators()).toEqual(parseCoords("(1, 2),(1, 1),(1, 0),(1, -1)"));
 
-    rover.extendManipulators();
+    relationPos = rover.extendManipulators();
+    expect(relationPos).toEqual(new Coord(1, -2));
     expect(rover.getManipulators()).toEqual(parseCoords("(1, 2),(1, 1),(1, 0),(1, -1),(1, -2)"));
 
     rover.extendManipulators();
     expect(rover.getManipulators()).toEqual(parseCoords("(1, 3),(1, 2),(1, 1),(1, 0),(1, -1),(1, -2)"));
+  });
+
+  test("Rotate and extend manipulators", () => {
+
+    let rover = new Rover(new Coord(2, 5), 1, 1);
+
+    rover.rotCW();
+
+    let relationPos = rover.extendManipulators();
+
+    expect(relationPos).toEqual(new Coord(2, -1));
+
+    relationPos = rover.extendManipulators();
+    expect(relationPos).toEqual(new Coord(-2, -1));
   });
 
 });

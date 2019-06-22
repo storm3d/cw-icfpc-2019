@@ -266,11 +266,16 @@ export class Rover {
     return mans;
   }
 
-  extendManipulators() : void {
-    if (this.widthLeft <= this.widthRight)
+  extendManipulators() : Coord {
+    if (this.widthLeft <= this.widthRight) {
       this.widthLeft++;
-    else
+      return this.getManipulators()[0];
+    }
+    else {
       this.widthRight++;
+      let mans = this.getManipulators();
+      return mans[mans.length - 1];
+    }
   }
 }
 
@@ -309,7 +314,10 @@ export class State {
     let wx = this.worker.pos.x;
     let wy = this.worker.pos.y;
     this.m.wrap(wx, wy);
-    this.worker.getManipulators().forEach(m => this.m.wrap(wx + m.x, wy + m.y));
+    this.worker.getManipulators().forEach(m => {
+      if (!this.m.isCrossObstacle(this.worker.pos, new Coord(wx + m.x, wy + m.y)))
+        this.m.wrap(wx + m.x, wy + m.y)
+    });
 
     for(let i = this.boosters.length - 1; i >= 0; i--) {
       if(this.boosters[i].pos.isEqual(this.worker.pos)) {
@@ -321,7 +329,6 @@ export class State {
           this.drills++;
         else if(this.boosters[i].type === "R")
           this.teleports++;
-
         if(this.boosters[i].type !== "X")
           this.boosters.splice(i,1);
       }
