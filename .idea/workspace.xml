@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6cbc51dc-d562-43dd-a905-3032ba7962f5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/dijkstra.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/dijkstra.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/solve.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/solve.test.js" afterDir="false" />
-    </list>
+    <list default="true" id="6cbc51dc-d562-43dd-a905-3032ba7962f5" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +49,7 @@
         <entry file="file://$PROJECT_DIR$/src/model/dijkstra.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="292">
-              <caret line="187" column="21" lean-forward="true" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
+              <caret line="187" column="21" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -63,8 +57,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/model/model.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="342" column="40" selection-start-line="342" selection-start-column="40" selection-end-line="342" selection-end-column="40" />
+            <state relative-caret-position="139">
+              <caret line="341" column="46" lean-forward="true" selection-start-line="341" selection-start-column="46" selection-end-line="341" selection-end-column="46" />
             </state>
           </provider>
         </entry>
@@ -426,7 +420,14 @@
       <option name="project" value="LOCAL" />
       <updated>1561155602165</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="added booster-first search up to 40 cells deep&#10;currently searches only B boosters">
+      <created>1561167011804</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1561167011804</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -462,7 +463,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="40132000" />
+    <option name="totallyTimeSpent" value="40784000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
@@ -473,7 +474,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32987553" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.22380106" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.062166963" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -555,7 +556,8 @@
     <MESSAGE value="optimize dijkstra" />
     <MESSAGE value="draw rover manipulators on state dump" />
     <MESSAGE value="small solver optimization" />
-    <option name="LAST_COMMIT_MESSAGE" value="small solver optimization" />
+    <MESSAGE value="added booster-first search up to 40 cells deep&#10;currently searches only B boosters" />
+    <option name="LAST_COMMIT_MESSAGE" value="added booster-first search up to 40 cells deep&#10;currently searches only B boosters" />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
@@ -791,14 +793,14 @@
     <entry file="file://$PROJECT_DIR$/src/model/dijkstra.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="292">
-          <caret line="187" column="21" lean-forward="true" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
+          <caret line="187" column="21" selection-start-line="187" selection-start-column="21" selection-end-line="187" selection-end-column="21" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/model/model.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="342" column="40" selection-start-line="342" selection-start-column="40" selection-end-line="342" selection-end-column="40" />
+        <state relative-caret-position="139">
+          <caret line="341" column="46" lean-forward="true" selection-start-line="341" selection-start-column="46" selection-end-line="341" selection-end-column="46" />
         </state>
       </provider>
     </entry>
