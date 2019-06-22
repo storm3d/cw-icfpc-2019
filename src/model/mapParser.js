@@ -1,36 +1,51 @@
 // @flow
 import fs from 'fs'
 
-import { State, OBSTACLE, FREE } from '../model/model'
+import { State, OBSTACLE, FREE, Coord, Booster } from '../model/model'
 
 const COORDS_REGEXP = /\([0-9]+,[0-9]+\)/g
 
 export default class MapParser {
-  obstaclesCoords: Array<Array<number>> = []
-  path: string
-  state: State
-  content: string
-  modelsBasePath: string = `${__dirname}/../../part-1-initial`
+  obstaclesCoords: Array<Array<number>> = [];
+  path: string;
+  state: State;
+  content: string;
 
-  constructor(filename: string) {
-    this.path = `${this.modelsBasePath}/${filename}`
-    this.content = fs.readFileSync(this.path).toString()
+  constructor(filename: string, content : string = "") {
+
+    if(content !== "") {
+      this.content = content;
+    }
+    else {
+      this.content = fs.readFileSync(filename).toString();
+    }
   }
 
   getState(): State {
     const [contourClusters, initialWorkerPos, obstacles, boosters] = this.content.split('#')
-    const { map, maxY, maxX } = this.formContoursMap(contourClusters)
-    // const { map: obstaclesMap } = this.formContoursMap(obstacles)
 
-    // console.log(obstaclesMap)
+    //console.log(contourClusters);
+    //console.log(obstacles);
 
-    this.state = new State(maxX, maxY)
+    let obj = {
+      map : {},
+      maxX : 0,
+      maxY : 0
+    };
+    this.formContoursMap(contourClusters, obj);
 
-    for (let y = 0; y <= maxY; y++) {
-      let paint = OBSTACLE
+    let obstaclesArr = obstacles.split(';');
+    obstaclesArr.forEach(o => this.formContoursMap(o, obj));
 
-      for (let x = 0; x <= maxX; x++) {
-        if (map[x] && map[x].find(([startY, endY]) => startY <= y && y < endY)) {
+    //console.log(obstaclesArr)
+
+    this.state = new State(obj.maxX, obj.maxY)
+
+    for (let y = 0; y <= obj.maxY; y++) {
+      let paint = OBSTACLE;
+
+      for (let x = 0; x <= obj.maxX; x++) {
+        if (obj.map[x] && obj.map[x].find(([startY, endY]) => startY <= y && y < endY)) {
           paint = paint === OBSTACLE ? FREE : OBSTACLE
         }
 
@@ -38,7 +53,25 @@ export default class MapParser {
       }
     }
 
-    this.fillWorkerStartPos(initialWorkerPos)
+    this.fillWorkerStartPos(initialWorkerPos);
+
+    let boostersArr = boosters.split(';');
+    //console.log(boostersArr);
+    boostersArr.forEach(str => {
+      if(!str)
+        return;
+
+      const type = str[0];
+      str = str.substr(1);
+
+      const t = str.split(',');
+      const x = parseInt(t[0].slice(1), 10);
+      const y = parseInt(t[1].slice(0, -1), 10);
+
+      //console.log(type + " " + x + " " + y);
+      this.state.boosters.push(new Booster(x, y, type));
+    });
+
 
     return this.state
   }
@@ -48,13 +81,12 @@ export default class MapParser {
     const x = parseInt(t[0].slice(1), 10)
     const y = parseInt(t[1].slice(0, -1), 10)
 
-    this.state.worker.pos.x = x
-    this.state.worker.pos.y = y
+    this.state.moveWorker(new Coord(x, y));
+
   }
 
-  formContoursMap(contours: string) {
-    let maxX = 0
-    let maxY = 0
+  formContoursMap(contours: string, obj) {
+
     const matches = contours.match(COORDS_REGEXP)
 
     if (!matches) {
@@ -69,17 +101,17 @@ export default class MapParser {
       return [x, y]
     })
 
+    //console.log(coords);
+
     // Adds start coords in the end for closure
     coords.push(coords[0])
-
-    const map = {};
 
     for (let i = 0; i < coords.length; i++) {
       const currX = coords[i][0]
       const currY = coords[i][1]
 
-      maxX = currX > maxX ? currX : maxX
-      maxY = currY > maxY ? currY : maxY
+      obj.maxX = currX > obj.maxX ? currX : obj.maxX
+      obj.maxY = currY > obj.maxY ? currY : obj.maxY
 
       if (i === 0) {
         continue
@@ -89,14 +121,12 @@ export default class MapParser {
       const prevY = coords[i - 1][1]
 
       if (prevX === currX) {
-        if (!map[currX]) {
-          map[currX] = []
+        if (!obj.map[currX]) {
+          obj.map[currX] = []
         }
 
-        map[currX].push([currY, prevY].sort((a, b) => a - b))
+        obj.map[currX].push([currY, prevY].sort((a, b) => a - b))
       }
     }
-
-    return { maxX, maxY, map }
   }
 }

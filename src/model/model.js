@@ -13,12 +13,16 @@ export class Coord {
     this.y = y;
   }
 
+  isEqual(c: Coord): boolean {
+    return this.x === c.x && this.y === c.y;
+  }
+
   getAdded(v: Coord) {
-    return new Coord(this.x + v.x, this.y + v.y)
+    return new Coord(this.x + v.x, this.y + v.y);
   }
 
   getDiff(v: Coord) {
-    return new Coord(v.x - this.x, v.y - this.y)
+    return new Coord(v.x - this.x, v.y - this.y);
   }
 
   getCenter() {
@@ -26,11 +30,11 @@ export class Coord {
   }
 
   isEqual(c : Coord) {
-    return this.x === c.x && this.y === c.y
+    return this.x === c.x && this.y === c.y;
   }
 
   getCopy() {
-    return new Coord(this.x, this.y)
+    return new Coord(this.x, this.y);
   }
 
   rotCW(): Coord {
@@ -85,14 +89,14 @@ export class Matrix {
   constructor(w: number, h: number) {
     this.w = w;
     this.h = h;
-    this.pixels = new Uint8Array(w * h);
+    this.pixels = new Uint16Array(w * h);
   }
 
   get(x: number, y: number) {
     return this.pixels[this.toIndex(x, y)];
   }
 
-  set(x: number, y: number, v: FREE | OBSTACLE | WRAPPED) {
+  set(x: number, y: number, v: number /*FREE | OBSTACLE | WRAPPED*/) {
     this.pixels[this.toIndex(x, y)] = v;
   }
 
@@ -211,7 +215,7 @@ export const parseMatrix = (layer: string) : Matrix => {
       if (cols[i] !== "." && cols[i] !== "*" && cols[i] !== "#")
         throw `Invalid character ${cols[i]} in matrix template`;
 
-      matrix.set(i, h - j - 1, cols[i] === "." ? FREE : cols[i] === "*" ? WRAPPED : OBSTACLE)
+      matrix.set(i, h - j - 1, cols[i] === "." ? FREE : cols[i] === "*" ? WRAPPED : OBSTACLE);
     }
   }
 
@@ -220,21 +224,58 @@ export const parseMatrix = (layer: string) : Matrix => {
 
 export class Rover {
   pos: Coord;
-  manipulators: Array<Coord>;
+  widthLeft: number;
+  widthRight: number;
+  rotation: number;
 
-  constructor(pos: Coord, manipulators: Array<Coord>) {
+  constructor(pos: Coord, widthLeft: number, widthRight: number, rotation: number = 3) {
     this.pos = pos;
-    this.manipulators = manipulators;
+    this.widthLeft = widthLeft;
+    this.widthRight = widthRight;
+    this.rotation = rotation;
   }
 
   rotCW() {
-    this.manipulators = this.manipulators
-      .map(c => c.rotCW());
+    this.rotation += 3;
+    if (this.rotation > 9)
+      this.rotation = 0;
   }
 
   rotCCW() {
-    this.manipulators = this.manipulators
-      .map(c => c.rotCCW());
+    this.rotation -= 3;
+    if (this.rotation < 0)
+      this.rotation = 9;
+  }
+
+  getManipulators(): Array<Coord> {
+    let mans = [];
+
+    for (let i = this.widthLeft - 1; i >= 0; i--)
+      mans.push(new Coord(1, i + 1));
+
+    mans.push(new Coord(1, 0));
+
+    for (let i = 0; i < this.widthRight; i++)
+      mans.push(new Coord(1, -(i + 1)));
+
+    if (this.rotation === 0)
+      mans = mans.map(m => m.rotCCW());
+    else for (let i = 3; i < this.rotation; i += 3)
+      mans = mans.map(m => m.rotCW());
+
+    return mans;
+  }
+
+  extendManipulators() : Coord {
+    if (this.widthLeft <= this.widthRight) {
+      this.widthLeft++;
+      return this.getManipulators()[0];
+    }
+    else {
+      this.widthRight++;
+      let mans = this.getManipulators();
+      return mans[mans.length - 1];
+    }
   }
 }
 
@@ -259,8 +300,8 @@ export class State {
 
   constructor(w: number, h: number) {
     this.m = new Matrix(w, h);
-    this.boosters = new Array();
-    this.worker = new Rover(new Coord(-1, -1), [new Coord(1, -1), new Coord(1, 0), new Coord(1, 1)]);
+    this.boosters = [];
+    this.worker = new Rover(new Coord(-1, -1), 1, 1);
     this.extensions = 0;
     this.fasts = 0;
     this.drills = 0;
@@ -273,50 +314,76 @@ export class State {
     let wx = this.worker.pos.x;
     let wy = this.worker.pos.y;
     this.m.wrap(wx, wy);
-    this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
-    // this.worker.manipulators.forEach(m => this.m.wrap(wx + m.x, wy + m.y));
+    this.worker.getManipulators().forEach(m => {
+      if (!this.m.isCrossObstacle(this.worker.pos, new Coord(wx + m.x, wy + m.y)))
+        this.m.wrap(wx + m.x, wy + m.y)
+    });
 
     for(let i = this.boosters.length - 1; i >= 0; i--) {
       if(this.boosters[i].pos.isEqual(this.worker.pos)) {
-        if(this.boosters[i].type === 'B')
+        if(this.boosters[i].type === "B")
           this.extensions++;
-        else if(this.boosters[i].type === 'F')
+        else if(this.boosters[i].type === "F")
           this.fasts++;
-        else if(this.boosters[i].type === 'L')
+        else if(this.boosters[i].type === "L")
           this.drills++;
-        else if(this.boosters[i].type === 'R')
+        else if(this.boosters[i].type === "R")
           this.teleports++;
-
-        if(this.boosters[i].type !== 'X')
+        if(this.boosters[i].type !== "X")
           this.boosters.splice(i,1);
       }
     }
   }
 
-  dump() {
+  checkBooster(x : number, y : number) : boolean {
+    //console.log("cb " + x + ", "+ y);
+    for(let i = 0; i < this.boosters.length; i++) {
+      if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
+        //if (this.boosters[i].type !== "X") {
+        if (this.boosters[i].type === "B") {
+          //console.log("booster!")
+          return true;
+        }
+      }
+    }
+
+      return false;
+  }
+
+  dump(drawManipulators = false) {
     let str = "";
+
+    let mans = this.worker.getManipulators().map(m => m.getAdded(this.worker.pos));
 
     for (let j = this.m.h - 1; j >= 0; j--) {
       str += "| ";
+      let prevMan = false;
       for (let i = 0; i < this.m.w; i++) {
+        let currMan = mans.find(m => m.isEqual(new Coord(i, j)));
+
+        if (drawManipulators && (currMan || prevMan))
+          str = str.substring(0, str.length - 1) + 'I';
+
         let c = this.m.get(i, j);
-        let char = ". ";
+        let char = ".";
 
         if (c === FREE)
-          char = ". ";
+          char = ".";
         else if (c === OBSTACLE)
-          char = "# ";
+          char = "#";
         else if (c === WRAPPED)
-          char = "* ";
+          char = "*";
 
         if(this.worker.pos.x === i && this.worker.pos.y === j)
-          char = "W ";
+          char = "W";
 
         for(let k = 0; k < this.boosters.length; k++)
           if(this.boosters[k].pos.x === i && this.boosters[k].pos.y === j)
-            char = this.boosters[k].type + " ";
+            char = this.boosters[k].type;
 
         str += char;
+        str += drawManipulators && currMan ? 'I' : ' ';
+        prevMan = currMan;
       }
       str += "|\n";
     }
@@ -331,7 +398,7 @@ export const parseCoords = (coords: string) : Array<Coord> => {
     .map(c => c.replace(/ *\,? *\( */, "")) // remove opening brace with comma and spaces
     .filter(c => c !== "")
     .map(c => {
-      let xy = c.split(',');
+      let xy = c.split(",");
       return new Coord(parseInt(xy[0].trim()), parseInt(xy[1].trim()));
     });
 };

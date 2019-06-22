@@ -1,6 +1,6 @@
 //@flow
 
-import {Matrix, Coord} from "./model";
+import {Matrix, Coord, State} from "./model";
 
 // dijkstra solve graph starting at s
 // from https://gist.github.com/jpillora/7382441
@@ -132,28 +132,207 @@ function solve(graph, s) {
 function matrixToGraph(m: Matrix) {
   let c: Coord;
   let graph = {};
+  let mem = [];
   for (let y = 0; y < m.h; y++) {
     for (let x = 0; x < m.w; x++) {
       let n = m.toIndex(x, y);
+      let nx1 = m.toIndex(x - 1, y);
+      let nx2 = m.toIndex(x + 1, y);
+      let ny1 = m.toIndex(x, y - 1);
+      let ny2 = m.toIndex(x, y + 1);
       graph[n] = {};
+      
+      if (!mem.includes(nx1)) {
+        mem[nx1] = m.isValid(x - 1, y) && !m.isObstacle(x - 1, y);
+      }
+      if (!mem.includes(nx2)) {
+        mem[nx2] = m.isValid(x + 1, y) && !m.isObstacle(x + 1, y);
+      }
+      if (!mem.includes(ny1)) {
+        mem[ny1] = m.isValid(x, y - 1) && !m.isObstacle(x, y - 1);
+      }
+      if (!mem.includes(ny2)) {
+        mem[ny2] = m.isValid(x, y + 1) && !m.isObstacle(x, y + 1);
+      }
 
-      c = new Coord(x - 1, y);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x + 1, y);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x, y - 1);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
-
-      c = new Coord(x, y + 1);
-      if (m.isValidCoord(c) && !m.isObstacle(c.x, c.y)) graph[n][m.coord2index(c)] = 1;
+      if (mem[nx1]) graph[n][nx1] = 1;
+      if (mem[nx2]) graph[n][nx2] = 1;
+      if (mem[ny1]) graph[n][ny1] = 1;
+      if (mem[ny2]) graph[n][ny2] = 1;
     }
   }
   return graph;
 }
 
-export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
+function breadthSearch(s: State, source: Coord) {
+
+  let lens = new Matrix(s.m.w, s.m.h);
+  let front = new Array(source.getCopy());
+  lens.set(source.x, source.y, 1)
+
+  let nearestFree : Coord = 0;
+  const maxSearchLen = 40;
+
+  while(front.length) {
+    let c = front[0];
+    let curLen = lens.get(c.x, c.y);
+
+    // exceeded the search radius - go to just a free cell
+    if(curLen >= maxSearchLen && nearestFree !== 0) {
+      //console.log("exceeded range");
+      break;
+    }
+
+    front.shift();
+
+    let nx = c.x + 1;
+    let ny = c.y;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    //console.log("front");
+    //console.log(front);
+  }
+
+  //console.log(nearestFree);
+
+  if(nearestFree === 0)
+    return undefined;
+
+  let path = [ nearestFree ];
+  while(true) {
+   //console.log(path);
+
+    let c = path[path.length - 1];
+    let minL = 999999;
+    let minC = 0;
+
+    let nx = c.x + 1;
+    let ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    if(!minC)
+      throw "Weird shit happened";
+
+    path.push(minC);
+  }
+
+  return path.reverse();
+}
+
+export default function pathToNearestFreePoint(s: State, source: Coord) {
+
+  return breadthSearch(s, source);
+
+  /*
+
+  if (m.isValid(source.x + 1, source.y) && m.isFree(source.x + 1, source.y))
+    return [new Coord(source.x + 1, source.y)];
+
+  if (m.isValid(source.x, source.y + 1) && m.isFree(source.x, source.y + 1))
+    return [new Coord(source.x, source.y + 1)];
+
+  if (m.isValid(source.x - 1, source.y) && m.isFree(source.x - 1, source.y))
+    return [new Coord(source.x - 1, source.y)];
+
+  if (m.isValid(source.x, source.y - 1) && m.isFree(source.x, source.y - 1))
+    return [new Coord(source.x, source.y - 1)];
+
   let graph = matrixToGraph(m);
 
   let solutions = solve(graph, m.coord2index(source));
@@ -174,4 +353,6 @@ export default function pathToNearestFreePoint(m: Matrix, source: Coord) {
   }
 
   return shortestPath;
+
+   */
 }

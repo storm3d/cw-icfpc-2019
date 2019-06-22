@@ -36,7 +36,7 @@
     "prestart": "babel src -d dist",
     "start": "node dist/index.js",
     "prelaunch": "babel src -d dist",
-    "launch": "node dist/runner/launch.js",
+    "launch": "node dist/runner/launch.js && node dist/score.js",
     "show": "node visualizer/server.js"
   },
   "jest": {
