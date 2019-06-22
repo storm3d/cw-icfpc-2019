@@ -2,7 +2,160 @@
 
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import { State } from "./model/model";
+import {Coord, Matrix, State, Rover} from "./model/model";
+
+const maxSearchLen = 35;
+
+function findPath(s: State, worker : Rover) {
+
+  let source = worker.pos.getCopy();
+  let lens = new Matrix(s.m.w, s.m.h);
+  let front = new Array(source.getCopy());
+  lens.set(source.x, source.y, 1)
+
+  let nearestFree : Coord = 0;
+
+  while(front.length) {
+    let c = front[0];
+    let curLen = lens.get(c.x, c.y);
+
+    // exceeded the search radius - go to just a free cell
+    if(curLen >= maxSearchLen && nearestFree !== 0) {
+      //console.log("exceeded range");
+      break;
+    }
+
+    front.shift();
+
+    let nx = c.x + 1;
+    let ny = c.y;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+
+    if(s.m.isValid(nx, ny)) {
+      if (s.checkBooster(nx, ny)) {
+        nearestFree = new Coord(nx, ny);
+        break;
+      }
+      if (s.m.isFree(nx, ny) && nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+      }
+      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+        front.push(new Coord(nx, ny));
+        lens.set(nx, ny, curLen + 1);
+      }
+    }
+
+    //console.log("front");
+    //console.log(front);
+  }
+
+  //console.log(nearestFree);
+
+  if(nearestFree === 0)
+    return undefined;
+
+  let path = [ nearestFree ];
+  while(true) {
+    //console.log(path);
+
+    let c = path[path.length - 1];
+    let minL = 999999;
+    let minC = 0;
+
+    let nx = c.x + 1;
+    let ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y + 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x - 1;
+    ny = c.y;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    nx = c.x;
+    ny = c.y - 1;
+    if(source.x === nx && source.y === ny)
+      break;
+    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
+      minL = lens.get(nx, ny);
+      minC = new Coord(nx, ny);
+    }
+
+    if(!minC)
+      throw "Weird shit happened";
+
+    path.push(minC);
+  }
+
+  return path.reverse();
+}
 
 export default class Solver {
 
@@ -17,7 +170,7 @@ export default class Solver {
   solve(): Solution {
 
     while(true) {
-      let path = nearestFree(this.state, this.state.worker.pos);
+      let path = findPath(this.state, this.state.worker);
       if (path === undefined)
         return this.solution;
 
