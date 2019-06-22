@@ -4,14 +4,14 @@ import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
 import {Coord, Matrix, State, Rover} from "./model/model";
 
-const maxSearchLen = 35;
+const maxSearchLen = 15;
 
 function findPath(s: State, worker : Rover) {
 
   let source = worker.pos.getCopy();
   let lens = new Matrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
-  lens.set(source.x, source.y, 1)
+  lens.set(source.x, source.y, 1);
 
   let nearestFree : Coord = 0;
 
@@ -27,8 +27,30 @@ function findPath(s: State, worker : Rover) {
 
     front.shift();
 
-    let nx = c.x + 1;
-    let ny = c.y;
+    let dirs = {
+      0 : {
+        nx : c.x,
+        ny : c.y + 1,
+      },
+      3 : {
+        nx : c.x + 1,
+        ny : c.y,
+      },
+      6 : {
+        nx : c.x,
+        ny : c.y - 1,
+      },
+      9 : {
+        nx : c.x - 1,
+        ny : c.y,
+      }
+    };
+
+    // go this dir first
+    let nx = dirs[worker.rotation].nx;
+    let ny = dirs[worker.rotation].ny;
+
+    delete dirs[worker.rotation];
 
     if(s.m.isValid(nx, ny)) {
       if (s.checkBooster(nx, ny)) {
@@ -43,57 +65,31 @@ function findPath(s: State, worker : Rover) {
         lens.set(nx, ny, curLen + 1);
       }
     }
+    //console.log(dirs);
 
-    nx = c.x;
-    ny = c.y + 1;
+    let isFound = false;
+    for (let dirsKey in dirs) {
+      let nx = dirs[dirsKey].nx;
+      let ny = dirs[dirsKey].ny;
 
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
+      if(s.m.isValid(nx, ny)) {
+        if (s.checkBooster(nx, ny)) {
+          nearestFree = new Coord(nx, ny);
+          isFound = true;
+          break;
+        }
+        if (s.m.isFree(nx, ny) && nearestFree === 0) {
+          nearestFree = new Coord(nx, ny);
+        }
+        if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
+          front.push(new Coord(nx, ny));
+          lens.set(nx, ny, curLen + 1);
+        }
       }
     }
 
-    nx = c.x - 1;
-    ny = c.y;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
-
-    nx = c.x;
-    ny = c.y - 1;
-
-    if(s.m.isValid(nx, ny)) {
-      if (s.checkBooster(nx, ny)) {
-        nearestFree = new Coord(nx, ny);
-        break;
-      }
-      if (s.m.isFree(nx, ny) && nearestFree === 0) {
-        nearestFree = new Coord(nx, ny);
-      }
-      if (s.m.isPassable(nx, ny) && lens.get(nx, ny) === 0) {
-        front.push(new Coord(nx, ny));
-        lens.set(nx, ny, curLen + 1);
-      }
-    }
+    if(isFound)
+      break;
 
     //console.log("front");
     //console.log(front);
