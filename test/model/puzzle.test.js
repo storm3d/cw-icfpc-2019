@@ -47,4 +47,15 @@ describe("Parse Puzzle", () => {
         expect(puzzle.oSqs.length).toEqual(0);
     });
 
+    test("Should generate simple task", () => {
+        let puzzleParser = new PuzzleParser(null,"0,1,10,4,1200,0,0,0,0,0,0#(1,1),(2,1),(1,2)#(2,2),(3,3),(7,9),(2,7),(5,6),(7,4)");
+        let puzzle = puzzleParser.getPuzzle();
+
+        let state = puzzle.generateState();
+
+
+
+        //console.log(state.dump());
+    });
+
 });
