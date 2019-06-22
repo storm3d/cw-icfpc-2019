@@ -149,15 +149,29 @@ export class Matrix {
     return this.pixels[index] === OBSTACLE;
   }
 
-  getNeighbors(index: number): Array<number> {
+  getNeighbors(from: Coord, len: number = 1): Array<Coord> {
     let neighbors = [];
 
-    if (index > this.w) neighbors.push(index - this.w);
-    if (index > 0) neighbors.push(index - 1);
-    if (index % this.h < this.w - 1) neighbors.push(index + 1);
-    if (index < (this.w - 1) * this.h) neighbors.push(index + this.w);
-
+    for (let i = -len; i <= len; i++) {
+      for (let j = -len; j <= len; j++) {
+        if ((i === 0 || j === 0) && Math.abs(i) !== Math.abs(j))
+          neighbors.push(new Coord(from.x + i, from.y + j));
+      }
+    }
     return neighbors;
+  }
+
+  getFreeNeighborsNum(x: number, y: number, len: number = 1): Array<Coord> {
+    let n = 0;
+
+    for (let i = -len; i <= len; i++) {
+      for (let j = -len; j <= len; j++) {
+        if (this.isValid(x + i, y + j) &&
+          this.isFree(x + i, y + j))
+          n++;
+      }
+    }
+    return n;
   }
 
   coord2index(c: Coord): number {
