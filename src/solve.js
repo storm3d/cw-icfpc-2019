@@ -223,9 +223,12 @@ export default class Solver {
     let hasActiveTeleport = false;
     let teleportPos: Coord;
     let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
-    let isNearCenter = (c: Coord) => {
-      let diff = c.getDiff(matrixCenter);
-      return (Math.abs(diff.x) + Math.abs(diff.y)) < 50;
+    let isNear = (a: Coord, b: Coord, d: number) => {
+      let diff = a.getDiff(b);
+      return (Math.abs(diff.x) + Math.abs(diff.y)) < d;
+    };
+    let isNearCenter = (c: Coord) => { 
+      return isNear(c, matrixCenter, 20);
     };
 
     let stepActiveBoosters = () => {
@@ -245,27 +248,46 @@ export default class Solver {
       }
     };
 
-
+    let prevTeleportLen = 0;
     while(true) {
+      //if (this.solution.result.length % 1000 == 0){
+      //  console.log(this.solution.result);
+      //  if (this.solution.result.length > 3000) throw "UPS";
+      //}
       let path = findPath(this.state, this.state.worker, false);
-      if (path === undefined)
+      if (path === undefined) {
+        if (this.state.m.getFreeNum() > 0) {
+          throw "WUT ???";
+        }
         return this.solution;
+      }
 
-      if (hasActiveTeleport) {
+      if (hasActiveTeleport && (path.length > (prevTeleportLen + 5))) {
         let workerT = this.state.worker.getCopy();
         workerT.pos = teleportPos;
         let pathT = findPath(this.state, workerT, false);
-        if (pathT.length + 5 < path.length) {
+        prevTeleportLen = pathT.length;
+        if ((pathT.length + 25 < path.length) & !isNear(teleportPos, this.state.worker.pos, 10)) {
           this.solution.activateTeleport(teleportPos.x, teleportPos.y);
           this.state.moveWorker(teleportPos);
           stepActiveBoosters();
+          //
+          path = findPath(this.state, this.state.worker, false);
         }
-        path = findPath(this.state, this.state.worker, false);
+      }
+      // dumb greedy teleports
+      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) ){ //&& matrixCenter.x > 50 && matrixCenter.y > 50) {
+        hasActiveTeleport = true;
+        this.state.teleports--;
+        this.solution.plantTeleport();
+        teleportPos = this.state.worker.pos.getCopy();
+        prevTeleportLen = path.length;
+        //stepActiveBoosters();
       }
 
       // dumb greedy drills
-      //if (false) {
-      if (this.state.drills > 0 || drillTurns > 0) {
+      if (false) {
+      //if (this.state.drills > 0 || drillTurns > 0) {
           drilling = false;
           let path1 = findPath(this.state, this.state.worker, true);
           if ((path1.length + 20 < path.length) &&
@@ -282,15 +304,6 @@ export default class Solver {
       }
       // console.log(path);
       
-      // dumb greedy teleports
-      if (!hasActiveTeleport && (this.state.teleports > 0) ){ //&& isNearCenter(this.state.worker.pos) && matrixCenter.x > 50 && matrixCenter.y > 50) {
-        hasActiveTeleport = true;
-        this.state.teleports--;
-        this.solution.plantTeleport();
-        stepActiveBoosters();
-        teleportPos = this.state.worker.pos.getCopy();
-      }
-
       for (let i = 0; i < Math.ceil(path.length / 2); i++) {
         if (this.state.m.getFreeNeighborsNum(path[i].x, path[i].y, 1) > 0) {
           let dx = -(this.state.worker.pos.x - path[i].x);
