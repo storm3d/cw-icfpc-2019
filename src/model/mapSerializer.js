@@ -14,6 +14,18 @@ class Path {
     this.end = end;
     this.orientation = orientation;
   }
+
+  flipStartEnd(): Path {
+    const tempX = this.start.x;
+    const tempY = this.start.y;
+
+    this.start.x = this.end.x;
+    this.start.y = this.end.y;
+    this.end.x = tempX;
+    this.end.y = tempY;
+
+    return this;
+  }
 }
 
 export default class MapSerializer {
@@ -26,14 +38,14 @@ export default class MapSerializer {
   dump(): string {
     const verticalPaths = this.getVerticalPaths();
     const horizontalPaths = this.getHorizontalPaths();
+    const paths = this.sortHorizontalPaths(verticalPaths, horizontalPaths);
+    const dump = paths.map(path => `(${path.start.x},${path.start.y}),(${path.end.x},${path.end.y})`)
+      .join(',');
 
-    console.log('verticalPaths', verticalPaths);
-    console.log('horizontalPaths', horizontalPaths);
-    // console.log(paths);
-
-    return '';
+    return dump;
   }
 
+  /** @private */
   getVerticalPaths(): Array<Path> {
     const paths: Array<Path> = [];
 
@@ -67,6 +79,7 @@ export default class MapSerializer {
     return paths;
   }
 
+  /** @private */
   getHorizontalPaths(): Array<Path> {
     const paths: Array<Path> = [];
 
@@ -101,39 +114,78 @@ export default class MapSerializer {
   }
 
   /** @private */
-  findFirstFreeCell(): Coord {
-    for (let y = 0; y < this.state.m.w; y++) {
-      for (let x = 0; x < this.state.m.h; x++) {
-        const isFree = this.state.m.isFree(x, y);
+  sortHorizontalPaths(verticalPaths: Array<Path>, horizontalPaths: Array<Path>): Array<Path> {
+    let currPath;
 
-        if (isFree) {
-          return new Coord(x, y);
-        }
+    const paths: Array<Path> = verticalPaths.concat(horizontalPaths);
+    const currPathIndex = this.findStartPathIndex(paths);
+
+    currPath = paths[currPathIndex];
+    paths.splice(currPathIndex, 1);
+
+    const joinedPaths: Array<Path> = [currPath];
+
+    for (let i = 0; i < 10000; i++) {
+      const nextPathIndex = this.findNextPathIndex(currPath, paths);
+
+      if (nextPathIndex === null) {
+        break;
       }
+
+      currPath = paths[nextPathIndex];
+
+      if (currPath.orientation === HORIZONTAL_ORIENTATION) {
+        joinedPaths.push(currPath);
+      }
+
+      paths.splice(nextPathIndex, 1);
     }
 
-    throw new Error('No free cells were found');
+    return joinedPaths;
   }
 
   /** @private */
-  getNextCoord(currCoord: Coord, allCoords: Array<Coord>): Coord|null {
-    const coords = [
-      [currCoord.x + 1, currCoord.y], // Right
-      [currCoord.x, currCoord.y + 1], // Upper
-      [currCoord.x - 1, currCoord.y], // Left
-      [currCoord.x, currCoord.y - 1], // Bottom
-    ];
-    const neededCoords = coords.find(([x, y]) => (
-      this.state.m.isValid(x, y) &&
-      this.state.m.isFree(x, y) &&
-      this.state.m.isOnBorder(x, y) &&
-      ! allCoords.find((coord: Coord) => coord.x === x && coord.y === y)
-    ));
+  findStartPathIndex(paths: Array<Path>): number {
+    let neededIndex = 0;
+    let minY = paths[0].start.y;
 
-    if (!neededCoords) {
-      return null;
+    for (let i = 0; i < paths.length; i++) {
+      // First path should be horizontal
+      if (paths[i].orientation === VERTICAL_ORIENTATION) {
+        continue;
+      }
+
+      if (paths[i].start.y < minY || paths[i].end.y < minY) {
+        neededIndex = i;
+        minY = Math.min(paths[i].start.y, paths[i].end.y);
+      }
     }
 
-    return new Coord(neededCoords[0], neededCoords[1]);
+    const startPath = paths[neededIndex];
+
+    // Flip counter clockwise direction
+    if (startPath.start.x > startPath.end.x) {
+      startPath.flipStartEnd();
+    }
+
+    return neededIndex;
+  }
+
+  findNextPathIndex(currPath: Path, paths: Array<Path>): number|null {
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+
+      if (path.start.x === currPath.end.x && path.start.y === currPath.end.y) {
+        return i;
+      }
+
+      if (path.end.x === currPath.end.x && path.end.y === currPath.end.y) {
+        path.flipStartEnd();
+
+        return i;
+      }
+    }
+
+    return null;
   }
 }
