@@ -1,11 +1,12 @@
 // @flow
 import {cpus} from "os";
 import {MANIPULATOR_PRICE} from "../constants/boosters";
+import {Balance} from "../model/balance";
 
 const {fork} = require('child_process');
 
 const totalProblems = 300;
-let lambdaBalance = 23986;
+let lambdaBalance = 26687;
 
 function formatNum(num: number, size: number): string {
     let s = String(num);
@@ -31,6 +32,9 @@ const launch = () => {
     console.log('Before fork');
 
     let models = Array.from({length: totalProblems}, (v, k) => k + 1).reverse();
+
+    let balance = new Balance();
+    lambdaBalance = balance.getBalance();
 
     for (let i = 0; i < numCPUs; i++) {
         const forked = fork('./dist/fork.js');
