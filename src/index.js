@@ -19,7 +19,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     let extensions = solver.setCoins(coins);
     let solution = solver.solve();
 
-    totalSteps += solver.state.step;
+    totalSteps += solver.state.step + 1;
 
     /*
     solver.state.startingBoosters.forEach(b => {

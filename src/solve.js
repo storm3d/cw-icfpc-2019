@@ -106,9 +106,9 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
       return true;
     }
     if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-      let cost = pixelCost(s.m, nx, ny);
+      //let cost = pixelCost(s.m, nx, ny);
 
-      //let cost = 1;
+      let cost = 1;
 
       if(cost > bestPixelCost || nearestFree === 0) {
         //console.log(cost);
@@ -121,7 +121,7 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
     if ((isDrilling || s.m.isPassable(nx, ny)) && wavestep.get(nx, ny) === 0) {
       let newCoord = new Coord(nx, ny);
       front.push(newCoord);
-      let nextRotation = getNextRotation(newCoord, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
+      //let nextRotation = getNextRotation(newCoord, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
       wavestep.set(nx, ny, curLen + 1, cIndex);
     }
     return false;
@@ -290,11 +290,13 @@ export default class Solver {
                 : this.state.getRemainingBoostersNum() ? '*'
                     : ''));
 
+    if (seekingBooster === 'X')
+      this.state.lockInventoryBooster('C', workerId);
+
     //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
 
     // ban other targets
     let banTargets = this.getBannedTargets(workerId);
-
 
     let path = findPath(this.state, worker, banTargets, {seekingBooster : seekingBooster});
     if (path === undefined) {

@@ -457,10 +457,13 @@ export class InventoryBooster {
   stepAcquired : number;
   acquiredByWorkerId : number;
 
+  lockedById : number;
+
   constructor(type : string, stepAcquired : number, acquiredByWorkerId : number) {
     this.type = type;
     this.stepAcquired = stepAcquired;
     this.acquiredByWorkerId = acquiredByWorkerId;
+    this.lockedById = -1;
   }
 }
 
@@ -512,6 +515,8 @@ export class State {
             || (ib.acquiredByWorkerId > workerId && this.step > ib.stepAcquired + 1))) {
 
         //console.log("found!");
+
+        if(ib.lockedById === -1 || ib.lockedById === workerId)
           num++;
         }
       }
@@ -526,6 +531,19 @@ export class State {
       if(ib.type === type && ((ib.acquiredByWorkerId <= workerId && this.step > ib.stepAcquired)
           || (ib.acquiredByWorkerId > workerId && this.step > ib.stepAcquired + 1))) {
         this.inventoryBoosters.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  lockInventoryBooster(type : string, workerId : number) {
+    for(let i = 0; i < this.inventoryBoosters.length; i++) {
+      let ib = this.inventoryBoosters[i];
+
+      if(ib.type === type && ((ib.acquiredByWorkerId <= workerId && this.step > ib.stepAcquired)
+          || (ib.acquiredByWorkerId > workerId && this.step > ib.stepAcquired + 1))) {
+        ib.lockedById = workerId;
         return true;
       }
     }
@@ -558,7 +576,7 @@ export class State {
   }
 
   static isBoosterUseful(type : string) : boolean {
-    return type === "C" || type === "B" || type === "L" || type === "R" || type === "F";
+    return type === "C" || type === "B" /*|| type === "L" || type === "R" || type === "F"*/;
   }
 
   checkBooster(x : number, y : number, type : string) {
