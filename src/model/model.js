@@ -304,7 +304,7 @@ export class Rover {
   }
 
   getCopy(): Rover {
-    return new Rover(this.pos, this.widthLeft, this.widthRight, this.rotation);
+    return new Rover(this.pos.getCopy(), this.widthLeft, this.widthRight, this.rotation);
   }
 
   rotCW() {

@@ -33,6 +33,73 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
   let nearestFree : Coord = 0;
   let bestPixelCost = 0;
+  let getCoordNXNY = (c: Coord) : Array<Object> => {
+    return [{
+          nx : c.x,
+          ny : c.y + 1,
+        }, {
+          nx : c.x + 1,
+          ny : c.y,
+        }, {
+          nx : c.x,
+          ny : c.y - 1,
+        }, {
+          nx : c.x - 1,
+          ny : c.y,
+        },
+      ];
+  };
+  let getDirs2 = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
+    return [
+        nxny[1],
+        nxny[0],
+        nxny[3],
+        nxny[2],
+      ];
+  };
+  let getDirs2bt = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
+    return [
+        nxny[2],
+        nxny[3],
+        nxny[0],
+        nxny[1],
+      ];
+  };
+  let getDirs = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
+    return {
+        0 : nxny[0],
+        3 : nxny[1],
+        6 : nxny[2],
+        9 : nxny[3],
+      };
+  };
+  let tryDirection = (nx: number, ny: number, curLen: number) : boolean => {
+    if(!s.m.isValid(nx, ny)) {
+      return false;
+    }
+
+    if (s.checkBooster(nx, ny)) {
+      nearestFree = new Coord(nx, ny);
+      return true;
+    }
+    if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
+      // let cost = pixelCost(s.m, nx, ny) / Math.pow(curLen, 1);
+      let cost = 1;
+
+      if(cost > bestPixelCost || nearestFree === 0) {
+        nearestFree = new Coord(nx, ny);
+        bestPixelCost = cost;
+      }
+    }
+    if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
+      front.push(new Coord(nx, ny));
+      lens.set(nx, ny, curLen + 1);
+    }
+    return false;
+  }
 
   while(front.length) {
     let c = front[0];
@@ -46,78 +113,26 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
     front.shift();
 
-    let dirs = {
-      0 : {
-        nx : c.x,
-        ny : c.y + 1,
-      },
-      3 : {
-        nx : c.x + 1,
-        ny : c.y,
-      },
-      6 : {
-        nx : c.x,
-        ny : c.y - 1,
-      },
-      9 : {
-        nx : c.x - 1,
-        ny : c.y,
-      }
-    };
-
+    let dirs = getDirs2(c);
     // go this dir first
     // let nx = dirs[worker.rotation].nx;
     // let ny = dirs[worker.rotation].ny;
     //
     // delete dirs[worker.rotation];
     //
-    // if(s.m.isValid(nx, ny)) {
-    //   if (s.checkBooster(nx, ny)) {
-    //     nearestFree = new Coord(nx, ny);
-    //     break;
-    //   }
-    //   if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-    //     let cost = pixelCost(s.m, nx, ny);
-    //
-    //     if(cost > bestPixelCost || nearestFree === 0) {
-    //       nearestFree = new Coord(nx, ny);
-    //       bestPixelCost = cost;
-    //     }
-    //   }
-    //   if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
-    //     front.push(new Coord(nx, ny));
-    //     lens.set(nx, ny, curLen + 1);
-    //   }
-    // }
+    // if (tryDirection(nx, ny)) break;
     //console.log(dirs);
+
     let isFound = false;
     for (let dirsKey in dirs) {
       let nx = dirs[dirsKey].nx;
       let ny = dirs[dirsKey].ny;
 
-      if(s.m.isValid(nx, ny)) {
-        if (s.checkBooster(nx, ny)) {
-          nearestFree = new Coord(nx, ny);
-          isFound = true;
-          break;
-        }
-        if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-          // let cost = pixelCost(s.m, nx, ny) / Math.pow(curLen, 1);
-          let cost = 1;
-
-          if(cost > bestPixelCost || nearestFree === 0) {
-            nearestFree = new Coord(nx, ny);
-            bestPixelCost = cost;
-          }
-        }
-        if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
-          front.push(new Coord(nx, ny));
-          lens.set(nx, ny, curLen + 1);
-        }
-      }
+      isFound = tryDirection(nx, ny, curLen);
+      if (isFound) break;
     }
 
-    if(isFound)
+    if (isFound)
       break;
 
     //console.log("front");
@@ -130,48 +145,38 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     return undefined;
 
   let path = [ nearestFree ];
+
   while(true) {
     //console.log(path);
 
     let c = path[0];
     let minL = 999999;
     let minC = 0;
+    let backtrack_dirs = getDirs2bt(c);
 
-    let nx = c.x + 1;
-    let ny = c.y;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
+    let backTrackNextCell = (nx: number, ny: number) => {
+      if (!lens.isValid(nx, ny)) return;
+      let lensXY = lens.get(nx, ny);
+      if (lensXY < minL && lensXY !== 0) {
+        minL = lensXY;
+        minC = new Coord(nx, ny);
+      }
+    };
 
-    nx = c.x;
-    ny = c.y + 1;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
+    let backTrackDone = false;
+    for (let btKey in backtrack_dirs) {
+      let nx = backtrack_dirs[btKey].nx;
+      let ny = backtrack_dirs[btKey].ny;
 
-    nx = c.x - 1;
-    ny = c.y;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
-    }
+      // check if backtrack is done
+      backTrackDone = (source.x === nx && source.y === ny);
+      if (backTrackDone)
+        break;
+      backTrackNextCell(nx, ny);
 
-    nx = c.x;
-    ny = c.y - 1;
-    if(source.x === nx && source.y === ny)
-      break;
-    if(lens.get(nx, ny) < minL && lens.get(nx, ny) !== 0 && lens.isValid(nx, ny)) {
-      minL = lens.get(nx, ny);
-      minC = new Coord(nx, ny);
     }
+    if (backTrackDone)
+      break;
 
     if(!minC)
       throw "Weird shit happened";
@@ -227,7 +232,7 @@ export default class Solver {
       let diff = a.getDiff(b);
       return (Math.abs(diff.x) + Math.abs(diff.y)) < d;
     };
-    let isNearCenter = (c: Coord) => { 
+    let isNearCenter = (c: Coord) => {
       return isNear(c, matrixCenter, 20);
     };
 
@@ -250,10 +255,6 @@ export default class Solver {
 
     let prevTeleportLen = 0;
     while(true) {
-      //if (this.solution.result.length % 1000 == 0){
-      //  console.log(this.solution.result);
-      //  if (this.solution.result.length > 3000) throw "UPS";
-      //}
       let path = findPath(this.state, this.state.worker, false);
       if (path === undefined) {
         if (this.state.m.getFreeNum() > 0) {
@@ -277,7 +278,7 @@ export default class Solver {
       }
       // dumb greedy teleports
       //if (false) {
-      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) ){ //&& matrixCenter.x > 50 && matrixCenter.y > 50) {
+      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) && matrixCenter.x > 50 && matrixCenter.y > 50) {
         hasActiveTeleport = true;
         this.state.teleports--;
         this.solution.plantTeleport();
