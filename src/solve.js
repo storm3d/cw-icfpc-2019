@@ -237,115 +237,139 @@ export default class Solver {
     while(true) {
 
       for(let workerId = 0; workerId < boostersNum; workerId++) {
-        let worker = this.state.workers[workerId];
         this.solution.setWorkerId(workerId);
 
         // do we need to apply booster?
-        if(this.state.getAvailableInventoryBoosters('B', workerId) > 0) {
-          this.state.spendInventoryBooster('B', workerId);
-          let c = this.state.workers[workerId].extendManipulators();
-          this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
-          continue;
-        }
-        else if(this.state.getAvailableInventoryBoosters('C', workerId) > 0
-            && this.state.checkBooster(worker.pos.x, worker.pos.y, 'X')) {
-
-          this.state.spendInventoryBooster('C', workerId);
-          this.state.workers.push(new Rover(worker.pos.getCopy(), 1, 1));
-          this.solution.activateCloning();
-          this.solution.addWorker();
+        if (this.applyMainBoosters(workerId)) {
           continue;
         }
 
         // find out target
-        if(worker.path && !worker.path.length) {
+        if (!this.findWorkerTarget(workerId))
+          return this.solution;
+        // make worker step
+        this.stepWorkerPath(workerId);
 
-          let seekingBooster = !this.state.spawnsPresent ? 0
-              : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
-              : (this.state.getRemainingCloningNum() ? 'C'
-                      : this.state.getRemainingUnlockedBoostersNum() ? '*'
-                          : ''));
-
-          //if(this.state.getRemainingUnlockedBoostersNum())
-          //  console.log(this.state.step + " worker: " + workerId + " seeking "
-           ///     + seekingBooster + " unlocked "
-              //  + this.state.getRemainingUnlockedBoostersNum() + " cloning unlocked " + this.state.getRemainingCloningNum());
-          if(seekingBooster === 'X')
-            this.state.lockInventoryBooster('C', workerId);
-
-          //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
-
-          // ban other targets
-          let banTargets = [];
-          for(let i = 0; i < this.state.workers.length; i++)
-            if(i !== workerId && this.state.workers[i].target)
-              banTargets.push(this.state.workers[i].target);
-
-          let path = findPath(this.state, worker, banTargets, {seekingBooster : seekingBooster});
-          if (path === undefined) {
-            if (this.state.m.getFreeNum() === 0) {
-              return this.solution;
-            }
-          }
-
-          //console.log("1");
-          worker.path = path;
-          if(worker.path)
-            worker.target = path[path.length - 1];
-          else
-            worker.target = 0;
-
-          if(worker.target && (seekingBooster === '*' || seekingBooster === 'C')) {
-            let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
-            if(b.lockedBy === -1 && b.type !== 'X') {
-              b.lockedBy = workerId;
-              //console.log("locked "+ b.type);
-            }
-          }
-        }
-
-        // act on our current path
-        if(worker.path) {
-          let curPos = worker.pos;
-          //console.log(worker.pathStep);
-          //console.log(worker.path);
-          let nextPos = worker.path[worker.pathStep];
-
-          let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, worker.rotation);
-          if (turnType !== 0) {
-            if (turnType === 1) { // CW
-              this.solution.turnManipulatorsClockwise();
-              worker.rotCW();
-            } else if (turnType === 2) { // CCW
-              this.solution.turnManipulatorsCounterclockwise();
-              worker.rotCCW();
-            }
-
-            // fake move to apply changes
-            this.state.moveWorker(workerId, curPos);
-          } else {
-
-            // do actual move
-              //console.log("moving");
-              //console.log(worker.pos);
-            this.solution.move(worker.pos, nextPos);
-            this.state.moveWorker(workerId, nextPos);
-
-              //console.log("postmoving");
-
-            worker.pathStep++;
-            if (worker.pathStep >= worker.path.length) {
-              worker.path = [];
-              worker.pathStep = 0;
-            }
-          }
-        }
       }
 
       boostersNum = this.state.workers.length;
       this.state.step++;
     }
 
+  }
+
+  applyMainBoosters(workerId: number): boolean {
+    let worker = this.state.workers[workerId];
+    if(this.state.getAvailableInventoryBoosters('B', workerId) > 0) {
+      this.state.spendInventoryBooster('B', workerId);
+      let c = this.state.workers[workerId].extendManipulators();
+      this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+      return true;
+    }
+    else if(this.state.getAvailableInventoryBoosters('C', workerId) > 0
+        && this.state.checkBooster(worker.pos.x, worker.pos.y, 'X')) {
+
+      this.state.spendInventoryBooster('C', workerId);
+      this.state.workers.push(new Rover(worker.pos.getCopy(), 1, 1));
+      this.solution.activateCloning();
+      this.solution.addWorker();
+      return true;
+    }
+    return false;
+  }
+
+  findWorkerTarget(workerId: number): boolean {
+    let worker = this.state.workers[workerId];
+    if(!worker.path || worker.path.length > 0) {
+      return true;
+    }
+
+    let seekingBooster = !this.state.spawnsPresent ? 0
+        : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
+        : (this.state.getRemainingCloningNum() ? 'C'
+                : this.state.getRemainingUnlockedBoostersNum() ? '*'
+                    : ''));
+
+    //if(this.state.getRemainingUnlockedBoostersNum())
+          //  console.log(this.state.step + " worker: " + workerId + " seeking "
+           ///     + seekingBooster + " unlocked "
+              //  + this.state.getRemainingUnlockedBoostersNum() + " cloning unlocked " + this.state.getRemainingCloningNum());
+          if(seekingBooster === 'X')
+            this.state.lockInventoryBooster('C', workerId);
+
+    //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
+
+    // ban other targets
+    let banTargets = this.getBannedTargets(workerId);
+
+    let path = findPath(this.state, worker, banTargets, {seekingBooster : seekingBooster});
+    if (path === undefined) {
+      if (this.state.m.getFreeNum() === 0) {
+        return false;
+      }
+    }
+
+    //console.log("1");
+          worker.path = path;
+          if(worker.path)
+            worker.target = path[path.length - 1];
+          else
+            worker.target = 0;
+
+    if(worker.target && (seekingBooster === '*' || seekingBooster === 'C')) {
+      let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
+      if(b.lockedBy === -1 && b.type !== 'X') {
+        b.lockedBy = workerId;
+              //console.log("locked "+ b.type);
+            }
+    }
+
+    return true;
+  }
+
+  getBannedTargets(workerId: number):Array<Coord> {
+    return this.state.workers
+                .filter((w, i) => i !== workerId && w.target)
+                .map(w => w.target);
+  }
+
+  stepWorkerPath(workerId: number) {
+    let worker = this.state.workers[workerId];
+    // act on our current path
+    if(!worker.path) {
+      return;
+    }
+    let curPos = worker.pos;
+    let nextPos = worker.path[worker.pathStep];
+
+    let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, worker.rotation);
+    if (turnType !== 0) {
+      if (turnType === 1) { // CW
+        this.solution.turnManipulatorsClockwise();
+        worker.rotCW();
+      } else if (turnType === 2) { // CCW
+        this.solution.turnManipulatorsCounterclockwise();
+        worker.rotCCW();
+      }
+
+      // fake move to apply changes
+      this.state.moveWorker(workerId, curPos);
+    } else {
+
+      // do actual move
+        //console.log("moving");
+        //console.log(worker.pos);
+      this.solution.move(worker.pos, nextPos);
+      this.state.moveWorker(workerId, nextPos);
+
+        //console.log("postmoving");
+
+      worker.pathStep++;
+      if (worker.pathStep >= worker.path.length) {
+        worker.path = [];
+        worker.pathStep = 0;
+      }
+    }
   }
 
   solveOld(): Solution {

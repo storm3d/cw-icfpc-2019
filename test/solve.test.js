@@ -1,5 +1,6 @@
 import Solver, { pixelCost } from "../src/solve";
 import { parseState, parseMatrix } from "../src/model/model";
+import MapParser from '../src/model/mapParser';
 
 describe("solver", () => {
 
@@ -35,18 +36,18 @@ describe("solver", () => {
     expect(solver.state.m.getFreeNum()).toEqual(0);
     //console.log(solution.getString());
 
-    expect(solution.getString().length).toEqual(23); // DB(1,2)DAAQWWWEDDB(1,-2)
+    expect(solution.getString().length).toEqual(22); // DB(1,2)DAAQWWWEDDB(1,-2)
 
     //console.log(solver.state.dump());
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
-| * * * |
-| * * * |
+| * * F |
+| * * R |
 `);
     //solver.state.step+=10;
     expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
-    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(2);
+    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(1);
     expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(1);
 
   })
@@ -69,11 +70,11 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solver.solution.score).toEqual(33);
-    expect(solution.getString().length).toEqual(39);
+    expect(solver.solution.score).toEqual(39);
+    expect(solution.getString().length).toEqual(44);
     expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(0);
-    expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
     expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(0);
     //console.log(solution);
 
@@ -97,6 +98,26 @@ describe("solver", () => {
 
     let solver = new Solver(s);
     let solution = solver.solve();
+
+    // console.log(solution);
+
+    //console.log(solution.getString());
+    //console.log(solution.getString().length);
+  })
+
+  test("test solve fasts", () => {
+    const s = new MapParser('./problems/prob-012.desc').getState();
+
+    let solver = new Solver(s);
+    let solution = solver.solve();
+
+    expect(solver.state.m.getFreeNum()).toEqual(0);
+    expect(solver.solution.score).toEqual(521);
+    expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(2);
+    expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
+    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('C', 0)).toEqual(0);
 
     // console.log(solution);
 
