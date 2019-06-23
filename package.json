@@ -39,7 +39,9 @@
     "generate": "node dist/generate.js",
     "prelaunch": "babel src -d dist",
     "launch": "node dist/runner/launch.js && node dist/score.js",
-    "show": "node visualizer/server.js"
+    "show": "node visualizer/server.js",
+    "preautomine": "babel src -d dist",
+    "automine": "node dist/automine.js 5"
   },
   "jest": {
     "testEnvironment": "node"

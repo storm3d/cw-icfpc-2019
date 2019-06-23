@@ -33,13 +33,13 @@ const launch = () => {
                     let model = models.pop();
                     forked.send({type: 'model', model: formatNum(model, 3)});
                 } else {
-                    forked.send({type: 'kill'})
+                    forked.send({type: 'kill'});
                 }
             }
         });
     }
     // eslint-disable-next-line no-console
-    console.log('After fork')
+    console.log('After fork');
 };
 
 const launcher = () => {

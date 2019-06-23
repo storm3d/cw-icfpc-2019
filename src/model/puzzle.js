@@ -169,8 +169,8 @@ export class Puzzle {
 
         const getFreePoint = function () {
             let result = [];
-            for (let h = state.m.h - 1; h >= 0; h--) {
-                for (let w = 0; w < state.m.w; w++) {
+            for (let h = state.m.h - 1; h >= 0; h += 3) {
+                for (let w = 0; w < state.m.w; w += 5) {
                     let c = state.m.get(w, h);
                     if (c === FREE) {
                         result = [w,h];
@@ -210,12 +210,12 @@ export class Puzzle {
     addVertices (state, vertises) {
         const getFreePoint = function () {
             let result = [];
-            for (let h = 0; h < state.m.h; h++) {
+            for (let h = 0; h < state.m.h; h += 2) {
                 for (let w = 0; w < state.m.w; w +=2) {
                     let c = state.m.get(w, h);
-                    if (c === FREE) {
-                        result = [w,h];
-                        return result;
+                    if (c === FREE && (state.m.getFreeNeighborsNum(w,h) === 5 || state.m.getFreeNeighborsNum(w,h) === 6)) {
+                            result = [w,h];
+                            return result;
                     }
                 }
             }
