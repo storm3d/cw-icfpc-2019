@@ -1,6 +1,6 @@
 // @flow
 import {cpus} from "os";
-import {MANIPULATOR_PRICE} from "../constants/boosters";
+import {CLONING_PRICE, MANIPULATOR_PRICE} from "../constants/boosters";
 import {Balance} from "../model/balance";
 
 const {fork} = require('child_process');
@@ -17,9 +17,9 @@ function formatNum(num: number, size: number): string {
 }
 
 function getCoins(model: number): number {
-    let c = 2;
-    let spend = MANIPULATOR_PRICE * c;
-    if (lambdaBalance > spend) {
+    let c = 1;
+    let spend = CLONING_PRICE * c;
+    if (lambdaBalance > spend && model < 220) {
         lambdaBalance -= spend;
 
         return spend;
