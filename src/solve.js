@@ -3,7 +3,7 @@
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
 import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME, InventoryBooster} from "./model/model";
-import { MANIPULATOR_PRICE } from './constants/boosters';
+import { MANIPULATOR_PRICE, CLONING_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
 const minSearchLen = 3;
@@ -605,8 +605,8 @@ export default class Solver {
   /** @private */
   buyBoosters(): number {
     let counter = 0;
-    while (this.coins >= MANIPULATOR_PRICE) {
-      this.buyManipulator();
+    while (this.coins >= CLONING_PRICE) {
+      this.buyClone();
       counter++;
     }
 
@@ -619,6 +619,15 @@ export default class Solver {
     this.coins = this.coins - MANIPULATOR_PRICE;
 
     let acuiredBooster = new InventoryBooster('B', -1, 0);
+    this.state.inventoryBoosters.push(acuiredBooster);
+  }
+
+  /** @private */
+  buyClone() {
+    console.log('buy clone');
+    this.coins = this.coins - CLONING_PRICE;
+
+    let acuiredBooster = new InventoryBooster('C', -1, 0);
     this.state.inventoryBoosters.push(acuiredBooster);
   }
 }
