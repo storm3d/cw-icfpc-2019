@@ -180,7 +180,6 @@ export class Puzzle {
             }
             return result;
         };
-
         // • mNum manipulator extensions
         // • fNum fast wheels,
         // • dNum drills,
@@ -205,6 +204,28 @@ export class Puzzle {
         state.worker.pos.y = initialPoint[1];
 
 
+        return state;
+    }
+
+    addVertices (state, vertises) {
+        const getFreePoint = function () {
+            let result = [];
+            for (let h = 0; h < state.m.h; h++) {
+                for (let w = 0; w < state.m.w; w +=2) {
+                    let c = state.m.get(w, h);
+                    if (c === FREE) {
+                        result = [w,h];
+                        return result;
+                    }
+                }
+            }
+            return result;
+        };
+
+        for(let i = 0; i < vertises + 10; i++) {
+            let freePoint = getFreePoint();
+            state.m.set(freePoint[0], freePoint[1], 1);
+        }
 
         return state;
     }
