@@ -12,7 +12,9 @@
 <!-- End Jekyll SEO tag -->
 <body><header class="site-header">
 
-  <textarea id="log-steps"></textarea>
+  <div id='textarea-box'>
+    <textarea id="log-steps"></textarea>
+  </div>
   <p class="hint">hint: remember you can undo/redo input changes with ctrl+z/ctrl+shift+z</p>
   <p class="hint">hint: don't accidentally hit visualizer control keys, you can toggle them off</p>
     
@@ -56,8 +58,37 @@
     font-size: 12px;
   }
 </style>
+<style>
+  /* styles to highlight text in textarea */
+  #textarea-box {
+    font-family: monospace !important;
+  }
+
+  #log-steps {
+    border-radius: 0; /* reset browser defaults */
+    margin: 0;
+    font-family: monospace !important;
+  }
+
+  .mark--bg--green {
+    color: transparent;
+    background-color: #8DEA6B;
+  }
+
+  .mark--cursor {
+    color: transparent;
+    background-color: #AA7ABB;
+  }
+  
+  .mark--error {
+    color: transparent;
+    background-color: initial;
+    border-bottom: 1px solid red;
+  }
+</style>
 
 <center>
+<script src="src/highlight-ta.min.js"></script>
 <script type="text/javascript" src="/lambda.js"></script>
 <table>
 <tr>

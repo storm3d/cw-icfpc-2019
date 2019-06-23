@@ -1,19 +1,64 @@
-// fp debug utils
+// fp & debug utils
 var logArgs = f => (...args) => {
   console.log(Object(f).name || 'anonymous function', args);
   return f(...args);
 };
 var identity = x => x;
+/* Features */
 // TODO: highlight current step as italic (handle batteries, extensions _somehow_, handle clones _later_) and highlight text before currentStep as green
 // TODO: if a mistake move, highlight it (and till end of line) as red error
-// TODO: make button controls: toggle visualizer keys, play, pause, next, back, forward play, forward back,
+// TODO: make button controls: toggle visualizer keys, play, pause, next, back, forward play, forward back, gotocolumn
 // TODO: make textarea oninput rebuild the binary tree of moves
 // patching visualizer for interactivity
+/* highlight walked solution in textarea */
+// TODO: destroy hihglighting on loading new solution text file or reset press
+var ht = {}; // highlighter plugin instance
+highlightTextarea(identity); // init plugin
+function highlightTextarea(highlighterFn) {
+  // clear highlighting
+  Object(ht).destroy && ht.destroy();
+  var textareaBox = document.getElementById("textarea-box");
+  var textAreaEl = document.getElementById("log-steps");
+  ht = hlghtta(textareaBox, textAreaEl, {myPattern: {"function": highlighterFn}});
+  return ht;
+}
 function getTextarea() {
   return document.querySelector('#log-steps');
 }
 function loadSolutionIntoTextArea(solutionText) {
   return getTextarea().value = solutionText;
+}
+function toSteps(text) {
+  // probably worth to cache
+  let ignoreUntilIndex = -1;
+  return text.split('').reduce((stepsMemo, char, charIndex, chars) => {
+    if (ignoreUntilIndex >= charIndex) {
+      return stepsMemo;
+    }
+    if ('WDASQE'.includes(char)) { // chars that don't require additional syntax
+      return stepsMemo.concat([char]);
+    } else if (char === 'B') {
+      const closingParenIndex = chars.indexOf(')', charIndex);
+      ignoreUntilIndex = closingParenIndex;
+      return stepsMemo.concat([chars.slice(charIndex, closingParenIndex + 1).join('')])
+    }
+    return stepsMemo.concat([char]); // forgiving spaces and other noisy stuff
+  }, [])
+}
+function receiveTimeStep(timeStep) {
+  // based on timeStep we can highlight a step
+  highlightTextarea(text => {
+    const steps = toSteps(text);
+    const alreadyWalkedSolution = steps.slice(0, timeStep === 0 ? 0 : timeStep - 1);
+    console.log({ alreadyWalkedSolution: alreadyWalkedSolution.join('') })
+    const htmlAlreadyWalkedSolution =
+      alreadyWalkedSolution.join() &&
+      `<mark class="mark--bg--green">${alreadyWalkedSolution.join('')}</mark>`;
+    const textCursor = steps.slice(timeStep - 1, timeStep)[0]; // TODO: handle last char edge case
+    const htmlCursor = `<mark class="mark--cursor">${textCursor}</mark>`;
+    const textRest = steps.slice(timeStep + 1, -1).join(''); // TODO: same, handle last char edge case
+    return `${htmlAlreadyWalkedSolution}${htmlCursor}${textRest}`
+  })
 }
 // pretty-printed visualizer from https://icfpcontest2019.github.io/solution_visualiser/
 var render,
@@ -4508,6 +4553,8 @@ validate;
   }
   var Zl = drawState;
   function drawState(MainNamespace, canvasEl, mapMatrix, height, width, unknownMap1, unknownMap2, unknownMap3, timeSteps) {
+    // call our callback onStartDrawState
+    receiveTimeStep(timeSteps);
     var n = new $l(unknownMap1),
     q = J().y;
     n = L(n, q);
