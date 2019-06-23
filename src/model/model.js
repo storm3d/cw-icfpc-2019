@@ -369,6 +369,9 @@ export class Rover {
   path : Array<Coord>;
   pathStep : number;
   target : Coord;
+  drillTicks : number;
+  wheelTicks : number;
+  isDrilling : boolean;
 
   constructor(pos: Coord, widthLeft: number, widthRight: number, rotation: number = 3) {
     this.pos = pos;
@@ -379,6 +382,9 @@ export class Rover {
     this.path = [];
     this.pathStep = 0;
     this.target = 0;
+    this.drillTicks = 0;
+    this.wheelTicks = 0;
+    this.isDrilling = false;
   }
 
   getCopy(): Rover {
