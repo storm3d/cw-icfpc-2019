@@ -6,7 +6,7 @@ import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME, Inventor
 import { MANIPULATOR_PRICE, CLONING_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
-const minSearchLen = 3;
+const minSearchLen = 2;
 
 
 export function getTurnType(rotation : number, dx : number, dy : number) : number {
@@ -106,9 +106,9 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
       return true;
     }
     if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-      //let cost = pixelCost(s.m, nx, ny);
+      let cost = pixelCost(s.m, nx, ny);
 
-      let cost = 1;
+      //let cost = 1;
 
       if(cost > bestPixelCost || nearestFree === 0) {
         //console.log(cost);
@@ -204,7 +204,7 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
 
 
 export function pixelCost(matrix: Matrix, x: number, y: number): number {
-  return 10000-matrix.getFreeNeighborsNum(x, y, 5);
+  return 10000-matrix.getFreeNeighborsNum(x, y, 2);
 }
 
 export default class Solver {
@@ -318,8 +318,12 @@ export default class Solver {
                 : this.state.getRemainingUnlockedBoostersNum() ? '*'
                     : ''));
 
-    if (seekingBooster === 'X')
-      this.state.lockInventoryBooster('C', workerId);
+    //if(this.state.getRemainingUnlockedBoostersNum())
+          //  console.log(this.state.step + " worker: " + workerId + " seeking "
+           ///     + seekingBooster + " unlocked "
+              //  + this.state.getRemainingUnlockedBoostersNum() + " cloning unlocked " + this.state.getRemainingCloningNum());
+          if(seekingBooster === 'X')
+            this.state.lockInventoryBooster('C', workerId);
 
     //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
 
@@ -336,16 +340,19 @@ export default class Solver {
       //this.tryToDrill(workerId, banTargets, options);
     }
 
-    worker.path = path;
-    if(worker.path)
-      worker.target = path[path.length - 1];
-    else
-      worker.target = 0;
+    //console.log("1");
+          worker.path = path;
+          if(worker.path)
+            worker.target = path[path.length - 1];
+          else
+            worker.target = 0;
 
-    if(worker.target && seekingBooster === '*') {
+    if(worker.target && (seekingBooster === '*' || seekingBooster === 'C')) {
       let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
-      if(b.lockedBy === -1 && b.type !== 'X')
+      if(b.lockedBy === -1 && b.type !== 'X') {
         b.lockedBy = workerId;
+              //console.log("locked "+ b.type);
+            }
     }
 
     return true;
