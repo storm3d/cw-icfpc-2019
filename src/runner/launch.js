@@ -1,10 +1,11 @@
 // @flow
 import {cpus} from "os";
+import {MANIPULATOR_PRICE} from "../constants/boosters";
 
 const {fork} = require('child_process');
 
 const totalProblems = 300;
-const lambdaBalance = 18382;
+let lambdaBalance = 18382;
 
 function formatNum(num: number, size: number): string {
     let s = String(num);
@@ -15,11 +16,18 @@ function formatNum(num: number, size: number): string {
 }
 
 function getCoins(model: number): number {
-    if (model === totalProblems) {
-        return lambdaBalance - (Math.floor(lambdaBalance / totalProblems) * (totalProblems - 1));
+    // if (model === totalProblems) {
+    //     return lambdaBalance - (Math.floor(lambdaBalance / totalProblems) * (totalProblems - 1));
+    // }
+    // return Math.floor(lambdaBalance / totalProblems);
+
+    if (lambdaBalance > MANIPULATOR_PRICE) {
+        lambdaBalance -= MANIPULATOR_PRICE;
+
+        return MANIPULATOR_PRICE;
     }
 
-    return Math.floor(lambdaBalance / totalProblems);
+    return 0;
 }
 
 const launch = () => {
