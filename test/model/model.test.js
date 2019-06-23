@@ -1,6 +1,6 @@
 import {  } from "../../src/model/model";
 import assert from 'assert';
-import { Matrix, parseMatrix, State, Booster, parseState, parseCoords } from "../../src/model/model";
+import { Matrix, WaveMatrix, parseMatrix, State, Booster, parseState, parseCoords } from "../../src/model/model";
 import { WRAPPED, OBSTACLE } from "../../src/model/model";
 import {Coord} from "../../src/model/model";
 
@@ -136,5 +136,25 @@ describe("Basic model", () => {
     let m = parseMatrix(layout);
 
     expect(m.getNeighbors(new Coord(0, 0))).toEqual(parseCoords("(-1,0),(0,-1),(0,1),(1,0)"));
+  })
+
+  test("Test WaveMatrix", () => {
+    let w = 9;
+    let h = 7;
+    let waveMatrix = new WaveMatrix(w, h);
+
+    let coords = [new Coord(), new Coord(1,2), new Coord(1,1), new Coord(w-1, h-1), new Coord(w-1, 0), new Coord(7, 1)];
+    let idxes = coords.map(c => waveMatrix.toIndex(c.x, c. y));
+    let coords1 = idxes.map(n => waveMatrix.toCoord(n));
+    expect(coords1).toEqual(coords);
+
+    let coordsX = [new Coord(w, 0), new Coord(-3, h), new Coord(w-h-3, h)];
+    coordsX.forEach(c => {
+      let n = waveMatrix.toIndex(c.x, c. y);
+      let c1 = waveMatrix.toCoord(n);
+      expect(n).toBeGreaterThanOrEqual(0);
+      expect(n).toBeLessThan(w*h);
+      expect(c).not.toEqual(c1);
+    })
   })
 });

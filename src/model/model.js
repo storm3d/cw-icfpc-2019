@@ -20,6 +20,10 @@ export class Coord {
     return this.x === c.x && this.y === c.y;
   }
 
+  isEqualXY(x: number, y: number): boolean {
+    return this.x === x && this.y === y;
+  }
+
   getAdded(v: Coord) {
     return new Coord(this.x + v.x, this.y + v.y);
   }
@@ -77,6 +81,56 @@ export class Coord {
 
   toString() {
     return `(${this.x},${this.y})`;
+  }
+}
+
+export class WaveMatrix {
+  w: number;
+  h: number;
+  data: Int32Array;
+  prev: Int32Array;
+
+  constructor(w: number, h: number, data = undefined, prev = undefined) {
+    this.w = w;
+    this.h = h;
+    this.data = data || new Int32Array(w * h);
+    this.prev = prev || new Int32Array(w * h);
+  }
+
+  set(x: number, y: number, val: number, prev: number = -1) {
+    let idx = x + this.w * y;
+    this.data[idx] = val;
+    this.prev[idx] = prev;
+  }
+
+  get(x: number, y: number): number {
+    let idx = x + this.w * y;
+    return this.data[idx];
+  }
+
+  isValid(x: number, y: number): boolean {
+    return x >= 0 && y >= 0 && x < this.w && y < this.h;
+  }
+
+  toIndex(x: number, y: number): number {
+    return x + this.w * y;
+  }
+  toCoord(index: number): Coord {
+    let x = index % this.w;
+    let y = Math.floor((index - x) / this.w);
+    return new Coord(x, y);
+  }
+  nextX(index: number): number {
+    return index + 1;
+  }
+  prevX(index: number): number {
+    return index - 1;
+  }
+  nextY(index: number): number {
+    return index + this.w;
+  }
+  prevY(index: number): number {
+    return index - this.w;
   }
 }
 
