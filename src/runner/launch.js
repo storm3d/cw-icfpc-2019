@@ -17,7 +17,7 @@ function formatNum(num: number, size: number): string {
 }
 
 function getCoins(model: number): number {
-    let c = 1;
+    let c = 2;
     let spend = MANIPULATOR_PRICE * c;
     if (lambdaBalance > spend) {
         lambdaBalance -= spend;
