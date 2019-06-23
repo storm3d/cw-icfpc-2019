@@ -35,7 +35,7 @@ export function getWorkerTurnType(m: Matrix, curPos: Coord, nextPos: Coord, rota
   return 0;
 }
 
-export function findPath(s: State, worker : Rover, options: Object) {
+export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, options: Object) {
 
   let source = worker.pos.getCopy();
 
@@ -43,12 +43,18 @@ export function findPath(s: State, worker : Rover, options: Object) {
   let fastTime = options.fastTime || -1;
 
   //let workerCopy = worker.getCopy();
-  let isSeekingBoosters = s.getRemainingBoostersNum() > 0;
-  let searchLen = isSeekingBoosters ? maxSearchLen : minSearchLen;
+  let seekingBooster = options.seekingBooster;
+  let searchLen = seekingBooster ? maxSearchLen : minSearchLen;
 
   let wavestep = new WaveMatrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
   wavestep.set(source.x, source.y, 1, -1, worker.rotation);
+
+  // ban locations
+  for(let i = 0; i < banTargets.length; i++) {
+    wavestep.set(banTargets[i].x, banTargets[i].y, 33333);
+    //console.log("banned " + banTargets[i].x + " " + banTargets[i].x);
+  }
 
   let nearestFree : Coord = 0;
   let bestPixelCost = 0;
@@ -89,11 +95,11 @@ export function findPath(s: State, worker : Rover, options: Object) {
   };
 
   let tryDirection = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
-    if(!s.m.isValid(nx, ny)) {
+    if(!s.m.isValid(nx, ny) || wavestep.get(nx, ny) === 33333) {
       return false;
     }
 
-    if (isSeekingBoosters && s.checkBooster(nx, ny)) {
+    if (seekingBooster && s.checkBooster(nx, ny, seekingBooster)) {
       nearestFree = new Coord(nx, ny);
       let nextRotation = getNextRotation(nearestFree, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
       wavestep.set(nx, ny, curLen + 1, cIndex, nextRotation);
@@ -170,6 +176,7 @@ export function findPath(s: State, worker : Rover, options: Object) {
   }
 
   //console.log(nearestFree);
+  //console.log("found " + nearestFree.x + " " + nearestFree.x);
 
   if(nearestFree === 0)
     return undefined;
@@ -183,14 +190,14 @@ export function findPath(s: State, worker : Rover, options: Object) {
     };
 
   while (prev >= 0) {
-    adjustPathRotations(wavestep.rotation[btIndex], wavestep.rotation[prev]);
-    btIndex = prev;
+    //adjustPathRotations(wavestep.rotation[btIndex], wavestep.rotation[prev]);
+    //btIndex = prev;
     let prevC = wavestep.toCoord(prev);
     prev = wavestep.prev[prev];
     path.unshift(prevC);
   }
   path.shift();
-  adjustPathRotations(wavestep.rotation[btIndex], worker.rotation);
+  //adjustPathRotations(wavestep.rotation[btIndex], worker.rotation);
 
   return path;
 }
@@ -222,7 +229,110 @@ export default class Solver {
     return 0;
   }
 
-  solve(): Solution {
+  solve() : Solution {
+
+    this.state.step = 0;
+    let boostersNum = 1;
+
+    while(true) {
+
+      for(let workerId = 0; workerId < boostersNum; workerId++) {
+        let worker = this.state.workers[workerId];
+        this.solution.setWorkerId(workerId);
+
+        // do we need to apply booster?
+        if(this.state.getAvailableInventoryBoosters('B', workerId) > 0) {
+          this.state.spendInventoryBooster('B', workerId);
+          let c = this.state.workers[workerId].extendManipulators();
+          this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+          continue;
+        }
+        else if(this.state.getAvailableInventoryBoosters('C', workerId) > 0
+            && this.state.checkBooster(worker.pos.x, worker.pos.y, 'X')) {
+
+          this.state.spendInventoryBooster('C', workerId);
+          this.state.workers.push(new Rover(worker.pos.getCopy(), 1, 1));
+          this.solution.activateCloning();
+          this.solution.addWorker();
+          continue;
+        }
+
+        // find out target
+        if(worker.path && !worker.path.length) {
+
+          let seekingBooster = !this.state.spawnsPresent ? 0
+              : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
+              : (this.state.getRemainingCloningNum() ? 'C'
+                      : this.state.getRemainingBoostersNum() ? '*'
+                          : ''));
+
+          //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
+
+          // ban other targets
+          let banTargets = [];
+          for(let i = 0; i < this.state.workers.length; i++)
+            if(i !== workerId && this.state.workers[i].target)
+              banTargets.push(this.state.workers[i].target);
+
+          let path = findPath(this.state, worker, banTargets, {seekingBooster : seekingBooster});
+          if (path === undefined) {
+            if (this.state.m.getFreeNum() === 0) {
+              return this.solution;
+            }
+          }
+
+          worker.path = path;
+          if(worker.path)
+            worker.target = path[path.length - 1];
+          else
+            worker.target = 0;
+        }
+
+        // act on our current path
+        if(worker.path) {
+          let curPos = worker.pos;
+          //console.log(worker.pathStep);
+          //console.log(worker.path);
+          let nextPos = worker.path[worker.pathStep];
+
+          let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, worker.rotation);
+          if (turnType !== 0) {
+            if (turnType === 1) { // CW
+              this.solution.turnManipulatorsClockwise();
+              worker.rotCW();
+            } else if (turnType === 2) { // CCW
+              this.solution.turnManipulatorsCounterclockwise();
+              worker.rotCCW();
+            }
+
+            // fake move to apply changes
+            this.state.moveWorker(workerId, curPos);
+          } else {
+
+            // do actual move
+              //console.log("moving");
+              //console.log(worker.pos);
+            this.solution.move(worker.pos, nextPos);
+            this.state.moveWorker(workerId, nextPos);
+
+              //console.log("postmoving");
+
+            worker.pathStep++;
+            if (worker.pathStep >= worker.path.length) {
+              worker.path = [];
+              worker.pathStep = 0;
+            }
+          }
+        }
+      }
+
+      boostersNum = this.state.workers.length;
+      this.state.step++;
+    }
+
+  }
+
+  solveOld(): Solution {
     let drillTurns = 0;
     let drilling = false;
 

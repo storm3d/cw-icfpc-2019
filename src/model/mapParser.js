@@ -76,6 +76,9 @@ export default class MapParser {
         //console.log(type + " " + x + " " + y);
         this.state.boosters.push(new Booster(x, y, type));
 
+        if(type === 'X')
+            this.state.spawnsPresent = true;
+
         // bookkeeping
         //this.state.startingBoosters.push(new Booster(x, y, type));
       });

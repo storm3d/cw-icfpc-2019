@@ -19,7 +19,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     let extensions = solver.setCoins(coins);
     let solution = solver.solve();
 
-    totalSteps += solution.getScore();
+    totalSteps += solver.state.step;
 
     /*
     solver.state.startingBoosters.forEach(b => {
@@ -38,8 +38,8 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
 
 if (process.send === undefined) {
 
-    let mapsFrom = 155;
-    let mapsTo = 155;
+    let mapsFrom = 221;
+    let mapsTo = 221;
     for(let i = mapsFrom; i <= mapsTo; i++) {
         exec((i + "").padStart(3, "0"), () => 0, 0);
 
