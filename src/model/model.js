@@ -407,74 +407,115 @@ export class Rover {
 
 export class Booster {
   pos : Coord;
-  type : String;
+  type : string;
 
-  constructor(x: number, y: number, type: String) {
+  constructor(x: number, y: number, type: string) {
     this.pos = new Coord(x, y);
     this.type = type;
   }
 }
 
+export class InventoryBooster {
+  type : string;
+  stepAcquired : number;
+  acquiredByWorkerId : number;
+
+  constructor(type : string, stepAcquired : number, acquiredByWorkerId : number) {
+    this.type = type;
+    this.stepAcquired = stepAcquired;
+    this.acquiredByWorkerId = acquiredByWorkerId;
+  }
+}
+
 export class State {
+
+  // map
   m : Matrix;
   boosters : Array<Booster>;
-  worker : Rover;
-  extensions : number;
-  fasts : Number;
-  drills : Number;
-  teleports : Number;
+
+  // state
+  step : number;
+  workers : Array<Rover>;
+  inventoryBoosters : Array<InventoryBooster>;
 
   constructor(w: number, h: number, m: Matrix = undefined) {
     this.m = m ? m : new Matrix(w, h);
     this.boosters = [];
-    this.startingBoosters = [];
-    this.worker = new Rover(new Coord(-1, -1), 1, 1);
-    this.extensions = 0;
-    this.fasts = 0;
-    this.drills = 0;
-    this.teleports = 0;
+
+    this.step = 0;
+    this.workers = [];
+    this.workers[0] = new Rover(new Coord(-1, -1), 1, 1);
+    this.inventoryBoosters = [];
   }
 
   getCopy() {
     let copy = new State(this.m.w, this.m.h, this.m.getCopy());
     copy.boosters = this.boosters.slice(0); // shallow copy
-    copy.startingBoosters = this.startingBoosters; // copy ref
-    copy.worker = this.worker.getCopy(); // deep copy
-    copy.extensions = this.extensions;
-    copy.fasts = this.fasts;
-    copy.drills = this.drills;
-    copy.teleports = this.teleports;
+    copy.step = this.step;
+    copy.workers = this.workers.slice(0);
+    copy.inventoryBoosters = this.inventoryBoosters.slice(0);
     return copy;
   }
 
-  moveWorker(newPos : Coord) {
-    this.worker.pos = newPos.getCopy();
+  getAvailableInventoryBoosters(type : string, workerId : number) : number {
+    let num = 0;
+    //console.log(this.step);
 
-    let wx = this.worker.pos.x;
-    let wy = this.worker.pos.y;
+    for(let i = 0; i < this.inventoryBoosters.length; i++) {
+      let ib = this.inventoryBoosters[i];
+
+      //console.log(ib);
+
+      if(ib.type === type && ((ib.acquiredByWorkerId <= workerId && this.step > ib.stepAcquired)
+            || (ib.acquiredByWorkerId > workerId && this.step > ib.stepAcquired + 1))) {
+
+        //console.log("found!");
+          num++;
+        }
+      }
+
+    return num;
+  }
+
+  spendInventoryBooster(type : string, workerId : number) {
+    for(let i = 0; i < this.inventoryBoosters.length; i++) {
+      let ib = this.inventoryBoosters[i];
+
+      if(ib.type === type && ((ib.acquiredByWorkerId <= workerId && this.step > ib.stepAcquired)
+          || (ib.acquiredByWorkerId > workerId && this.step > ib.stepAcquired + 1))) {
+        this.inventoryBoosters.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  moveWorker(id : number, newPos : Coord) {
+
+    let worker = this.workers[id];
+    worker.pos = newPos.getCopy();
+
+    let wx = worker.pos.x;
+    let wy = worker.pos.y;
     this.m.wrap(wx, wy);
-    this.worker.getManipulators().forEach(m => {
-      if (!this.m.isCrossObstacle(this.worker.pos, new Coord(wx + m.x, wy + m.y)))
+    worker.getManipulators().forEach(m => {
+      if (!this.m.isCrossObstacle(worker.pos, new Coord(wx + m.x, wy + m.y)))
         this.m.wrap(wx + m.x, wy + m.y)
     });
 
+    // acquire boosters
     for(let i = this.boosters.length - 1; i >= 0; i--) {
-      if(this.boosters[i].pos.isEqual(this.worker.pos)) {
-        if(this.boosters[i].type === "B")
-          this.extensions++;
-        else if(this.boosters[i].type === "F")
-          this.fasts++;
-        else if(this.boosters[i].type === "L")
-          this.drills++;
-        else if(this.boosters[i].type === "R")
-          this.teleports++;
+      if(this.boosters[i].pos.isEqual(worker.pos)) {
+        let acuiredBooster = new InventoryBooster(this.boosters[i].type, this.step, id);
+        this.inventoryBoosters.push(acuiredBooster);
+
         if(this.boosters[i].type !== "X")
           this.boosters.splice(i,1);
       }
     }
   }
 
-  isBoosterUseful(type : string) : boolean {
+  static isBoosterUseful(type : string) : boolean {
     return type === "B" || type === "L" || type === "R";
   }
 
@@ -484,7 +525,7 @@ export class State {
       let booster = this.boosters[i];
       if (booster.pos.isEqualXY(x, y)) {
         //if (this.boosters[i].type !== "X") {
-        if (this.isBoosterUseful(booster.type)) {
+        if (State.isBoosterUseful(booster.type)) {
           //console.log("booster!")
           return true;
         }
@@ -496,25 +537,25 @@ export class State {
   getRemainingBoostersNum() : number {
     let num = 0;
     for(let i = 0; i < this.boosters.length; i++) {
-      if (this.isBoosterUseful(this.boosters[i].type))
+      if (State.isBoosterUseful(this.boosters[i].type))
         num++;
     }
     return num;
   }
 
-  dump(drawManipulators = false) {
+  dump(/*drawManipulators = false*/) {
     let str = "";
 
-    let mans = this.worker.getManipulators().map(m => m.getAdded(this.worker.pos));
+    //let mans = this.worker.getManipulators().map(m => m.getAdded(this.worker.pos));
 
     for (let j = this.m.h - 1; j >= 0; j--) {
       str += "| ";
       let prevMan = false;
       for (let i = 0; i < this.m.w; i++) {
-        let currMan = mans.find(m => m.isEqual(new Coord(i, j)));
+        //let currMan = mans.find(m => m.isEqual(new Coord(i, j)));
 
-        if (drawManipulators && (currMan || prevMan))
-          str = str.substring(0, str.length - 1) + 'I';
+        //if (drawManipulators && (currMan || prevMan))
+         // str = str.substring(0, str.length - 1) + 'I';
 
         let c = this.m.get(i, j);
         let char = ".";
@@ -526,7 +567,8 @@ export class State {
         else if (c === WRAPPED)
           char = "*";
 
-        if(this.worker.pos.x === i && this.worker.pos.y === j)
+        for(let k = 0; k < this.workers.length; k++)
+          if(this.workers[k].pos.x === i && this.workers[k].pos.y === j)
           char = "W";
 
         for(let k = 0; k < this.boosters.length; k++)
@@ -534,8 +576,9 @@ export class State {
             char = this.boosters[k].type;
 
         str += char;
-        str += drawManipulators && currMan ? 'I' : ' ';
-        prevMan = currMan;
+        str += ' ';
+        //str += drawManipulators && currMan ? 'I' : ' ';
+        //prevMan = currMan;
       }
       str += "|\n";
     }
@@ -583,7 +626,7 @@ export const parseState = (layer: string) : State => {
       s.m.set(i, h - j - 1, cols[i] === "#" ? OBSTACLE : cols[i] === "*" ? WRAPPED : FREE);
 
       if(cols[i] === "W")
-        s.moveWorker(new Coord(i, h - j - 1));
+        s.moveWorker(0, new Coord(i, h - j - 1));
 
       if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X" || cols[i] === "R") {
         s.boosters.push(new Booster(i, h - j - 1, cols[i]));

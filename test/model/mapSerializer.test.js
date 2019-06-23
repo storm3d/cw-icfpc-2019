@@ -15,7 +15,7 @@ describe('mapSerializer test', () => {
     ].join('\n');
     const state = new MapParser('', path).getState();
     const mapDump = state.dump();
-    const mapSerializer = new MapSerializer(state.m, state.worker);
+    const mapSerializer = new MapSerializer(state.m, state.workers[0]);
     const serializedPath = mapSerializer.dump();
 
     assert.strictEqual(serializedPath, path);
@@ -24,7 +24,7 @@ describe('mapSerializer test', () => {
   test('Selialized map path should be equal to input `prob-001.desc`', () => {
     const state = new MapParser('./problems/prob-001.desc').getState();
     const mapDump = state.dump();
-    const mapSerializer = new MapSerializer(state.m, state.worker);
+    const mapSerializer = new MapSerializer(state.m, state.workers[0]);
     const serializedPath = mapSerializer.dump();
 
     assert.strictEqual(serializedPath, '(0,0),(6,0),(6,1),(8,1),(8,2),(6,2),(6,3),(0,3)#(0,0)##');

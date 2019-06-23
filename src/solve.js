@@ -37,6 +37,8 @@ export function getWorkerTurnType(m: Matrix, curPos: Coord, nextPos: Coord, rota
 
 export function findPath(s: State, worker : Rover, options: Object) {
 
+  let source = worker.pos.getCopy();
+
   let isDrilling = options.isDrilling || false;
   let fastTime = options.fastTime || -1;
 
@@ -44,7 +46,6 @@ export function findPath(s: State, worker : Rover, options: Object) {
   let isSeekingBoosters = s.getRemainingBoostersNum() > 0;
   let searchLen = isSeekingBoosters ? maxSearchLen : minSearchLen;
 
-  let source = worker.pos.getCopy();
   let wavestep = new WaveMatrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
   wavestep.set(source.x, source.y, 1);
@@ -225,6 +226,8 @@ export default class Solver {
 
     let hasActiveTeleport: Array<Object> = [];
     let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
+    let workerId = 0;
+
     let isNear = (a: Coord, b: Coord, d: number) => {
       let diff = a.getDiff(b);
       return (Math.abs(diff.x) + Math.abs(diff.y)) < d;
@@ -238,8 +241,8 @@ export default class Solver {
       if (drillTurns > 0) {
           drillTurns--;
           // continue if drilling
-          if (drillTurns === 0 && drilling && this.state.drills > 0){
-            this.state.drills--;
+          if (drillTurns === 0 && drilling && this.state.getAvailableInventoryBoosters('L', workerId) > 0){
+            this.state.spendInventoryBooster('L', workerId);
             this.solution.startUsingDrill();
             drillTurns = DRILL_TIME;
           }
@@ -248,10 +251,11 @@ export default class Solver {
       if (wheelsTurns > 0) {
         wheelsTurns--;
       }
+      this.state.step++;
     };
 
     while(true) {
-      let path = findPath(this.state, this.state.worker, {fastTime: wheelsTurns});
+      let path = findPath(this.state, this.state.workers[workerId], {fastTime: wheelsTurns});
       if (path === undefined) {
         if (this.state.m.getFreeNum() > 0) {
           throw "WUT ???";
@@ -264,15 +268,13 @@ export default class Solver {
       hasActiveTeleport.forEach(teleportObj => {
         if (path.length > (teleportObj.path.length + 5)) {
           // get path from teleport for current worker configuration
-          let workerT = this.state.worker.getCopy();
-          workerT.pos = teleportObj.pos;
-          teleportObj.path = findPath(this.state, workerT, {fastTime: wheelsTurns - 1});
+          teleportObj.path = findPath(this.state, this.state.workers[workerId], {fastTime: wheelsTurns - 1});
 
           // check if it is better than the best
           if (bestTeleport.len > teleportObj.path.length) {
             // check if it is better than existing
             let pathIsBetter = (teleportObj.path.length + 25 < path.length);
-            let isWorkerNear = isNear(teleportObj.pos, this.state.worker.pos, 10);
+            let isWorkerNear = isNear(teleportObj.pos, this.state.workers[workerId].pos, 10);
 
             if (pathIsBetter && !isWorkerNear) {
               bestTeleport = {
@@ -289,25 +291,27 @@ export default class Solver {
         this.state.moveWorker(bestTeleport.pos);
         stepActiveBoosters();
         //
-        path = findPath(this.state, this.state.worker, {fastTime: wheelsTurns});
+        path = findPath(this.state, this.state.workers[workerId], {fastTime: wheelsTurns});
       }
 
       // greedy teleports :
       //if (false) {
-      if (!drilling && (this.state.teleports > 0) && matrixCenter.x > 20 && matrixCenter.y > 20) {
+      if (!drilling && (this.state.getAvailableInventoryBoosters('R', workerId) > 0)
+          && matrixCenter.x > 20 && matrixCenter.y > 20) {
         // plant teleport near center if we have only one
-        let plantTeleportHere = !hasActiveTeleport && isNearCenter(this.state.worker.pos);
+        let plantTeleportHere = !hasActiveTeleport && isNearCenter(this.state.workers[workerId].pos)
+          ;
         // or if we have spare - then somewhere far apart from existing
         let DEBUG_PLANT_MORE_THAN_ONE = false; // TODO: remove
         if (DEBUG_PLANT_MORE_THAN_ONE && !plantTeleportHere && (this.state.teleports > 1)) {
-          let teleportsNear = hasActiveTeleport.filter(t => isNear(t.pos, this.state.worker.pos, 20));
+          let teleportsNear = hasActiveTeleport.filter(t => isNear(t.pos, this.state.workers[workerId].pos, 20));
           plantTeleportHere = teleportsNear.length == 0;
         }
         if (plantTeleportHere){
-          this.state.teleports--;
+          this.state.spendInventoryBooster('R', workerId);
           this.solution.plantTeleport();
           let newTeleport = {
-            pos: this.state.worker.pos.getCopy(),
+            pos: this.state.workers[workerId].pos.getCopy(),
             path: path,
             };
           hasActiveTeleport.push(newTeleport);
@@ -318,17 +322,18 @@ export default class Solver {
 
       // dumb greedy drills
       //if (false) {
-      if (this.state.drills > 0 || drillTurns > 0) {
-          let path1 = findPath(this.state, this.state.worker, {isDrilling: true, fastTime: wheelsTurns - 1});
+      if (this.state.getAvailableInventoryBoosters('L', workerId) > 0 || drillTurns > 0) {
+          let path1 = findPath(this.state, this.state.workers[workerId], {isDrilling: true, fastTime: wheelsTurns - 1});
           // consider path if you actually can do it
-          let considerDrilling = (path1.length < (drillTurns + this.state.drills * DRILL_TIME));
+          let considerDrilling = (path1.length < (drillTurns
+              + this.state.getAvailableInventoryBoosters('L', workerId) * DRILL_TIME));
           //
           drilling = considerDrilling && ((path1.length + 20 < path.length) );
           if (drilling) {
               //console.log(`!!!!!!!!!!!!${path.length}, ${path1.length}`);
               path = path1;
-              if (drillTurns == 0) {
-                  this.state.drills--;
+              if (drillTurns === 0) {
+                  this.state.spendInventoryBooster('L', workerId);
                   this.solution.startUsingDrill();
                   drillTurns = DRILL_TIME;
               }
@@ -341,33 +346,33 @@ export default class Solver {
         if (path[i] === null){
           continue;
         }
-        let curPos = this.state.worker.pos;
+        let curPos = this.state.workers[workerId].pos;
         let nextPos = path[i];
 
-        let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, this.state.worker.rotation);
+        let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, this.state.workers[workerId].rotation);
         if (turnType !== 0) {
           if (turnType === 1) { // CW
             this.solution.turnManipulatorsClockwise();
-            this.state.worker.rotCW();
+            this.state.workers[workerId].rotCW();
           } else if (turnType === 2) { // CCW
             this.solution.turnManipulatorsCounterclockwise();
-            this.state.worker.rotCCW();
+            this.state.workers[workerId].rotCCW();
           }
           // fake move to apply changes
-          this.state.moveWorker(curPos);
+          this.state.moveWorker(workerId, curPos);
           stepActiveBoosters();
         }
         // do actual move
-        this.solution.move(this.state.worker.pos, nextPos);
-        this.state.moveWorker(nextPos);
+        this.solution.move(this.state.workers[workerId].pos, nextPos);
+        this.state.moveWorker(workerId, nextPos);
         // if drill is ON
         stepActiveBoosters();
         // console.log(this.state.dump(true));
       }
 
-      while (this.state.extensions > 0) {
-        this.state.extensions--;
-        let c = this.state.worker.extendManipulators();
+      while (this.state.getAvailableInventoryBoosters('B', 0) > 0) {
+            this.state.spendInventoryBooster('B', workerId);
+        let c = this.state.workers[workerId].extendManipulators();
         this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
         stepActiveBoosters();
       }

@@ -41,7 +41,7 @@ export default class MapParser {
 
     //console.log(obstaclesArr)
 
-    this.state = new State(obj.maxX, obj.maxY)
+    this.state = new State(obj.maxX, obj.maxY);
 
     for (let y = 0; y <= obj.maxY; y++) {
       let paint = OBSTACLE;
@@ -77,7 +77,7 @@ export default class MapParser {
         this.state.boosters.push(new Booster(x, y, type));
 
         // bookkeeping
-        this.state.startingBoosters.push(new Booster(x, y, type));
+        //this.state.startingBoosters.push(new Booster(x, y, type));
       });
     }
 
@@ -89,7 +89,7 @@ export default class MapParser {
     const x = parseInt(t[0].slice(1), 10)
     const y = parseInt(t[1].slice(0, -1), 10)
 
-    this.state.moveWorker(new Coord(x, y));
+    this.state.moveWorker(0, new Coord(x, y));
 
   }
 
