@@ -1,18 +1,23 @@
 // @flow
 import fs from 'fs';
 import {Solution} from "../model/solution";
+import {MANIPULATOR_PRICE} from "../constants/boosters";
 
 export class Writer {
     solution: Solution;
+    startExtensions: number;
+    buyfile: string;
 
-    constructor(solution: Solution) {
+    constructor(solution: Solution, startExtensions: number) {
         this.solution = solution;
+        this.startExtensions = startExtensions;
     }
 
-    write(folder: string, model: string, customPath: string|null = null, omitScore: boolean = false): number {
+    write(folder: string, model: string, customPath: string | null = null, omitScore: boolean = false): number {
         let filename = customPath || `./${folder}/prob-${model}.sol`;
-
         let scorefile = `./scores/prob-${model}.score`;
+
+        this.buyfile = `./${folder}/prob-${model}.buy`;
 
         if (!fs.existsSync(scorefile)) {
             this.writeScore(scorefile);
@@ -38,7 +43,7 @@ export class Writer {
         return this.solution.getString().length;
     }
 
-    writeSolve(filename: string, model:string): number {
+    writeSolve(filename: string, model: string): number {
         // eslint-disable-next-line no-console
         console.log(`Writing file ${filename}`);
         fs.writeFileSync(filename, this.solution.getString(), 'utf8');
@@ -46,6 +51,8 @@ export class Writer {
         fs.appendFileSync('./current_result.txt', scoreStr)
         // eslint-disable-next-line no-console
         console.log(`The file ${filename} has been saved!`);
+
+        this.writeExtensions();
 
         return this.solution.getString().length;
     }
@@ -56,5 +63,19 @@ export class Writer {
         console.log(`The score file ${filename} has been updated!`);
 
         return this.solution.getScore();
+    }
+
+    writeExtensions() {
+        if (this.startExtensions > 0) {
+            console.log(`Writing file ${this.buyfile}`);
+            let extensions = '';
+            while (this.startExtensions > 0) {
+                extensions += 'B';
+                this.startExtensions = this.startExtensions - MANIPULATOR_PRICE;
+            }
+            console.log(`Start extensions: ${extensions}`);
+            fs.writeFileSync(this.buyfile, extensions);
+            console.log(`The file ${this.buyfile} has been saved!`);
+        }
     }
 }

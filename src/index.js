@@ -13,11 +13,11 @@ let boostersStats = {};
 const exec = (model: string, callback: Function, coins: number = 0) => {
     const reader = new Reader('problems',model);
     const s = reader.read();
+
     const solver = new Solver(s);
-
     solver.setCoins(coins);
-
-    const solution = solver.solve();
+    let startExtensions = solver.state.extensions;
+    let solution = solver.solve();
 
     totalSteps += solution.getScore();
 
@@ -30,8 +30,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     });
      */
 
-    const writer = new Writer(solution);
-
+    let writer = new Writer(solution, startExtensions);
     writer.write('solutions', model);
 
     callback();
