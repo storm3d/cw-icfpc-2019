@@ -362,7 +362,7 @@ export default class Solver {
         // console.log(this.state.dump(true));
       }
 
-      if (this.state.extensions > 0) {
+      while (this.state.extensions > 0) {
         this.state.extensions--;
         let c = this.state.worker.extendManipulators();
         this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);

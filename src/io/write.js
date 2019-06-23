@@ -1,7 +1,7 @@
 // @flow
 import fs from 'fs';
 import {Solution} from "../model/solution";
-import {MANIPULATOR_PRICE} from "../constants/boosters";
+import {MANIPULATOR_LETTER, MANIPULATOR_PRICE} from "../constants/boosters";
 
 export class Writer {
     solution: Solution;
@@ -67,16 +67,16 @@ export class Writer {
 
     writeExtensions() {
         if (this.startExtensions > 0) {
-            console.log(`Writing file ${this.buyfile}`);
+            // console.log(`Writing file ${this.buyfile}`);
             let extensions = '';
-            console.log(`Count of extensions: ${this.startExtensions}`);
+            // console.log(`Count of extensions: ${this.startExtensions}`);
             while (this.startExtensions > 0) {
-                extensions += 'B';
+                extensions += MANIPULATOR_LETTER;
                 this.startExtensions = this.startExtensions - 1;
             }
-            console.log(`Start extensions: ${extensions}`);
+            console.log(`Buying extensions: ${extensions}`);
             fs.writeFileSync(this.buyfile, extensions);
-            console.log(`The file ${this.buyfile} has been saved!`);
+            // console.log(`The file ${this.buyfile} has been saved!`);
         }
     }
 }
