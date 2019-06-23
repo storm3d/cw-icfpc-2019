@@ -448,7 +448,7 @@ export class Booster {
     this.pos = new Coord(x, y);
     this.type = type;
 
-    this.lockedBy = 0;
+    this.lockedBy = -1;
   }
 }
 
@@ -579,7 +579,7 @@ export class State {
     return type === "C" || type === "B" /*|| type === "L" || type === "R" || type === "F"*/;
   }
 
-  checkBooster(x : number, y : number, type : string) {
+  checkBooster(x : number, y : number, type : string, filterLocked = false) {
     //console.log("cb " + x + ", "+ y);
     for(let i = 0; i < this.boosters.length; i++) {
       let booster = this.boosters[i];
@@ -587,17 +587,18 @@ export class State {
         //if (this.boosters[i].type !== "X") {
         if ((type === '*' && State.isBoosterUseful(booster.type)) || booster.type === type) {
           //console.log("booster!")
-          return booster;
+            if(!filterLocked || (filterLocked && booster.lockedBy === -1))
+                return booster;
         }
       }
     }
       return false;
   }
 
-  getRemainingBoostersNum() : number {
+  getRemainingUnlockedBoostersNum() : number {
     let num = 0;
     for(let i = 0; i < this.boosters.length; i++) {
-      if (State.isBoosterUseful(this.boosters[i].type))
+      if (this.boosters[i].lockedBy === -1 && State.isBoosterUseful(this.boosters[i].type))
         num++;
     }
     return num;

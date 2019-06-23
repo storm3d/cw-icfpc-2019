@@ -1,7 +1,7 @@
 // @flow
 import fs from 'fs';
 import {Solution} from "../model/solution";
-import {MANIPULATOR_LETTER, MANIPULATOR_PRICE} from "../constants/boosters";
+import {CLONING_LETTER, MANIPULATOR_LETTER, MANIPULATOR_PRICE} from "../constants/boosters";
 
 export class Writer {
     solution: Solution;
@@ -71,7 +71,7 @@ export class Writer {
             let extensions = '';
             // console.log(`Count of extensions: ${this.startExtensions}`);
             while (this.startExtensions > 0) {
-                extensions += MANIPULATOR_LETTER;
+                extensions += CLONING_LETTER;
                 this.startExtensions = this.startExtensions - 1;
             }
             console.log(`Buying extensions: ${extensions}`);

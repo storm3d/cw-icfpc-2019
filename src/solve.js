@@ -3,7 +3,7 @@
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
 import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME, InventoryBooster} from "./model/model";
-import { MANIPULATOR_PRICE } from './constants/boosters';
+import { MANIPULATOR_PRICE, CLONING_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
 const minSearchLen = 3;
@@ -99,7 +99,7 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
       return false;
     }
 
-    if (seekingBooster && s.checkBooster(nx, ny, seekingBooster)) {
+    if (seekingBooster && s.checkBooster(nx, ny, seekingBooster, true)) {
       nearestFree = new Coord(nx, ny);
       let nextRotation = getNextRotation(nearestFree, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
       wavestep.set(nx, ny, curLen + 1, cIndex, nextRotation);
@@ -287,7 +287,7 @@ export default class Solver {
     let seekingBooster = !this.state.spawnsPresent ? 0
         : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
         : (this.state.getRemainingCloningNum() ? 'C'
-                : this.state.getRemainingBoostersNum() ? '*'
+                : this.state.getRemainingUnlockedBoostersNum() ? '*'
                     : ''));
 
     if (seekingBooster === 'X')
@@ -310,6 +310,13 @@ export default class Solver {
       worker.target = path[path.length - 1];
     else
       worker.target = 0;
+
+    if(worker.target && seekingBooster === '*') {
+      let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
+      if(b.lockedBy === -1 && b.type !== 'X')
+        b.lockedBy = workerId;
+    }
+
     return true;
   }
 
@@ -622,8 +629,8 @@ export default class Solver {
   /** @private */
   buyBoosters(): number {
     let counter = 0;
-    while (this.coins >= MANIPULATOR_PRICE) {
-      this.buyManipulator();
+    while (this.coins >= CLONING_PRICE) {
+      this.buyClone();
       counter++;
     }
 
@@ -636,6 +643,15 @@ export default class Solver {
     this.coins = this.coins - MANIPULATOR_PRICE;
 
     let acuiredBooster = new InventoryBooster('B', -1, 0);
+    this.state.inventoryBoosters.push(acuiredBooster);
+  }
+
+  /** @private */
+  buyClone() {
+    console.log('buy clone');
+    this.coins = this.coins - CLONING_PRICE;
+
+    let acuiredBooster = new InventoryBooster('C', -1, 0);
     this.state.inventoryBoosters.push(acuiredBooster);
   }
 }
