@@ -110,7 +110,7 @@ export default class MapSerializer {
 
     paths.splice(currPathIndex, 1);
 
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000000000; i++) {
       const nextPathIndex = this.findNextPathIndex(currPath, paths);
 
       if (nextPathIndex === null) {
