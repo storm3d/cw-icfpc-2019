@@ -27,22 +27,27 @@ describe("solver", () => {
         | W B R |`;
     let s = parseState(layout);
     expect(s.m.getFreeNum()).toEqual(8);
+    expect(s.boosters.length).toEqual(8);
 
     let solver = new Solver(s);
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(22);
+    //console.log(solution.getString());
 
+    expect(solution.getString().length).toEqual(24); // DB(1,2)DAAQWWWEDDB(1,-2)
+
+    //console.log(solver.state.dump());
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
 | * * * |
 | * * * |
 `);
-    expect(solver.state.extensions).toEqual(0);
-    expect(solver.state.fasts).toEqual(1);
-    expect(solver.state.drills).toEqual(1);
-    expect(solver.state.teleports).toEqual(2);
+    //solver.state.step+=10;
+    expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
+    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(2);
+    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(2);
 
   })
 
@@ -66,10 +71,10 @@ describe("solver", () => {
     expect(solver.state.m.getFreeNum()).toEqual(0);
     expect(solver.solution.score).toEqual(33);
     expect(solution.getString().length).toEqual(39);
-    expect(solver.state.extensions).toEqual(0);
-    expect(solver.state.fasts).toEqual(0);
-    expect(solver.state.drills).toEqual(0);
-    expect(solver.state.teleports).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(0);
+    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(0);
     //console.log(solution);
 
     //console.log(solution.getString());

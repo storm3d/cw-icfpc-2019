@@ -200,9 +200,8 @@ export class Puzzle {
         });
 
         let initialPoint = getFreePoint();
-        state.worker.pos.x = initialPoint[0];
-        state.worker.pos.y = initialPoint[1];
-
+        state.workers[0].pos.x = initialPoint[0];
+        state.workers[0].pos.y = initialPoint[1];
 
         return state;
     }

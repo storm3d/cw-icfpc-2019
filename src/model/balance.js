@@ -9,8 +9,16 @@ export class Balance {
         this.loadBalance();
     }
 
-    static execBalance(cmd): string {
-        return execSync(cmd).toString().replace('\n', '');
+    static execBalance(cmd: string): string {
+        try {
+            return execSync(cmd).toString().replace('\n', '');
+        } catch (e) {
+            console.error('--------------------------------------ERROR--------------------------------------');
+            console.error(e.message);
+            console.error('--------------------------------------ERROR--------------------------------------');
+
+            return '';
+        }
     }
 
     loadBalance(): number {

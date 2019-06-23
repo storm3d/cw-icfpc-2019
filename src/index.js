@@ -42,9 +42,9 @@ if (process.send === undefined) {
     let mapsFrom = 155;
     let mapsTo = 155;
     for(let i = mapsFrom; i <= mapsTo; i++) {
-        exec((i + "").padStart(3, "0"), () => 0);
+        exec((i + "").padStart(3, "0"), () => 0, 0);
 
-        console.log("Total score: " + totalSteps);
+        console.log(`Total score: ${totalSteps}`);
 
         /*
         for (let k in boostersStats){
