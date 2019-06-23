@@ -27,8 +27,9 @@ const getFormattedDate = () => new Date().toLocaleString();
 const exec = (checkIntervalMinutes: number) => {
     let lastBlock = 0;
 
-    const newLastBlock = getLastBlockNumber();
     const fn = () => {
+        const newLastBlock = getLastBlockNumber();
+
         console.log(getFormattedDate(), 'Check...');
 
         if (newLastBlock === lastBlock) {
