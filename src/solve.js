@@ -229,6 +229,7 @@ export default class Solver {
     let wheelsTurns = 0;
     //let wheelsAttached = false;
 
+    let hasTeleportInCenter = false;
     let hasActiveTeleport: Array<Object> = [];
     let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
     let workerId = 0;
@@ -241,6 +242,12 @@ export default class Solver {
       return isNear(c, matrixCenter, 20);
     };
 
+    let stepActiveWheels = () => {
+      // if Fast is ON
+      if (wheelsTurns > 0) {
+        wheelsTurns--;
+      }
+    };
     let stepActiveBoosters = () => {
       // if drill is ON
       if (drillTurns > 0) {
@@ -250,12 +257,10 @@ export default class Solver {
             this.state.spendInventoryBooster('L', workerId);
             this.solution.startUsingDrill();
             drillTurns = DRILL_TIME;
+            stepActiveWheels();
           }
       }
-      // if Fast is ON
-      if (wheelsTurns > 0) {
-        wheelsTurns--;
-      }
+      stepActiveWheels();
       this.state.step++;
     };
 
@@ -320,23 +325,31 @@ export default class Solver {
       }
 
       // greedy teleports :
-      //if (false) {
-      if (!drilling && (this.state.getAvailableInventoryBoosters('R', workerId) > 0)
+      let teleportsInInventory = this.state.getAvailableInventoryBoosters('R', workerId);
+      if (!drilling && (teleportsInInventory > 0)
           && matrixCenter.x > 20 && matrixCenter.y > 20) {
+        let workerPos = this.state.workers[workerId].pos;
         // plant teleport near center if we have only one
-        let plantTeleportHere = !hasActiveTeleport && isNearCenter(this.state.workers[workerId].pos)
-          ;
+        let plantTeleportHere = !hasTeleportInCenter && isNearCenter(workerPos);
+
         // or if we have spare - then somewhere far apart from existing
-        let DEBUG_PLANT_MORE_THAN_ONE = false; // TODO: remove
-        if (DEBUG_PLANT_MORE_THAN_ONE && !plantTeleportHere && (this.state.teleports > 1)) {
-          let teleportsNear = hasActiveTeleport.filter(t => isNear(t.pos, this.state.workers[workerId].pos, 20));
-          plantTeleportHere = teleportsNear.length == 0;
+        let DEBUG_PLANT_MORE_THAN_ONE = true; // TODO: remove
+        if (DEBUG_PLANT_MORE_THAN_ONE && !plantTeleportHere) {
+          // if there is one in center or we have more than one in inventory
+          plantTeleportHere = hasTeleportInCenter || teleportsInInventory > 0;
+          if (plantTeleportHere) {
+            // check that it is not too close to another one
+            let teleportsNear = hasActiveTeleport.filter(t => isNear(t.pos, workerPos, 20));
+            plantTeleportHere = teleportsNear.length === 0;
+          }
         }
         if (plantTeleportHere){
+          if (isNearCenter(workerPos))
+              hasTeleportInCenter = true;
           this.state.spendInventoryBooster('R', workerId);
           this.solution.plantTeleport();
           let newTeleport = {
-            pos: this.state.workers[workerId].pos.getCopy(),
+            pos: workerPos.getCopy(),
             path: path,
             };
           hasActiveTeleport.push(newTeleport);
@@ -361,6 +374,7 @@ export default class Solver {
                   this.state.spendInventoryBooster('L', workerId);
                   this.solution.startUsingDrill();
                   drillTurns = DRILL_TIME;
+                  stepActiveWheels();
               }
           }
       }
@@ -368,7 +382,7 @@ export default class Solver {
 
 
       // dumb wheels
-      let ENABLE_WHEELS = false;
+      let ENABLE_WHEELS = true;
       if (ENABLE_WHEELS && wheelsTurns === 0 && this.state.getAvailableInventoryBoosters('F', workerId) > 0 && !drilling) {
         let pathF = findPath(this.state, this.state.workers[workerId], {fastTime: FAST_TIME});
         if (pathF !== undefined) {
