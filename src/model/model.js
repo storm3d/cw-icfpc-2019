@@ -89,18 +89,32 @@ export class WaveMatrix {
   h: number;
   data: Int32Array;
   prev: Int32Array;
+  rotation: Int8Array;
 
-  constructor(w: number, h: number, data = undefined, prev = undefined) {
+  constructor(w: number, h: number, data = undefined, prev = undefined, rotation = undefined) {
     this.w = w;
     this.h = h;
     this.data = data || new Int32Array(w * h);
     this.prev = prev || new Int32Array(w * h);
+    this.rotation = rotation || new Int16Array(w * h);
   }
 
-  set(x: number, y: number, val: number, prev: number = -1) {
+  set(x: number, y: number, val: number, prev: number = -1, rotation = -1) {
     let idx = x + this.w * y;
     this.data[idx] = val;
     this.prev[idx] = prev;
+    this.setPrevIndex(idx, prev, rotation);
+  }
+  setPrev(x: number, y: number, prev: number = -1, rotation = -1) {
+    this.setPrevIndex(x + this.w * y, prev, rotation);
+  }
+  setPrevIndex(index: number, prev: number, rotation) {
+    this.prev[index] = prev;
+    if(rotation === -1) {
+      this.rotation[index] = this.rotation[prev];
+    } else {
+      this.rotation[index] = rotation;
+    }
   }
 
   get(x: number, y: number): number {
@@ -362,16 +376,25 @@ export class Rover {
   }
 
   rotCW() {
-    this.rotation += 3;
-    if (this.rotation > 9)
-      this.rotation = 0;
+    this.rotation = this.getRotCW(this.rotation);
   }
 
   rotCCW() {
-    this.rotation -= 3;
-    if (this.rotation < 0)
-      this.rotation = 9;
+    this.rotation = this.getRotCCW(this.rotation);
   }
+
+  getRotCW(rotation) {
+    if (rotation >= 9)
+      return 0;
+    return rotation + 3;
+  }
+
+  getRotCCW(rotation) {
+    if (rotation <= 0)
+      return 9;
+    return rotation - 3;
+  }
+
 
   getManipulators(): Array<Coord> {
     let mans = [];
@@ -475,7 +498,7 @@ export class State {
   }
 
   isBoosterUseful(type : string) : boolean {
-    return type === "B" || type === "L" || type === "R";
+    return type === "B" || type === "L" || type === "R" || type === "F";
   }
 
   checkBooster(x : number, y : number) : boolean {

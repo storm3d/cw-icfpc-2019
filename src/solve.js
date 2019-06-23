@@ -47,7 +47,7 @@ export function findPath(s: State, worker : Rover, options: Object) {
   let source = worker.pos.getCopy();
   let wavestep = new WaveMatrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
-  wavestep.set(source.x, source.y, 1);
+  wavestep.set(source.x, source.y, 1, -1, worker.rotation);
 
   let nearestFree : Coord = 0;
   let bestPixelCost = 0;
@@ -76,25 +76,17 @@ export function findPath(s: State, worker : Rover, options: Object) {
         nxny[2],
       ];
   };
-  let getDirs2bt = (c: Coord) : Object => {
-    let nxny = getCoordNXNY(c);
-    return [
-        nxny[2],
-        nxny[3],
-        nxny[0],
-        nxny[1],
-      ];
+
+  let getNextRotation = (oldPos: Coord, newPos: Coord, rotation: number) => {
+    let turnType = getWorkerTurnType(s.m, oldPos, newPos, rotation);
+    if (turnType === 1) {
+        return worker.getRotCW(rotation);
+    } else if (turnType === 2) {
+        return worker.getRotCCW(rotation);
+    }
+    return rotation;
   };
-  /*
-  let getDirs = (c: Coord) : Object => {
-    let nxny = getCoordNXNY(c);
-    return {
-        0 : nxny[0],
-        3 : nxny[1],
-        6 : nxny[2],
-        9 : nxny[3],
-      };
-  };*/
+
 
   let tryDirection = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
     if(!s.m.isValid(nx, ny)) {
@@ -103,7 +95,8 @@ export function findPath(s: State, worker : Rover, options: Object) {
 
     if (isSeekingBoosters && s.checkBooster(nx, ny)) {
       nearestFree = new Coord(nx, ny);
-      wavestep.set(nx, ny, curLen + 1, cIndex);
+      let nextRotation = getNextRotation(nearestFree, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
+      wavestep.set(nx, ny, curLen + 1, cIndex, nextRotation);
       return true;
     }
     if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
@@ -112,23 +105,53 @@ export function findPath(s: State, worker : Rover, options: Object) {
       //let cost = 1;
 
       if(cost > bestPixelCost || nearestFree === 0) {
-
         //console.log(cost);
         nearestFree = new Coord(nx, ny);
         bestPixelCost = cost;
-        wavestep.prev[wavestep.toIndex(nx, ny)] = cIndex;
+        let nextRotation = getNextRotation(nearestFree, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
+        wavestep.setPrev(nx, ny, cIndex, nextRotation);
       }
     }
     if ((isDrilling || s.m.isPassable(nx, ny)) && wavestep.get(nx, ny) === 0) {
-      front.push(new Coord(nx, ny));
+      let newCoord = new Coord(nx, ny);
+      front.push(newCoord);
+      let nextRotation = getNextRotation(newCoord, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
       wavestep.set(nx, ny, curLen + 1, cIndex);
     }
     return false;
   };
 
+  let tryDirectionFasting = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
+    if(!s.m.isValid(nx, ny)) {
+      return false;
+    }
+    if (!(isDrilling || s.m.isPassable(nx, ny))) {
+      return false;
+    }
+    let c = wavestep.toCoord(cIndex);
+    // extrastep
+    let nx2 = nx + (nx - c.x);
+    let ny2 = ny + (ny - c.y);
+    return tryDirection(nx2, ny2, curLen, cIndex);
+  };
+
+  let tryDirections = (pos: Coord, curLen: number): boolean => {
+    let dirs = getDirs2(pos);
+    let cIndex = wavestep.toIndex(pos.x, pos.y);
+    for (let dirsKey in dirs) {
+      let nx = dirs[dirsKey].nx;
+      let ny = dirs[dirsKey].ny;
+
+      if (tryDirection(nx, ny, curLen, cIndex))
+        return true;
+    }
+    return false;
+  };
+
+  ////////////// forward wave
   while(front.length) {
-    let c = front[0];
-    let cIndex = wavestep.toIndex(c.x, c.y);
+    let c = front.shift();
+
     let curLen = wavestep.get(c.x, c.y);
 
     // exceeded the search radius - go to just a free cell
@@ -137,24 +160,8 @@ export function findPath(s: State, worker : Rover, options: Object) {
       break;
     }
 
-    front.shift();
-
-    let dirs = getDirs2(c);
-
-    let isFound = false;
-    for (let dirsKey in dirs) {
-      let nx = dirs[dirsKey].nx;
-      let ny = dirs[dirsKey].ny;
-
-      isFound = tryDirection(nx, ny, curLen, cIndex);
-      if (isFound) break;
-    }
-
-    if (isFound)
+    if (tryDirections(c, curLen))
       break;
-
-    //console.log("front");
-    //console.log(front);
   }
 
   //console.log(nearestFree);
@@ -162,32 +169,22 @@ export function findPath(s: State, worker : Rover, options: Object) {
   if(nearestFree === 0)
     return undefined;
 
+  ///////////// backtracking + filling for turns
   let path = [ nearestFree ];
   let btIndex = wavestep.toIndex(nearestFree.x, nearestFree.y);
   let prev = wavestep.prev[btIndex];
   while (prev >= 0) {
+    if (wavestep.rotation[btIndex] != wavestep.rotation[prev]) {
+      path.unshift(null); // add rotation as null
+    }
+    btIndex = prev;
     let prevC = wavestep.toCoord(prev);
     prev = wavestep.prev[prev];
     path.unshift(prevC);
   }
-
-  // try to precalc for rotations
-  let rotations = 0;
-  let workerCopy = worker.getCopy();
-  for(let i = 0; i < path.length; i++) {
-
-    let turnType = getWorkerTurnType(s.m, workerCopy.pos, path[i], workerCopy.rotation);
-    if (turnType === 1) {
-      workerCopy.rotCW();
-      rotations++;
-    } else if (turnType === 2) {
-      workerCopy.rotCW();
-      rotations++;
-    }
-    workerCopy.pos = path[i];
+  if (wavestep.rotation[btIndex] != worker.rotation) {
+      path.unshift(null); // add rotation as null
   }
-  // attach rotations as extra nulls
-  path.concat(Array.from({length: rotations}).fill(null));
 
   return path;
 }
@@ -379,19 +376,19 @@ export default class Solver {
   }
 
   solve_DFS_FreeNum(): Solution {
-      let front = new Map();
+      let DSFlist = new Map();
       let solution = new Solution();
       solution.state = this.state;
 
       let calcWeight = (s) => {return s.state.m.getFreeNum();}
       let calcNewTop = (f) => {return Array.from(f.keys()).sort()[0]; }
       let topKey = calcWeight(solution);
-      front.set(topKey, [solution]);
+      DSFlist.set(topKey, [solution]);
 
-      //console.log(calcNewTop(front), topKey);
+      //console.log(calcNewTop(DSFlist), topKey);
 
       while(topKey > 0) {
-          let top = front.get(topKey);
+          let top = DSFlist.get(topKey);
           //
           let trySolution = top.shift();
 
