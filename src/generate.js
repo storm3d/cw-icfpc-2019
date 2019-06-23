@@ -28,13 +28,13 @@ const exec = (model: string, callback: Function) => {
     let puzzle = puzzleParser.getPuzzle();
     let state = puzzle.generateState();
 
-    let mapSerializer = new MapSerializer(state.m, state.worker);
+    let mapSerializer = new MapSerializer(state.m, state.workers[0]);
     let serializedPath = mapSerializer.dump();
     let vertices = serializedPath.split('#')[0].split(",").length / 2;
     if (vertices < puzzle.vMin) {
         console.log("vertices", vertices);
         state = puzzle.addVertices(state, puzzle.vMin - vertices);
-        mapSerializer = new MapSerializer(state.m, state.worker);
+        mapSerializer = new MapSerializer(state.m, state.workers[0]);
         serializedPath = mapSerializer.dump();
         vertices = serializedPath.split('#')[0].split(",").length / 2;
         console.log("========= new vertices =====", vertices);
