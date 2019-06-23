@@ -35,7 +35,7 @@ describe("solver", () => {
     expect(solver.state.m.getFreeNum()).toEqual(0);
     //console.log(solution.getString());
 
-    expect(solution.getString().length).toEqual(24); // DB(1,2)DAAQWWWEDDB(1,-2)
+    expect(solution.getString().length).toEqual(23); // DB(1,2)DAAQWWWEDDB(1,-2)
 
     //console.log(solver.state.dump());
     expect(solver.state.dump()).toEqual(`| * * W |
@@ -47,7 +47,7 @@ describe("solver", () => {
     expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
     expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(2);
-    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(2);
+    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(1);
 
   })
 
