@@ -25,7 +25,7 @@ const exec = (model: string, callback: Function) => {
         console.log("========= new vertices =====", vertices);
     }
         serializedPath += puzzle.boostersStr.slice(0, -1);
-        fs.writeFileSync(`.//lambda-client/blocks/${model}/puzzle_sol.desc`, serializedPath, 'utf8');
+        fs.writeFileSync(`./lambda-client/blocks/${model}/puzzle_sol.desc`, serializedPath, 'utf8');
 
 
     callback();
