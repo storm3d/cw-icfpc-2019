@@ -12,9 +12,7 @@ const getLastBlockNumber = (): number => {
 
 const getFormattedDate = () => new Date().toLocaleString();
 
-const CHECK_INTERVAL_MIN = 0.5;
-
-const exec = () => {
+const exec = (checkIntervalMinutes: number) => {
     let lastBlock = 0;
 
     const newLastBlock = getLastBlockNumber();
@@ -40,15 +38,19 @@ const exec = () => {
         console.log(getFormattedDate(), '=====================================');
     };
 
-    console.log(getFormattedDate(), `Checking interval ${CHECK_INTERVAL_MIN} minutes`);
+    console.log(getFormattedDate(), `Checking interval ${checkIntervalMinutes} minutes`);
     fn();
-    setInterval(fn, CHECK_INTERVAL_MIN * 60000);
-
-    // callback();
+    setInterval(fn, checkIntervalMinutes * 60000);
 };
 
 if (process.send === undefined) {
-    exec();
+    let checkIntervalMinutes = process.argv[2] ? parseInt(process.argv[2], 10) : 0.5;
+
+    if (!checkIntervalMinutes || Number.isNaN(checkIntervalMinutes)) {
+        checkIntervalMinutes = 0.5;
+    }
+
+    exec(checkIntervalMinutes);
 }
 
 module.exports = {
