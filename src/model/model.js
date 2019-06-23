@@ -420,19 +420,31 @@ export class State {
     }
   }
 
+  isBoosterUseful(type : string) : boolean {
+    return type === "B" || type === "L" || type === "R";
+  }
+
   checkBooster(x : number, y : number) : boolean {
     //console.log("cb " + x + ", "+ y);
     for(let i = 0; i < this.boosters.length; i++) {
       if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
         //if (this.boosters[i].type !== "X") {
-        if (this.boosters[i].type === "B" || this.boosters[i].type === "L" || this.boosters[i].type === "R") {
+        if (this.isBoosterUseful(this.boosters[i].type)) {
           //console.log("booster!")
           return true;
         }
       }
     }
-
       return false;
+  }
+
+  getRemainingBoostersNum() : number {
+    let num = 0;
+    for(let i = 0; i < this.boosters.length; i++) {
+      if (this.isBoosterUseful(this.boosters[i].type))
+        num++;
+    }
+    return num;
   }
 
   dump(drawManipulators = false) {
