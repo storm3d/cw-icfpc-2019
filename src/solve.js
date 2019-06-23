@@ -365,7 +365,8 @@ export default class Solver {
 
 
       // dumb wheels
-      if (wheelsTurns === 0 && this.state.fasts > 0 && !drilling) {
+      let ENABLE_WHEELS = false;
+      if (ENABLE_WHEELS && wheelsTurns === 0 && this.state.getAvailableInventoryBoosters('F', workerId) > 0 && !drilling) {
         let pathF = findPath(this.state, this.state.workers[workerId], {fastTime: FAST_TIME});
         if (pathF !== undefined) {
           path = pathF;
