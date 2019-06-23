@@ -419,7 +419,7 @@ export class State {
   m : Matrix;
   boosters : Array<Booster>;
   worker : Rover;
-  extensions : Number;
+  extensions : number;
   fasts : Number;
   drills : Number;
   teleports : Number;
@@ -474,25 +474,32 @@ export class State {
     }
   }
 
+  isBoosterUseful(type : string) : boolean {
+    return type === "B" || type === "L" || type === "R";
+  }
+
   checkBooster(x : number, y : number) : boolean {
     //console.log("cb " + x + ", "+ y);
     for(let i = 0; i < this.boosters.length; i++) {
       let booster = this.boosters[i];
       if (booster.pos.isEqualXY(x, y)) {
         //if (this.boosters[i].type !== "X") {
-
-        if (booster.type === "B"
-         || booster.type === "L"
-         || booster.type === "R"
-         //|| booster.type === "F"
-         ) {
+        if (this.isBoosterUseful(booster.type)) {
           //console.log("booster!")
           return true;
         }
       }
     }
-
       return false;
+  }
+
+  getRemainingBoostersNum() : number {
+    let num = 0;
+    for(let i = 0; i < this.boosters.length; i++) {
+      if (this.isBoosterUseful(this.boosters[i].type))
+        num++;
+    }
+    return num;
   }
 
   dump(drawManipulators = false) {

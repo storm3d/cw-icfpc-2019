@@ -3,8 +3,10 @@
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
 import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
+import { MANIPULATOR_PRICE } from './constants/boosters';
 
-const maxSearchLen = 15;
+const maxSearchLen = 10000;
+const minSearchLen = 1;
 
 
 export function getTurnType(rotation : number, dx : number, dy : number) : number {
@@ -37,6 +39,10 @@ export function findPath(s: State, worker : Rover, options: Object) {
 
   let isDrilling = options.isDrilling || false;
   let fastTime = options.fastTime || -1;
+
+  //let workerCopy = worker.getCopy();
+  let isSeekingBoosters = s.getRemainingBoostersNum() > 0;
+  let searchLen = isSeekingBoosters ? maxSearchLen : minSearchLen;
 
   let source = worker.pos.getCopy();
   let wavestep = new WaveMatrix(s.m.w, s.m.h);
@@ -79,6 +85,7 @@ export function findPath(s: State, worker : Rover, options: Object) {
         nxny[1],
       ];
   };
+  /*
   let getDirs = (c: Coord) : Object => {
     let nxny = getCoordNXNY(c);
     return {
@@ -87,23 +94,26 @@ export function findPath(s: State, worker : Rover, options: Object) {
         6 : nxny[2],
         9 : nxny[3],
       };
-  };
+  };*/
 
   let tryDirection = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
     if(!s.m.isValid(nx, ny)) {
       return false;
     }
 
-    if (s.checkBooster(nx, ny)) {
+    if (isSeekingBoosters && s.checkBooster(nx, ny)) {
       nearestFree = new Coord(nx, ny);
       wavestep.set(nx, ny, curLen + 1, cIndex);
       return true;
     }
     if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
-      // let cost = pixelCost(s.m, nx, ny) / Math.pow(curLen, 1);
-      let cost = 1;
+      let cost = pixelCost(s.m, nx, ny);
+
+      //let cost = 1;
 
       if(cost > bestPixelCost || nearestFree === 0) {
+
+        //console.log(cost);
         nearestFree = new Coord(nx, ny);
         bestPixelCost = cost;
         wavestep.prev[wavestep.toIndex(nx, ny)] = cIndex;
@@ -114,7 +124,7 @@ export function findPath(s: State, worker : Rover, options: Object) {
       wavestep.set(nx, ny, curLen + 1, cIndex);
     }
     return false;
-  }
+  };
 
   while(front.length) {
     let c = front[0];
@@ -122,8 +132,8 @@ export function findPath(s: State, worker : Rover, options: Object) {
     let curLen = wavestep.get(c.x, c.y);
 
     // exceeded the search radius - go to just a free cell
-    if(curLen >= maxSearchLen && nearestFree !== 0) {
-      //console.log("exceeded range");
+    if(curLen >= searchLen && nearestFree !== 0) {
+      //console.log("exceeded range " + curLen);
       break;
     }
 
@@ -184,37 +194,29 @@ export function findPath(s: State, worker : Rover, options: Object) {
 
 
 export function pixelCost(matrix: Matrix, x: number, y: number): number {
-  let cost = 0;
-
-  let i = matrix.toIndex(x, y);
-
-  if (matrix.isFreeIndex(i)) {
-    let n = matrix.getNeighbors(new Coord(x, y), 2);
-    let blockedNeighbors = 0;
-    let wrappedNeighbors = 0;
-
-    n.forEach(k => {
-      if (!matrix.isValid(k.x, k.y) || matrix.isObstacle(k.x, k.y)) blockedNeighbors++;
-      if (matrix.isValid(k.x, k.y) && matrix.isWrapped(k.x, k.y)) wrappedNeighbors++;
-    });
-
-    cost += 1 + wrappedNeighbors * 0.1 + blockedNeighbors * 0.5;
-  }
-  return cost;
+  return 10000-matrix.getFreeNeighborsNum(x, y, 5);
 }
 
 export default class Solver {
 
   state : State;
   solution : Solution;
+  coins: number = 0;
 
   constructor(state : State) {
     this.state = state;
     this.solution = new Solution();
   }
 
-  solve(): Solution {
+  setCoins(coins: number): void {
+    this.coins = coins;
 
+    if (this.coins) {
+      this.buyBoosters();
+    }
+  }
+
+  solve(): Solution {
     let drillTurns = 0;
     let drilling = false;
 
@@ -236,7 +238,7 @@ export default class Solver {
       if (drillTurns > 0) {
           drillTurns--;
           // continue if drilling
-          if (drillTurns == 0 && drilling && this.state.drills > 0){
+          if (drillTurns === 0 && drilling && this.state.drills > 0){
             this.state.drills--;
             this.solution.startUsingDrill();
             drillTurns = DRILL_TIME;
@@ -396,5 +398,18 @@ export default class Solver {
           break;
       }
       return this.solution;
+  }
+
+  /** @private */
+  buyBoosters(): void {
+    while (this.coins >= MANIPULATOR_PRICE) {
+      this.buyManipulator();
+    }
+  }
+
+  /** @private */
+  buyManipulator() {
+    this.coins = this.coins - MANIPULATOR_PRICE;
+    this.state.extensions = this.state.extensions ? this.state.extensions + 1 : 1;
   }
 }
