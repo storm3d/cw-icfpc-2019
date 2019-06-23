@@ -33,25 +33,48 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
   let nearestFree : Coord = 0;
   let bestPixelCost = 0;
+  let getCoordNXNY = (c: Coord) : Array<Object> => {
+    return [{
+          nx : c.x,
+          ny : c.y + 1,
+        }, {
+          nx : c.x + 1,
+          ny : c.y,
+        }, {
+          nx : c.x,
+          ny : c.y - 1,
+        }, {
+          nx : c.x - 1,
+          ny : c.y,
+        },
+      ];
+  };
+  let getDirs2 = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
+    return [
+        nxny[1],
+        nxny[0],
+        nxny[3],
+        nxny[2],
+      ];
+  };
+  let getDirs2bt = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
+    return [
+        nxny[2],
+        nxny[3],
+        nxny[0],
+        nxny[1],
+      ];
+  };
   let getDirs = (c: Coord) : Object => {
+    let nxny = getCoordNXNY(c);
     return {
-      0 : {
-        nx : c.x,
-        ny : c.y + 1,
-      },
-      3 : {
-        nx : c.x + 1,
-        ny : c.y,
-      },
-      6 : {
-        nx : c.x,
-        ny : c.y - 1,
-      },
-      9 : {
-        nx : c.x - 1,
-        ny : c.y,
-      }
-    };
+        0 : nxny[0],
+        3 : nxny[1],
+        6 : nxny[2],
+        9 : nxny[3],
+      };
   };
   let tryDirection = (nx: number, ny: number, curLen: number) : boolean => {
     if(!s.m.isValid(nx, ny)) {
@@ -90,7 +113,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
 
     front.shift();
 
-    let dirs = getDirs(c);
+    let dirs = getDirs2(c);
     // go this dir first
     // let nx = dirs[worker.rotation].nx;
     // let ny = dirs[worker.rotation].ny;
@@ -129,7 +152,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     let c = path[0];
     let minL = 999999;
     let minC = 0;
-    let backtrack_dirs = getDirs(c);
+    let backtrack_dirs = getDirs2bt(c);
 
     let backTrackNextCell = (nx: number, ny: number) => {
       if (!lens.isValid(nx, ny)) return;
