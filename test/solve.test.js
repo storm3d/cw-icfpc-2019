@@ -36,14 +36,44 @@ describe("solver", () => {
 
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
-| * * F |
+| * * * |
 | * * * |
 `);
     expect(solver.state.extensions).toEqual(0);
-    expect(solver.state.fasts).toEqual(1);
+    expect(solver.state.fasts).toEqual(2);
     expect(solver.state.drills).toEqual(1);
     expect(solver.state.teleports).toEqual(2);
 
+  })
+
+  test("test drills", () => {
+    const layout = `
+        | * * * * * * * * * * |
+        | * # # # # # # # # * |
+        | * # * * * * * * # . |
+        | * # * # # # # * * # |
+        | * # * # * * * # * * |
+        | * # * # W L * * # * |
+        | * # * # # # # * # * |
+        | * # * * * * * * # * |
+        | * # # # # # # # # * |
+        | B * * * * * * * * * |`;
+    let s = parseState(layout);
+
+    let solver = new Solver(s);
+    let solution = solver.solve();
+
+    expect(solver.state.m.getFreeNum()).toEqual(0);
+    expect(solver.solution.score).toEqual(33);
+    expect(solution.getString().length).toEqual(39);
+    expect(solver.state.extensions).toEqual(0);
+    expect(solver.state.fasts).toEqual(0);
+    expect(solver.state.drills).toEqual(0);
+    expect(solver.state.teleports).toEqual(0);
+    //console.log(solution);
+
+    //console.log(solution.getString());
+    //console.log(solution.getString().length);
   })
 
   test("test basic solve1", () => {

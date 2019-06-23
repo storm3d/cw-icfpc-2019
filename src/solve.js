@@ -2,7 +2,7 @@
 
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import {Coord, Matrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
+import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
 
 const maxSearchLen = 15;
 
@@ -23,13 +23,17 @@ export function getTurnType(rotation : number, dx : number, dy : number) : numbe
   return 0;
 }
 
-export function findPath(s: State, worker : Rover, isDrilling: boolean) {
+export function findPath(s: State, worker : Rover, options: Object) {
+
+  let isDrilling = options.isDrilling || false;
+  let isWheeling = options.isWheeling || false;
 
   let workerCopy = worker.getCopy();
   let source = worker.pos.getCopy();
-  let lens = new Matrix(s.m.w, s.m.h);
+  //let lens = new Matrix(s.m.w, s.m.h);
+  let wavestep = new WaveMatrix(s.m.w, s.m.h);
   let front = new Array(source.getCopy());
-  lens.set(source.x, source.y, 1);
+  wavestep.set(source.x, source.y, 1);
 
   let nearestFree : Coord = 0;
   let bestPixelCost = 0;
@@ -76,13 +80,15 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
         9 : nxny[3],
       };
   };
-  let tryDirection = (nx: number, ny: number, curLen: number) : boolean => {
+
+  let tryDirection = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
     if(!s.m.isValid(nx, ny)) {
       return false;
     }
 
     if (s.checkBooster(nx, ny)) {
       nearestFree = new Coord(nx, ny);
+      wavestep.set(nx, ny, curLen + 1, cIndex);
       return true;
     }
     if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
@@ -92,18 +98,20 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
       if(cost > bestPixelCost || nearestFree === 0) {
         nearestFree = new Coord(nx, ny);
         bestPixelCost = cost;
+        wavestep.prev[wavestep.toIndex(nx, ny)] = cIndex;
       }
     }
-    if ((s.m.isPassable(nx, ny) || isDrilling) && lens.get(nx, ny) === 0) {
+    if ((isDrilling || s.m.isPassable(nx, ny)) && wavestep.get(nx, ny) === 0) {
       front.push(new Coord(nx, ny));
-      lens.set(nx, ny, curLen + 1);
+      wavestep.set(nx, ny, curLen + 1, cIndex);
     }
     return false;
   }
 
   while(front.length) {
     let c = front[0];
-    let curLen = lens.get(c.x, c.y);
+    let cIndex = wavestep.toIndex(c.x, c.y);
+    let curLen = wavestep.get(c.x, c.y);
 
     // exceeded the search radius - go to just a free cell
     if(curLen >= maxSearchLen && nearestFree !== 0) {
@@ -128,7 +136,7 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
       let nx = dirs[dirsKey].nx;
       let ny = dirs[dirsKey].ny;
 
-      isFound = tryDirection(nx, ny, curLen);
+      isFound = tryDirection(nx, ny, curLen, cIndex);
       if (isFound) break;
     }
 
@@ -145,43 +153,12 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     return undefined;
 
   let path = [ nearestFree ];
-
-  while(true) {
-    //console.log(path);
-
-    let c = path[0];
-    let minL = 999999;
-    let minC = 0;
-    let backtrack_dirs = getDirs2bt(c);
-
-    let backTrackNextCell = (nx: number, ny: number) => {
-      if (!lens.isValid(nx, ny)) return;
-      let lensXY = lens.get(nx, ny);
-      if (lensXY < minL && lensXY !== 0) {
-        minL = lensXY;
-        minC = new Coord(nx, ny);
-      }
-    };
-
-    let backTrackDone = false;
-    for (let btKey in backtrack_dirs) {
-      let nx = backtrack_dirs[btKey].nx;
-      let ny = backtrack_dirs[btKey].ny;
-
-      // check if backtrack is done
-      backTrackDone = (source.x === nx && source.y === ny);
-      if (backTrackDone)
-        break;
-      backTrackNextCell(nx, ny);
-
-    }
-    if (backTrackDone)
-      break;
-
-    if(!minC)
-      throw "Weird shit happened";
-
-    path.unshift(minC);
+  let btIndex = wavestep.toIndex(nearestFree.x, nearestFree.y);
+  let prev = wavestep.prev[btIndex];
+  while (prev >= 0) {
+    let prevC = wavestep.toCoord(prev);
+    prev = wavestep.prev[prev];
+    path.unshift(prevC);
   }
 
   return path;
@@ -255,7 +232,7 @@ export default class Solver {
 
     let prevTeleportLen = 0;
     while(true) {
-      let path = findPath(this.state, this.state.worker, false);
+      let path = findPath(this.state, this.state.worker, {});
       if (path === undefined) {
         if (this.state.m.getFreeNum() > 0) {
           throw "WUT ???";
@@ -266,14 +243,14 @@ export default class Solver {
       if (hasActiveTeleport && (path.length > (prevTeleportLen + 5))) {
         let workerT = this.state.worker.getCopy();
         workerT.pos = teleportPos;
-        let pathT = findPath(this.state, workerT, false);
+        let pathT = findPath(this.state, workerT, {});
         prevTeleportLen = pathT.length;
         if ((pathT.length + 25 < path.length) & !isNear(teleportPos, this.state.worker.pos, 10)) {
           this.solution.activateTeleport(teleportPos.x, teleportPos.y);
           this.state.moveWorker(teleportPos);
           stepActiveBoosters();
           //
-          path = findPath(this.state, this.state.worker, false);
+          path = findPath(this.state, this.state.worker, {});
         }
       }
       // dumb greedy teleports
@@ -290,10 +267,12 @@ export default class Solver {
       // dumb greedy drills
       //if (false) {
       if (this.state.drills > 0 || drillTurns > 0) {
-          drilling = false;
-          let path1 = findPath(this.state, this.state.worker, true);
-          if ((path1.length + 20 < path.length) &&
-               (path1.length < (drillTurns + this.state.drills * DRILL_TIME))) {
+          let path1 = findPath(this.state, this.state.worker, {isDrilling: true});
+          // consider path if you actually can do it
+          let considerDrilling = (path1.length < (drillTurns + this.state.drills * DRILL_TIME));
+          //
+          drilling = considerDrilling && ((path1.length + 20 < path.length) );
+          if (drilling) {
               //console.log(`!!!!!!!!!!!!${path.length}, ${path1.length}`);
               path = path1;
               if (drillTurns == 0) {
@@ -301,7 +280,6 @@ export default class Solver {
                   this.solution.startUsingDrill();
                   drillTurns = DRILL_TIME;
               }
-              drilling = true;
           }
       }
       // console.log(path);
