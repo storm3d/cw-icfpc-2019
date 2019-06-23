@@ -19,3 +19,4 @@ yarn-error.log*
 dist
 /all_results.txt
 /current_result_*.txt
+/current_result.txt
