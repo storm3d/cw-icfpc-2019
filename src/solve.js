@@ -202,8 +202,7 @@ export default class Solver {
 
     let wheelsTurns = 0;
     let wheelsAttached = false;
-    let hasActiveTeleport = false;
-    let teleportPos: Coord;
+    let hasActiveTeleport: Array<Object> = [];
     let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
     let isNear = (a: Coord, b: Coord, d: number) => {
       let diff = a.getDiff(b);
@@ -230,7 +229,6 @@ export default class Solver {
       }
     };
 
-    let prevTeleportLen = 0;
     while(true) {
       let path = findPath(this.state, this.state.worker, {});
       if (path === undefined) {
@@ -240,29 +238,62 @@ export default class Solver {
         return this.solution;
       }
 
-      if (hasActiveTeleport && (path.length > (prevTeleportLen + 5))) {
-        let workerT = this.state.worker.getCopy();
-        workerT.pos = teleportPos;
-        let pathT = findPath(this.state, workerT, {});
-        prevTeleportLen = pathT.length;
-        if ((pathT.length + 25 < path.length) & !isNear(teleportPos, this.state.worker.pos, 10)) {
-          this.solution.activateTeleport(teleportPos.x, teleportPos.y);
-          this.state.moveWorker(teleportPos);
+      //// TELEPORTS: ///////////////////////////
+      let bestTeleport = {len: 999999, pos: null};
+      hasActiveTeleport.forEach(teleportObj => {
+        if (path.length > (teleportObj.path.length + 5)) {
+          // get path from teleport for current worker configuration
+          let workerT = this.state.worker.getCopy();
+          workerT.pos = teleportObj.pos;
+          teleportObj.path = findPath(this.state, workerT, {});
+
+          // check if it is better than the best
+          if (bestTeleport.len > teleportObj.path.length) {
+            // check if it is better than existing
+            let pathIsBetter = (teleportObj.path.length + 25 < path.length);
+            let isWorkerNear = isNear(teleportObj.pos, this.state.worker.pos, 10);
+
+            if (pathIsBetter && !isWorkerNear) {
+              bestTeleport = {
+                  len : teleportObj.path.length,
+                  pos : teleportObj.pos,
+                };
+            }
+          }
+        }
+      });
+      // go to best teleport if any
+      if (bestTeleport.pos) {
+        this.solution.activateTeleport(bestTeleport.pos.x, bestTeleport.pos.y);
+        this.state.moveWorker(bestTeleport.pos);
+        stepActiveBoosters();
+        //
+        path = findPath(this.state, this.state.worker, {});
+      }
+
+      // greedy teleports :
+      //if (false) {
+      if (!drilling && (this.state.teleports > 0) && matrixCenter.x > 20 && matrixCenter.y > 20) {
+        // plant teleport near center if we have only one
+        let plantTeleportHere = !hasActiveTeleport && isNearCenter(this.state.worker.pos);
+        // or if we have spare - then somewhere far apart from existing
+        let DEBUG_PLANT_MORE_THAN_ONE = false; // TODO: remove
+        if (DEBUG_PLANT_MORE_THAN_ONE && !plantTeleportHere && (this.state.teleports > 1)) {
+          let teleportsNear = hasActiveTeleport.filter(t => isNear(t.pos, this.state.worker.pos, 20));
+          plantTeleportHere = teleportsNear.length == 0;
+        }
+        if (plantTeleportHere){
+          this.state.teleports--;
+          this.solution.plantTeleport();
+          let newTeleport = {
+            pos: this.state.worker.pos.getCopy(),
+            path: path,
+            };
+          hasActiveTeleport.push(newTeleport);
           stepActiveBoosters();
-          //
-          path = findPath(this.state, this.state.worker, {});
         }
       }
-      // dumb greedy teleports
-      //if (false) {
-      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) && matrixCenter.x > 50 && matrixCenter.y > 50) {
-        hasActiveTeleport = true;
-        this.state.teleports--;
-        this.solution.plantTeleport();
-        teleportPos = this.state.worker.pos.getCopy();
-        prevTeleportLen = path.length;
-        //stepActiveBoosters();
-      }
+      //// TELEPORTS END ///////////////////////////
 
       // dumb greedy drills
       //if (false) {
@@ -285,9 +316,15 @@ export default class Solver {
       // console.log(path);
 
       for (let i = 0; i < Math.ceil(path.length /*/ 2*/); i++) {
-        if (this.state.m.getFreeNeighborsNum(path[i].x, path[i].y, 1) > 0) {
-          let dx = -(this.state.worker.pos.x - path[i].x);
-          let dy = -(this.state.worker.pos.y - path[i].y);
+        // skip fillers
+        if (path[i] === null){
+          continue;
+        }
+        let pathCoord = path[i];
+
+        if (this.state.m.getFreeNeighborsNum(pathCoord.x, pathCoord.y, 1) > 0) {
+          let dx = -(this.state.worker.pos.x - pathCoord.x);
+          let dy = -(this.state.worker.pos.y - pathCoord.y);
 
           let turnType = getTurnType(this.state.worker.rotation, dx, dy);
           if (turnType === 1) { // CW
@@ -303,20 +340,18 @@ export default class Solver {
           }
         }
 
-        this.solution.move(this.state.worker.pos, path[i]);
-        this.state.moveWorker(path[i]);
+        this.solution.move(this.state.worker.pos, pathCoord);
+        this.state.moveWorker(pathCoord);
         // if drill is ON
         stepActiveBoosters();
-
-        if (this.state.extensions > 0) {
-          this.state.extensions--;
-          let c = this.state.worker.extendManipulators();
-          this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
-          stepActiveBoosters();
-        }
-
-
         // console.log(this.state.dump(true));
+      }
+
+      if (this.state.extensions > 0) {
+        this.state.extensions--;
+        let c = this.state.worker.extendManipulators();
+        this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+        stepActiveBoosters();
       }
 
 

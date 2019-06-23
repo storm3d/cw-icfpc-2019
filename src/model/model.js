@@ -477,9 +477,15 @@ export class State {
   checkBooster(x : number, y : number) : boolean {
     //console.log("cb " + x + ", "+ y);
     for(let i = 0; i < this.boosters.length; i++) {
-      if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
+      let booster = this.boosters[i];
+      if (booster.pos.isEqualXY(x, y)) {
         //if (this.boosters[i].type !== "X") {
-        if (this.boosters[i].type === "B" || this.boosters[i].type === "L" || this.boosters[i].type === "R") {
+
+        if (booster.type === "B"
+         || booster.type === "L"
+         || booster.type === "R"
+         //|| booster.type === "F"
+         ) {
           //console.log("booster!")
           return true;
         }
