@@ -87,7 +87,6 @@ export function findPath(s: State, worker : Rover, options: Object) {
     return rotation;
   };
 
-
   let tryDirection = (nx: number, ny: number, curLen: number, cIndex: number) : boolean => {
     if(!s.m.isValid(nx, ny)) {
       return false;
@@ -135,15 +134,20 @@ export function findPath(s: State, worker : Rover, options: Object) {
     return tryDirection(nx2, ny2, curLen, cIndex);
   };
 
-  let tryDirections = (pos: Coord, curLen: number): boolean => {
+  let tryAllDirections = (pos: Coord, curLen: number): boolean => {
     let dirs = getDirs2(pos);
     let cIndex = wavestep.toIndex(pos.x, pos.y);
     for (let dirsKey in dirs) {
       let nx = dirs[dirsKey].nx;
       let ny = dirs[dirsKey].ny;
 
-      if (tryDirection(nx, ny, curLen, cIndex))
-        return true;
+      if (fastTime > curLen) {
+        if (tryDirectionFasting(nx, ny, curLen, cIndex))
+          return true;
+      } else {
+        if (tryDirection(nx, ny, curLen, cIndex))
+          return true;
+      }
     }
     return false;
   };
@@ -160,7 +164,7 @@ export function findPath(s: State, worker : Rover, options: Object) {
       break;
     }
 
-    if (tryDirections(c, curLen))
+    if (tryAllDirections(c, curLen))
       break;
   }
 
@@ -169,22 +173,23 @@ export function findPath(s: State, worker : Rover, options: Object) {
   if(nearestFree === 0)
     return undefined;
 
-  ///////////// backtracking + filling for turns
+  ///////////// backtracking + adjusting for rotations on turns
   let path = [ nearestFree ];
   let btIndex = wavestep.toIndex(nearestFree.x, nearestFree.y);
   let prev = wavestep.prev[btIndex];
+  let adjustPathRotations = (r1, r2) => {
+      if (r1 != r2) path.unshift(null);
+    };
+
   while (prev >= 0) {
-    if (wavestep.rotation[btIndex] != wavestep.rotation[prev]) {
-      path.unshift(null); // add rotation as null
-    }
+    adjustPathRotations(wavestep.rotation[btIndex], wavestep.rotation[prev]);
     btIndex = prev;
     let prevC = wavestep.toCoord(prev);
     prev = wavestep.prev[prev];
     path.unshift(prevC);
   }
-  if (wavestep.rotation[btIndex] != worker.rotation) {
-      path.unshift(null); // add rotation as null
-  }
+  path.shift();
+  adjustPathRotations(wavestep.rotation[btIndex], worker.rotation);
 
   return path;
 }
@@ -249,6 +254,10 @@ export default class Solver {
 
     while(true) {
       let path = findPath(this.state, this.state.worker, {fastTime: wheelsTurns});
+      if (path === undefined && wheelsTurns > 0) {
+        // baseline path
+        path = findPath(this.state, this.state.worker, {});
+      }
       if (path === undefined) {
         if (this.state.m.getFreeNum() > 0) {
           throw "WUT ???";
@@ -257,13 +266,18 @@ export default class Solver {
       }
 
       //// TELEPORTS: ///////////////////////////
-      let bestTeleport = {len: 999999, pos: null};
+      let bestTeleport = {len: 999999, pos: null, path: null};
       hasActiveTeleport.forEach(teleportObj => {
         if (path.length > (teleportObj.path.length + 5)) {
           // get path from teleport for current worker configuration
           let workerT = this.state.worker.getCopy();
           workerT.pos = teleportObj.pos;
-          teleportObj.path = findPath(this.state, workerT, {fastTime: wheelsTurns - 1});
+          let teleportPath = findPath(this.state, workerT, {fastTime: wheelsTurns - 1});
+          if (teleportPath === undefined) {
+            teleportObj.path = findPath(this.state, workerT, {});
+          } else {
+            teleportObj.path = teleportPath;
+          }
 
           // check if it is better than the best
           if (bestTeleport.len > teleportObj.path.length) {
@@ -275,6 +289,7 @@ export default class Solver {
               bestTeleport = {
                   len : teleportObj.path.length,
                   pos : teleportObj.pos,
+                  path: teleportObj.path,
                 };
             }
           }
@@ -286,7 +301,7 @@ export default class Solver {
         this.state.moveWorker(bestTeleport.pos);
         stepActiveBoosters();
         //
-        path = findPath(this.state, this.state.worker, {fastTime: wheelsTurns});
+        path = bestTeleport.path;
       }
 
       // greedy teleports :
@@ -315,8 +330,11 @@ export default class Solver {
 
       // dumb greedy drills
       //if (false) {
-      if (this.state.drills > 0 || drillTurns > 0) {
-          let path1 = findPath(this.state, this.state.worker, {isDrilling: true, fastTime: wheelsTurns - 1});
+      if ((this.state.drills > 0 || drillTurns > 0) ){ //&& wheelsTurns == 0) {
+          //let path1 = findPath(this.state, this.state.worker, {isDrilling: true, fastTime: wheelsTurns - 1});
+          let path1 = findPath(this.state, this.state.worker, {isDrilling: true});
+          if (!path1) throw "FAST FAILED!";
+
           // consider path if you actually can do it
           let considerDrilling = (path1.length < (drillTurns + this.state.drills * DRILL_TIME));
           //
@@ -333,6 +351,19 @@ export default class Solver {
       }
       // console.log(path);
 
+
+      // dumb wheels
+      if (wheelsTurns === 0 && this.state.fasts > 0 && !drilling) {
+        let pathF = findPath(this.state, this.state.worker, {fastTime: FAST_TIME});
+        if (pathF !== undefined) {
+          path = pathF;
+          this.solution.attachFastWheels();
+          wheelsTurns = FAST_TIME;
+          this.state.fasts--;
+        }
+      }
+
+      //console.log(path);
       for (let i = 0; i < Math.ceil(path.length /*/ 2*/); i++) {
         // skip fillers
         if (path[i] === null){
@@ -340,25 +371,59 @@ export default class Solver {
         }
         let curPos = this.state.worker.pos;
         let nextPos = path[i];
+        let deltaCoord = curPos.getDiff(nextPos);
 
-        let turnType = getWorkerTurnType(this.state.m, curPos, nextPos, this.state.worker.rotation);
-        if (turnType !== 0) {
-          if (turnType === 1) { // CW
-            this.solution.turnManipulatorsClockwise();
-            this.state.worker.rotCW();
-          } else if (turnType === 2) { // CCW
-            this.solution.turnManipulatorsCounterclockwise();
-            this.state.worker.rotCCW();
-          }
-          // fake move to apply changes
-          this.state.moveWorker(curPos);
+        let stepDelta = Math.abs(deltaCoord.x) + Math.abs(deltaCoord.y);
+        //  console.log(`delta = ${stepDelta}, ${curPos}, ${nextPos}`);
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ARGH!!!! ERROR - PATH TOO SHORT
+        // skip move to ajust to singlesteps
+        while ((stepDelta === 1) && (wheelsTurns > 0)) {
+          this.solution.skipTurn();
           stepActiveBoosters();
         }
-        // do actual move
-        this.solution.move(this.state.worker.pos, nextPos);
-        this.state.moveWorker(nextPos);
-        // if drill is ON
-        stepActiveBoosters();
+
+        // if ALL OK then this array will have one pair inside
+        let moves = [[curPos, nextPos]];
+        // fast move
+        if (stepDelta === 2) {
+          // create half step move
+          let delta2 = new Coord(deltaCoord.x / 2, deltaCoord.y / 2);
+          let halfPos = curPos.getAdded(delta2);
+          if (wheelsTurns > 0) {
+            // apply half step move here to update state properly
+            this.state.moveWorker(halfPos);
+            moves = [[halfPos, nextPos]]
+          } else {
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ARGH!!!! ERROR - PATH TOO LONG
+            moves = [[curPos, halfPos], [halfPos, nextPos]];
+          }
+        }
+        for (let move_idx = 0; move_idx < moves.length; move_idx ++) {
+          // check for rotations on end of moves chain
+          let pos1 = moves[move_idx][0];
+          let pos2 = moves[move_idx][1];
+          if (move_idx === moves.length - 1) {
+            let turnType = getWorkerTurnType(this.state.m, pos1, pos2, this.state.worker.rotation);
+            if (turnType !== 0) {
+              if (turnType === 1) { // CW
+                this.solution.turnManipulatorsClockwise();
+                this.state.worker.rotCW();
+              } else if (turnType === 2) { // CCW
+                this.solution.turnManipulatorsCounterclockwise();
+                this.state.worker.rotCCW();
+              }
+              // update state to apply rotation changes
+              this.state.moveWorker(pos2);
+              stepActiveBoosters();
+            }
+          }
+
+          // do actual move
+          this.solution.move(pos1, pos2);
+          this.state.moveWorker(pos2);
+          stepActiveBoosters();
+        }
         // console.log(this.state.dump(true));
       }
 

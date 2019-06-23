@@ -20,14 +20,16 @@ export class Solution {
         if (diff.x === 1 && diff.y === 0) {
             this.moveRight()
         }
-        if (diff.x === -1 && diff.y === 0) {
+        else if (diff.x === -1 && diff.y === 0) {
             this.moveLeft()
         }
-        if (diff.x === 0 && diff.y === 1) {
+        else if (diff.x === 0 && diff.y === 1) {
             this.moveUp()
         }
-        if (diff.x === 0 && diff.y === -1) {
+        else if (diff.x === 0 && diff.y === -1) {
             this.moveDown()
+        } else {
+          throw `NO TURN FOR ${first} ${second}`;
         }
     }
 
@@ -83,6 +85,11 @@ export class Solution {
 
     plantTeleport() {
         this.result += "R";
+        this.score++;
+    }
+
+    skipTurn() {
+        this.result += "Z";
         this.score++;
     }
 
