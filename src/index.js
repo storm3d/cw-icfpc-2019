@@ -40,7 +40,7 @@ if (process.send === undefined) {
 
     let mapsNum = 155;
     for(let i = 155; i <= mapsNum; i++) {
-        exec((i + "").padStart(3, "0"), () => 0, 2000);
+        exec((i + "").padStart(3, "0"), () => 0, 0);
 
         console.log(`Total score: ${totalSteps}`);
 

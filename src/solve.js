@@ -2,11 +2,11 @@
 
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
-import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
+import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME, InventoryBooster} from "./model/model";
 import { MANIPULATOR_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
-const minSearchLen = 1;
+const minSearchLen = 3;
 
 
 export function getTurnType(rotation : number, dx : number, dy : number) : number {
@@ -255,6 +255,14 @@ export default class Solver {
     };
 
     while(true) {
+
+      while (this.state.getAvailableInventoryBoosters('B', workerId) > 0) {
+        this.state.spendInventoryBooster('B', workerId);
+        let c = this.state.workers[workerId].extendManipulators();
+        this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
+        stepActiveBoosters();
+      }
+
       let path = findPath(this.state, this.state.workers[workerId], {fastTime: wheelsTurns});
       if (path === undefined) {
         if (this.state.m.getFreeNum() > 0) {
@@ -369,15 +377,6 @@ export default class Solver {
         stepActiveBoosters();
         // console.log(this.state.dump(true));
       }
-
-      while (this.state.getAvailableInventoryBoosters('B', 0) > 0) {
-            this.state.spendInventoryBooster('B', workerId);
-        let c = this.state.workers[workerId].extendManipulators();
-        this.solution.attachNewManipulatorWithRelativeCoordinates(c.x, c.y);
-        stepActiveBoosters();
-      }
-
-
     }
 
     return this.solution;
@@ -415,6 +414,8 @@ export default class Solver {
   /** @private */
   buyManipulator() {
     this.coins = this.coins - MANIPULATOR_PRICE;
-    this.state.extensions = this.state.extensions ? this.state.extensions + 1 : 1;
+
+    let acuiredBooster = new InventoryBooster('B', -1, 0);
+    this.state.inventoryBoosters.push(acuiredBooster);
   }
 }
