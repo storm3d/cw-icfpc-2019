@@ -182,10 +182,12 @@ export class Matrix {
 
   wrap(x: number, y: number) {
     if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE) {
+      if (this.freeN > 0 && this.pixels[this.toIndex(x, y)] !== WRAPPED) {
+        this.freeN--;
+      }
+
       this.pixels[this.toIndex(x, y)] = WRAPPED;
-        if (this.freeN > 0) {
-            this.freeN--;
-        }
+
     }
   }
 
@@ -364,11 +366,19 @@ export class Rover {
   widthRight: number;
   rotation: number;
 
+  path : Array<Coord>;
+  pathStep : number;
+  target : Coord;
+
   constructor(pos: Coord, widthLeft: number, widthRight: number, rotation: number = 3) {
     this.pos = pos;
     this.widthLeft = widthLeft;
     this.widthRight = widthRight;
     this.rotation = rotation;
+
+    this.path = [];
+    this.pathStep = 0;
+    this.target = 0;
   }
 
   getCopy(): Rover {
@@ -432,9 +442,13 @@ export class Booster {
   pos : Coord;
   type : string;
 
+  lockedBy : number;
+
   constructor(x: number, y: number, type: string) {
     this.pos = new Coord(x, y);
     this.type = type;
+
+    this.lockedBy = 0;
   }
 }
 
@@ -461,6 +475,8 @@ export class State {
   workers : Array<Rover>;
   inventoryBoosters : Array<InventoryBooster>;
 
+  spawnsPresent : boolean;
+
   constructor(w: number, h: number, m: Matrix = undefined) {
     this.m = m ? m : new Matrix(w, h);
     this.boosters = [];
@@ -469,6 +485,8 @@ export class State {
     this.workers = [];
     this.workers[0] = new Rover(new Coord(-1, -1), 1, 1);
     this.inventoryBoosters = [];
+
+    this.spawnsPresent = false;
   }
 
   getCopy() {
@@ -477,6 +495,7 @@ export class State {
     copy.step = this.step;
     copy.workers = this.workers.slice(0);
     copy.inventoryBoosters = this.inventoryBoosters.slice(0);
+    copy.spawnsPresent = this.spawnsPresent;
     return copy;
   }
 
@@ -539,18 +558,18 @@ export class State {
   }
 
   static isBoosterUseful(type : string) : boolean {
-    return type === "B" || type === "L" || type === "R" /*|| type === "F"*/;
+    return type === "C" || type === "B" || type === "L" || type === "R" || type === "F";
   }
 
-  checkBooster(x : number, y : number) : boolean {
+  checkBooster(x : number, y : number, type : string) {
     //console.log("cb " + x + ", "+ y);
     for(let i = 0; i < this.boosters.length; i++) {
       let booster = this.boosters[i];
       if (booster.pos.isEqualXY(x, y)) {
         //if (this.boosters[i].type !== "X") {
-        if (State.isBoosterUseful(booster.type)) {
+        if ((type === '*' && State.isBoosterUseful(booster.type)) || booster.type === type) {
           //console.log("booster!")
-          return true;
+          return booster;
         }
       }
     }
@@ -561,6 +580,15 @@ export class State {
     let num = 0;
     for(let i = 0; i < this.boosters.length; i++) {
       if (State.isBoosterUseful(this.boosters[i].type))
+        num++;
+    }
+    return num;
+  }
+
+  getRemainingCloningNum() : number {
+    let num = 0;
+    for(let i = 0; i < this.boosters.length; i++) {
+      if (this.boosters[i].type === 'C')
         num++;
     }
     return num;
@@ -652,6 +680,8 @@ export const parseState = (layer: string) : State => {
         s.moveWorker(0, new Coord(i, h - j - 1));
 
       if(cols[i] === "B" || cols[i] === "F" || cols[i] === "L" || cols[i] === "X" || cols[i] === "R") {
+        if(cols[i] === "X")
+          s.spawnsPresent = true;
         s.boosters.push(new Booster(i, h - j - 1, cols[i]));
       }
     }

@@ -2,16 +2,30 @@
 import {Coord} from "./model";
 
 export class Solution {
-    result: string;
+
+    results: Array<string>;
     score: number;
+    workerId : number;
 
     constructor(result: String = undefined, score?: number) {
-        this.result = result ? result : "";
+        this.results = result ? [ result ] : [ "" ];
         this.score = score ? score : 0;
+        this.workerId = 0;
     }
 
-    getCopy() {
-        new Solution(this.result);
+    //getCopy() {
+      //  new Solution(this.result);
+    //}
+
+
+    setWorkerId(id : number) {
+        if(id >= this.results.length)
+            throw "No such worker";
+        this.workerId = id;
+    }
+
+    addWorker() {
+        this.results.push('');
     }
 
     move(first: Coord, second: Coord) {
@@ -34,72 +48,83 @@ export class Solution {
     }
 
     moveUp() {
-        this.result += "W";
+        this.results[this.workerId] += "W";
         this.score++;
     }
 
     moveDown() {
-        this.result += "S";
+        this.results[this.workerId] += "S";
         this.score++;
     }
 
     moveLeft() {
-        this.result += "A";
+        this.results[this.workerId] += "A";
         this.score++;
     }
 
     moveRight() {
-        this.result += "D";
+        this.results[this.workerId] += "D";
         this.score++;
     }
 
     doNothing() {
-        this.result += "Z";
+        this.results[this.workerId] += "Z";
         this.score++;
     }
 
     turnManipulatorsClockwise() {
-        this.result += "E";
+        this.results[this.workerId] += "E";
         this.score++;
     }
 
     turnManipulatorsCounterclockwise() {
-        this.result += "Q";
+        this.results[this.workerId] += "Q";
         this.score++;
     }
 
     attachNewManipulatorWithRelativeCoordinates(x: number, y: number) {
-        this.result += `B(${x},${y})`;
+        this.results[this.workerId] += `B(${x},${y})`;
         this.score++;
     }
 
     attachFastWheels() {
-        this.result += "F";
+        this.results[this.workerId] += "F";
         this.score++;
     }
 
     startUsingDrill() {
-        this.result += "L";
+        this.results[this.workerId] += "L";
         this.score++;
     }
 
     plantTeleport() {
-        this.result += "R";
+        this.results[this.workerId] += "R";
         this.score++;
     }
 
     skipTurn() {
-        this.result += "Z";
+        this.results[this.workerId] += "Z";
         this.score++;
     }
 
     activateTeleport(x: number, y: number) {
-        this.result += `T(${x},${y})`;
+        this.results[this.workerId] += `T(${x},${y})`;
+        this.score++;
+    }
+
+    activateCloning() {
+        this.results[this.workerId] += `C`;
         this.score++;
     }
 
     getString() {
-        return this.result;
+        let str = "";
+        for(let i = 0; i < this.results.length; i++) {
+            str += this.results[i];
+            if(i !== this.results.length - 1)
+                str += '#';
+        }
+        return str;
     }
 
     getScore() {
