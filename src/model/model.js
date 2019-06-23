@@ -607,7 +607,7 @@ export class State {
   getRemainingCloningNum() : number {
     let num = 0;
     for(let i = 0; i < this.boosters.length; i++) {
-      if (this.boosters[i].type === 'C')
+      if (this.boosters[i].lockedBy === -1 && this.boosters[i].type === 'C')
         num++;
     }
     return num;
