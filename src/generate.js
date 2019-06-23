@@ -9,7 +9,7 @@ import { Writer } from './io/write';
 
 const solveTask = (model: string) => {
     const taskFilename = `${__dirname}/../lambda-client/blocks/${model}/task.desc`;
-    const solutionFilename = `${__dirname}/../lambda-client/blocks/${model}/task_sol.desc`;
+    const solutionFilename = `${__dirname}/../lambda-client/blocks/${model}/task.sol`;
     const reader = new Reader('', '', taskFilename);
     const state = reader.read();
     const solver = new Solver(state);
