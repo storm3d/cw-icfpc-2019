@@ -99,7 +99,7 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
       return false;
     }
 
-    if (seekingBooster && s.checkBooster(nx, ny, seekingBooster)) {
+    if (seekingBooster && s.checkBooster(nx, ny, seekingBooster, true)) {
       nearestFree = new Coord(nx, ny);
       let nextRotation = getNextRotation(nearestFree, wavestep.toCoord(cIndex), wavestep.rotation[cIndex]);
       wavestep.set(nx, ny, curLen + 1, cIndex, nextRotation);
@@ -263,7 +263,7 @@ export default class Solver {
           let seekingBooster = !this.state.spawnsPresent ? 0
               : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
               : (this.state.getRemainingCloningNum() ? 'C'
-                      : this.state.getRemainingBoostersNum() ? '*'
+                      : this.state.getRemainingUnlockedBoostersNum() ? '*'
                           : ''));
 
           if(seekingBooster === 'X')
@@ -290,7 +290,11 @@ export default class Solver {
           else
             worker.target = 0;
 
-//          if()
+          if(worker.target && seekingBooster === '*') {
+            let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
+            if(b.lockedBy === -1 && b.type !== 'X')
+              b.lockedBy = workerId;
+          }
         }
 
         // act on our current path
