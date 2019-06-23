@@ -9,8 +9,8 @@ export class Writer {
         this.solution = solution;
     }
 
-    write(folder: string, model: string): number {
-        let filename = `./${folder}/prob-${model}.sol`;
+    write(folder: string, model: string, customPath: string|null = null, omitScore: boolean = false): number {
+        let filename = customPath || `./${folder}/prob-${model}.sol`;
 
         let scorefile = `./scores/prob-${model}.score`;
 
@@ -24,7 +24,9 @@ export class Writer {
         let savedScore = parseInt(fs.readFileSync(scorefile).toString(), 10);
 
         if (DEBUG || savedScore <= this.solution.getScore()) {
-            this.writeScore(scorefile);
+            if (omitScore !== true) {
+                this.writeScore(scorefile);
+            }
 
             return this.writeSolve(filename, model);
         }
