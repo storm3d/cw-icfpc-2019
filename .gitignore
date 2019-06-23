@@ -20,3 +20,5 @@ dist
 /all_results.txt
 /current_result_*.txt
 /current_result.txt
+lambda-client/blocks
+solutions/*.buy
