@@ -211,12 +211,15 @@ export default class Solver {
     this.solution = new Solution();
   }
 
-  setCoins(coins: number): void {
+  setCoins(coins: number): number {
     this.coins = coins;
+    console.log(`set coins ${coins}`);
 
     if (this.coins) {
-      this.buyBoosters();
+      return this.buyBoosters();
     }
+
+    return 0;
   }
 
   solve(): Solution {
@@ -467,14 +470,19 @@ export default class Solver {
   }
 
   /** @private */
-  buyBoosters(): void {
+  buyBoosters(): number {
+    let counter = 0;
     while (this.coins >= MANIPULATOR_PRICE) {
       this.buyManipulator();
+      counter++;
     }
+
+    return counter;
   }
 
   /** @private */
   buyManipulator() {
+    console.log('buy manipulator');
     this.coins = this.coins - MANIPULATOR_PRICE;
 
     let acuiredBooster = new InventoryBooster('B', -1, 0);

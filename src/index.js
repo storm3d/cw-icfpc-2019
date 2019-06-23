@@ -16,8 +16,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     const s = reader.read();
 
     const solver = new Solver(s);
-    solver.setCoins(coins);
-    let startExtensions = solver.state.extensions;
+    let extensions = solver.setCoins(coins);
     let solution = solver.solve();
 
     totalSteps += solution.getScore();
@@ -31,7 +30,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     });
      */
 
-    let writer = new Writer(solution, startExtensions);
+    let writer = new Writer(solution, extensions);
     writer.write('solutions', model);
 
     callback();
