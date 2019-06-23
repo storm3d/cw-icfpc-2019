@@ -69,9 +69,10 @@ export class Writer {
         if (this.startExtensions > 0) {
             console.log(`Writing file ${this.buyfile}`);
             let extensions = '';
+            console.log(`Count of extensions: ${this.startExtensions}`);
             while (this.startExtensions > 0) {
                 extensions += 'B';
-                this.startExtensions = this.startExtensions - MANIPULATOR_PRICE;
+                this.startExtensions = this.startExtensions - 1;
             }
             console.log(`Start extensions: ${extensions}`);
             fs.writeFileSync(this.buyfile, extensions);
