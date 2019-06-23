@@ -90,16 +90,14 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
     //   }
     // }
     //console.log(dirs);
-    let isFound = false;
-    for (let dirsKey in dirs) {
+    let tryDirection = (dirsKey: String) => {
       let nx = dirs[dirsKey].nx;
       let ny = dirs[dirsKey].ny;
 
       if(s.m.isValid(nx, ny)) {
         if (s.checkBooster(nx, ny)) {
           nearestFree = new Coord(nx, ny);
-          isFound = true;
-          break;
+          return true;
         }
         if (s.m.isFree(nx, ny) /*&& nearestFree === 0*/) {
           // let cost = pixelCost(s.m, nx, ny) / Math.pow(curLen, 1);
@@ -115,6 +113,13 @@ export function findPath(s: State, worker : Rover, isDrilling: boolean) {
           lens.set(nx, ny, curLen + 1);
         }
       }
+      return false;
+    }
+
+    let isFound = false;
+    for (let dirsKey in dirs) {
+      isFound = tryDirection(dirsKey);
+      if (isFound) break;
     }
 
     if(isFound)
@@ -227,7 +232,7 @@ export default class Solver {
       let diff = a.getDiff(b);
       return (Math.abs(diff.x) + Math.abs(diff.y)) < d;
     };
-    let isNearCenter = (c: Coord) => { 
+    let isNearCenter = (c: Coord) => {
       return isNear(c, matrixCenter, 20);
     };
 
@@ -277,7 +282,7 @@ export default class Solver {
       }
       // dumb greedy teleports
       //if (false) {
-      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) ){ //&& matrixCenter.x > 50 && matrixCenter.y > 50) {
+      if (!drilling && !hasActiveTeleport && (this.state.teleports > 0) && isNearCenter(this.state.worker.pos) && matrixCenter.x > 50 && matrixCenter.y > 50) {
         hasActiveTeleport = true;
         this.state.teleports--;
         this.solution.plantTeleport();

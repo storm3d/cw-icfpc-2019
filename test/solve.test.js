@@ -32,17 +32,17 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solution.getString().length).toEqual(26);
+    expect(solution.getString().length).toEqual(29);
 
-    expect(solver.state.dump()).toEqual(`| * * W |
+    expect(solver.state.dump()).toEqual(`| * * * |
 | X # # |
 | * * F |
-| * * R |
+| * * W |
 `);
     expect(solver.state.extensions).toEqual(0);
     expect(solver.state.fasts).toEqual(1);
     expect(solver.state.drills).toEqual(1);
-    expect(solver.state.teleports).toEqual(1);
+    expect(solver.state.teleports).toEqual(2);
 
   })
 
