@@ -3,6 +3,7 @@
 import {Solution} from "./model/solution";
 import nearestFree from "./model/dijkstra";
 import {Coord, Matrix, State, Rover, DRILL_TIME, FAST_TIME} from "./model/model";
+import { MANIPULATOR_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
 const minSearchLen = 1;
@@ -205,14 +206,22 @@ export default class Solver {
 
   state : State;
   solution : Solution;
+  coins: number = 0;
 
   constructor(state : State) {
     this.state = state;
     this.solution = new Solution();
   }
 
-  solve(): Solution {
+  setCoins(coins: number): void {
+    this.coins = coins;
 
+    if (this.coins) {
+      this.buyBoosters();
+    }
+  }
+
+  solve(): Solution {
     let drillTurns = 0;
     let drilling = false;
 
@@ -356,5 +365,18 @@ export default class Solver {
           break;
       }
       return this.solution;
+  }
+
+  /** @private */
+  buyBoosters(): void {
+    while (this.coins >= MANIPULATOR_PRICE) {
+      this.buyManipulator();
+    }
+  }
+
+  /** @private */
+  buyManipulator() {
+    this.coins = this.coins - MANIPULATOR_PRICE;
+    this.state.extensions = this.state.extensions ? this.state.extensions + 1 : 1;
   }
 }

@@ -10,15 +10,12 @@ import MapParser from "./model/mapParser";
 let totalSteps = 0;
 let boostersStats = {};
 
-const exec = (model: string, callback: Function) => {
+const exec = (model: string, callback: Function, coins: number = 0) => {
+    const reader = new Reader('problems',model);
+    const s = reader.read();
 
-    let reader = new Reader('problems',model);
-    let s = reader.read();
-
-    // console.log(s.dump());
-
-    let solver = new Solver(s);
-
+    const solver = new Solver(s);
+    solver.setCoins(coins);
     let startExtensions = solver.state.extensions;
     let solution = solver.solve();
 
