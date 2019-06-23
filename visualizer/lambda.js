@@ -57,9 +57,15 @@ function receiveTimeStep(timeStep) {
     const textCursor = steps.slice(timeStep - 1, timeStep)[0]; // TODO: handle last char edge case
     const htmlCursor = `<mark class="mark--cursor">${textCursor}</mark>`;
     const textRest = steps.slice(timeStep + 1, -1).join(''); // TODO: same, handle last char edge case
+    // last char edge case seems to be handled w\o errors, last char stays highlighted as cursor
     return `${htmlAlreadyWalkedSolution}${htmlCursor}${textRest}`
   })
 }
+/* toggle visualizer hotkey listeners */
+document.querySelector("#toggle-visualizer-hotkeys").addEventListener('change', event => {
+  window.visualizerHotkeysEnabled = event.target.checked;
+  event.target.blur(); // to use visualizer Space key straight away
+})
 // pretty-printed visualizer from https://icfpcontest2019.github.io/solution_visualiser/
 var render,
 validate;
@@ -5140,7 +5146,7 @@ validate;
     this.hg().onchange = rm(Tl(), this.Vi);
     // input#submit_solution
     this.getSubmitSolutionInput().onclick = rm(Tl(), this.drawOnCanvasOnTick);
-    Sg(Tg()).onkeypress = function handleDocumentKeypress(a) {
+    Sg(Tg()).onkeypress = function handleDocumentKeypress(event) {
       a: {
         getMainNamespace();
         var b = getMainNamespace();
@@ -5149,40 +5155,48 @@ validate;
         null !==
         b.me() && b.me().blur();
         b.getSubmitSolutionInput().blur();
-        switch (a.keyCode | 0) {
+        if (!window.visualizerHotkeysEnabled) {
+          return event;
+        }
+        getTextarea().blur()
+        switch (event.keyCode | 0) {
           /**
            * key codes taken from https://www.w3.org/2002/09/tests/keys.html
            */
           case 32: // 'Space' key
           case 115: // 'S' key (lowercase)
-            a.preventDefault();
-            a = getMainNamespace();
-            a.isPlaying = !a.isPlaying;
+            event.preventDefault();
+            event = getMainNamespace();
+            event.isPlaying = !event.isPlaying;
             break;
           case 114: // 'R' key (lowercase)
-            a = getMainNamespace().drawOnCanvasOnTick.resetCanvas(a);
+            event = getMainNamespace().drawOnCanvasOnTick.resetCanvas(event);
             break a;
           case 100: // 'D' key (lowercase)
-            a.preventDefault();
+            event.preventDefault();
             tm();
             break;
           case 97: // 'A' key (lowercase)
-            a.preventDefault(),
+            event.preventDefault(),
             um()
         }
-        a = void 0
+        event = void 0
       }
-      return a
+      return event
     };
-    Sg(Tg()).onkeydown = function (a) {
+    Sg(Tg()).onkeydown = function (event) {
       getMainNamespace();
-      switch (a.keyCode | 0) {
+      if (!window.visualizerHotkeysEnabled) {
+        return event;
+      }
+      getTextarea().blur()
+      switch (event.keyCode | 0) {
         case 39:
-          a.preventDefault();
+          event.preventDefault();
           tm();
           break;
         case 37:
-          a.preventDefault(),
+          event.preventDefault(),
           um()
       }
     }

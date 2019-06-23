@@ -26,10 +26,12 @@
 
 <style>
 .wrapper {
+  display: flex;
   max-width: -webkit-calc(3000px - (30px * 2));
   max-width: calc(3000px - (30px * 2));
   margin-right: auto;
   margin-left: auto;
+  margin-left: 0;
   padding-right: 30px;
   padding-left: 30px; }
   @media screen and (max-width: 3000px) {
@@ -37,7 +39,7 @@
       max-width: -webkit-calc(3000px - (30px));
       max-width: calc(3000px - (30px));
       padding-right: 15px;
-      padding-left: 15px; } }
+      padding-left: 0px; } }
   
   #canvas-box {
     min-height: 600px;
@@ -86,7 +88,17 @@
     border-bottom: 1px solid red;
   }
 </style>
+<style>
+  /* styles for custom controls (intercativity) */
+  #custom-controls-box {
+    border: 1px solid magenta;
+  }
+</style>
 
+<div id="custom-controls-box">
+  <input type="checkbox" id="toggle-visualizer-hotkeys" title="Toggle hotkeys (Left to slow down, etc) of a visualizer app. Checked is on, unchecked is off." checked="" autocomplete="off" />
+  <script>window.visualizerHotkeysEnabled = true</script>
+</div>
 <center>
 <script src="src/highlight-ta.min.js"></script>
 <script type="text/javascript" src="/lambda.js"></script>
