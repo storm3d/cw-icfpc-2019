@@ -365,7 +365,7 @@ export class State {
   m : Matrix;
   boosters : Array<Booster>;
   worker : Rover;
-  extensions : Number;
+  extensions : number;
   fasts : Number;
   drills : Number;
   teleports : Number;

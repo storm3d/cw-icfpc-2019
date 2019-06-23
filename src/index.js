@@ -10,15 +10,14 @@ import MapParser from "./model/mapParser";
 let totalSteps = 0;
 let boostersStats = {};
 
-const exec = (model: string, callback: Function) => {
+const exec = (model: string, callback: Function, coins: number = 0) => {
+    const reader = new Reader('problems',model);
+    const s = reader.read();
+    const solver = new Solver(s);
 
-    let reader = new Reader('problems',model);
-    let s = reader.read();
+    solver.setCoins(coins);
 
-    // console.log(s.dump());
-
-    let solver = new Solver(s);
-    let solution = solver.solve();
+    const solution = solver.solve();
 
     totalSteps += solution.getScore();
 
@@ -31,7 +30,8 @@ const exec = (model: string, callback: Function) => {
     });
      */
 
-    let writer = new Writer(solution);
+    const writer = new Writer(solution);
+
     writer.write('solutions', model);
 
     callback();
