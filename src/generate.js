@@ -1,8 +1,23 @@
 // @flow
 import fs from 'fs';
-import { Puzzle, PuzzleParser, PuzzleMap } from "./model/puzzle";
-import MapSerializer from "./model/mapSerializer";
 
+import { PuzzleParser } from './model/puzzle';
+import MapSerializer from './model/mapSerializer';
+import { Reader } from './io/read';
+import Solver from './solve';
+import { Writer } from './io/write';
+
+const solveTask = (model: string) => {
+    const taskFilename = `${__dirname}/../lambda-client/blocks/${model}/task.desc`;
+    const solutionFilename = `${__dirname}/../lambda-client/blocks/${model}/task.sol`;
+    const reader = new Reader('', '', taskFilename);
+    const state = reader.read();
+    const solver = new Solver(state);
+    const solution = solver.solve();
+    const writer = new Writer(solution);
+
+    writer.write('', '', solutionFilename, true);
+};
 
 const exec = (model: string, callback: Function) => {
 
@@ -27,6 +42,8 @@ const exec = (model: string, callback: Function) => {
         serializedPath += puzzle.boostersStr.slice(0, -1);
         fs.writeFileSync(`./lambda-client/blocks/${model}/puzzle_sol.desc`, serializedPath, 'utf8');
 
+
+    solveTask(model);
 
     callback();
 };
