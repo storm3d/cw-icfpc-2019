@@ -5,7 +5,7 @@ import {MANIPULATOR_PRICE} from "../constants/boosters";
 const {fork} = require('child_process');
 
 const totalProblems = 300;
-let lambdaBalance = 18382;
+let lambdaBalance = 23986;
 
 function formatNum(num: number, size: number): string {
     let s = String(num);
@@ -16,11 +16,6 @@ function formatNum(num: number, size: number): string {
 }
 
 function getCoins(model: number): number {
-    // if (model === totalProblems) {
-    //     return lambdaBalance - (Math.floor(lambdaBalance / totalProblems) * (totalProblems - 1));
-    // }
-    // return Math.floor(lambdaBalance / totalProblems);
-
     if (lambdaBalance > MANIPULATOR_PRICE) {
         lambdaBalance -= MANIPULATOR_PRICE;
 

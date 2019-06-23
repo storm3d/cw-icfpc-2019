@@ -74,7 +74,7 @@ export class Writer {
                 this.startExtensions = this.startExtensions - MANIPULATOR_PRICE;
             }
             console.log(`Start extensions: ${extensions}`);
-            fs.writeFileSync(this.buyfile, `${this.solution.getScore()}`);
+            fs.writeFileSync(this.buyfile, extensions);
             console.log(`The file ${this.buyfile} has been saved!`);
         }
     }
