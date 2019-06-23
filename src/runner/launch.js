@@ -1,6 +1,6 @@
 // @flow
 import {cpus} from "os";
-import {CLONING_PRICE, MANIPULATOR_PRICE} from "../constants/boosters";
+import {CLONING_PRICE} from "../constants/boosters";
 import {Balance} from "../model/balance";
 
 const {fork} = require('child_process');

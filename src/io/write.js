@@ -7,10 +7,12 @@ export class Writer {
     solution: Solution;
     startExtensions: number;
     buyfile: string;
+    score : number;
 
-    constructor(solution: Solution, startExtensions: number) {
+    constructor(solution: Solution, startExtensions: number, score : number) {
         this.solution = solution;
         this.startExtensions = startExtensions;
+        this.score = score;
     }
 
     write(folder: string, model: string, customPath: string | null = null, omitScore: boolean = false): number {
@@ -47,7 +49,7 @@ export class Writer {
         // eslint-disable-next-line no-console
         console.log(`Writing file ${filename}`);
         fs.writeFileSync(filename, this.solution.getString(), 'utf8');
-        let scoreStr = `${model}:${this.solution.getScore()};`;
+        let scoreStr = `${model}:${this.score};`;
         fs.appendFileSync('./current_result.txt', scoreStr)
         // eslint-disable-next-line no-console
         console.log(`The file ${filename} has been saved!`);
@@ -58,11 +60,11 @@ export class Writer {
     }
 
     writeScore(filename: string): number {
-        fs.writeFileSync(filename, `${this.solution.getScore()}`);
+        fs.writeFileSync(filename, `${this.score}`);
         // eslint-disable-next-line no-console
         console.log(`The score file ${filename} has been updated!`);
 
-        return this.solution.getScore();
+        return this.score;
     }
 
     writeExtensions() {
