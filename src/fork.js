@@ -3,7 +3,7 @@ import {exec} from "./index";
 
 if (process.send === undefined) {
     console.log('Single launch');
-    exec('001',() => 0);
+    exec('001',() => 0, 0);
 } else {
     process.on('message', (msg) => {
             console.log(msg);
@@ -16,7 +16,7 @@ if (process.send === undefined) {
             if (msg.type === 'model') {
                 exec(msg.model, () => {
                     process.send({type: 'ask'})
-                });
+                }, msg.coins);
             }
         }
     );
