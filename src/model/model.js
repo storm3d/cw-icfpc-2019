@@ -4,6 +4,9 @@ export const FREE = 0;
 export const OBSTACLE = 1;
 export const WRAPPED = 2;
 
+export const FAST_TIME = 50;
+export const DRILL_TIME = 30;
+
 export class Coord {
   x: number;
   y: number;
@@ -46,25 +49,22 @@ export class Coord {
   }
 
   isObstacleCrossed(to, testedCoord: Coord) {
-    return this.getPointOfIntersection(this.getCenter(),
-        to.getCenter(),
-        testedCoord,
-        new Coord(testedCoord.x + 1, testedCoord.y))
+    let fromC = this.getCenter();
+    let toC = to.getCenter();
+
+    return this.getPointOfIntersection(fromC, toC,
+      testedCoord, new Coord(testedCoord.x + 1, testedCoord.y))
         ||
-        this.getPointOfIntersection(this.getCenter(),
-            to.getCenter(),
-            testedCoord,
-            new Coord(testedCoord.x, testedCoord.y + 1))
+        this.getPointOfIntersection(fromC, toC,
+          testedCoord, new Coord(testedCoord.x, testedCoord.y + 1))
         ||
-        this.getPointOfIntersection(this.getCenter(),
-            to.getCenter(),
-            new Coord(testedCoord.x + 1, testedCoord.y),
-            new Coord(testedCoord.x + 1, testedCoord.y + 1))
+        this.getPointOfIntersection(fromC, toC,
+          new Coord(testedCoord.x + 1, testedCoord.y),
+          new Coord(testedCoord.x + 1, testedCoord.y + 1))
         ||
-        this.getPointOfIntersection(this.getCenter(),
-            to.getCenter(),
-            new Coord(testedCoord.x, testedCoord.y + 1),
-            new Coord(testedCoord.x + 1, testedCoord.y + 1));
+        this.getPointOfIntersection(fromC, toC,
+          new Coord(testedCoord.x, testedCoord.y + 1),
+          new Coord(testedCoord.x + 1, testedCoord.y + 1));
   }
 
   getPointOfIntersection(start1:Coord, end1:Coord, start2:Coord, end2:Coord) {
@@ -72,7 +72,7 @@ export class Coord {
     let vector2 = (end2.x - start2.x) * (end1.y - start2.y) - (end2.y - start2.y) * (end1.x - start2.x);
     let vector3 = (end1.x - start1.x) * (start2.y - start1.y) - (end1.y - start1.y) * (start2.x - start1.x);
     let vector4 = (end1.x - start1.x) * (end2.y - start1.y) - (end1.y - start1.y) * (end2.x - start1.x);
-    return ((vector1 * vector2 <= 0) && (vector3 * vector4 <= 0));
+    return ((vector1 * vector2 < 0) && (vector3 * vector4 < 0));
   }
 
   toString() {
@@ -84,12 +84,20 @@ export class Coord {
 export class Matrix {
   w: number;
   h: number;
-  pixels: Uint8Array;
+  pixels: Uint16Array; // don't change it to 8!
+  freeN: number;
 
-  constructor(w: number, h: number) {
+  constructor(w: number, h: number, pixels = undefined) {
     this.w = w;
     this.h = h;
-    this.pixels = new Uint16Array(w * h);
+    this.pixels = pixels ? pixels : new Uint16Array(w * h);
+    this.freeN = -1;
+  }
+
+  getCopy() {
+    let copy = new Matrix(this.w, this.h, new Uint16Array(this.pixels));
+    copy.freeN = this.freeN;
+    return copy;
   }
 
   get(x: number, y: number) {
@@ -97,16 +105,28 @@ export class Matrix {
   }
 
   set(x: number, y: number, v: number /*FREE | OBSTACLE | WRAPPED*/) {
-    this.pixels[this.toIndex(x, y)] = v;
+    let idx = this.toIndex(x, y);
+    if (this.freeN > 0 && v === WRAPPED && this.pixels[idx] === FREE) {
+        this.freeN--;
+    }
+    this.pixels[idx] = v;
   }
 
   wrap(x: number, y: number) {
-    if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE)
+    if (this.isValid(x, y) && this.pixels[this.toIndex(x, y)] !== OBSTACLE) {
       this.pixels[this.toIndex(x, y)] = WRAPPED;
+        if (this.freeN > 0) {
+            this.freeN--;
+        }
+    }
   }
 
   isWrapped(x: number, y: number) {
     return this.pixels[this.toIndex(x, y)] === WRAPPED;
+  }
+
+  isWrappedIndex(index: number) {
+    return this.pixels[index] === WRAPPED;
   }
 
   isPassable(x: number, y: number) {
@@ -123,6 +143,35 @@ export class Matrix {
 
   isObstacle(x: number, y: number): boolean {
     return this.pixels[this.toIndex(x, y)] === OBSTACLE;
+  }
+
+  isObstacleIndex(index: number): boolean {
+    return this.pixels[index] === OBSTACLE;
+  }
+
+  getNeighbors(from: Coord, len: number = 1): Array<Coord> {
+    let neighbors = [];
+
+    for (let i = -len; i <= len; i++) {
+      for (let j = -len; j <= len; j++) {
+        if ((i === 0 || j === 0) && Math.abs(i) !== Math.abs(j))
+          neighbors.push(new Coord(from.x + i, from.y + j));
+      }
+    }
+    return neighbors;
+  }
+
+  getFreeNeighborsNum(x: number, y: number, len: number = 1): Array<Coord> {
+    let n = 0;
+
+    for (let i = -len; i <= len; i++) {
+      for (let j = -len; j <= len; j++) {
+        if (this.isValid(x + i, y + j) &&
+          this.isFree(x + i, y + j))
+          n++;
+      }
+    }
+    return n;
   }
 
   coord2index(c: Coord): number {
@@ -148,12 +197,14 @@ export class Matrix {
   }
 
   getFreeNum() : Number {
+    if (this.freeN >= 0) return this.freeN;
     let freeNum = 0;
     for (let j = this.h - 1; j >= 0; j--)
       for (let i = 0; i < this.w; i++)
         if(this.isFree(i, j))
           freeNum++;
 
+    this.freeN = freeNum;
     return freeNum;
   }
 
@@ -190,6 +241,23 @@ export class Matrix {
       str += "|\n";
     }
     return str;
+  }
+
+  isOnBorder(x: number, y: number) {
+    const coords = [
+      [x + 1, y], // Right middle
+      [x + 1, y + 1], // Right upper
+      [x, y + 1], // Upper middle
+      [x - 1, y + 1], // Left upper
+      [x - 1, y], // Middle left
+      [x - 1, y - 1], // Left bottom
+      [x, y - 1], // Middle bottom
+      [x + 1, y - 1], // Right bottom
+    ];
+
+    return coords.find(([currX, currY]) => (
+      !this.isValid(currX, currY)) || this.isObstacle(currX, currY)
+    );
   }
 }
 
@@ -233,6 +301,10 @@ export class Rover {
     this.widthLeft = widthLeft;
     this.widthRight = widthRight;
     this.rotation = rotation;
+  }
+
+  getCopy(): Rover {
+    return new Rover(this.pos.getCopy(), this.widthLeft, this.widthRight, this.rotation);
   }
 
   rotCW() {
@@ -298,14 +370,27 @@ export class State {
   drills : Number;
   teleports : Number;
 
-  constructor(w: number, h: number) {
-    this.m = new Matrix(w, h);
+  constructor(w: number, h: number, m: Matrix = undefined) {
+    this.m = m ? m : new Matrix(w, h);
     this.boosters = [];
+    this.startingBoosters = [];
     this.worker = new Rover(new Coord(-1, -1), 1, 1);
     this.extensions = 0;
     this.fasts = 0;
     this.drills = 0;
     this.teleports = 0;
+  }
+
+  getCopy() {
+    let copy = new State(this.m.w, this.m.h, this.m.getCopy());
+    copy.boosters = this.boosters.slice(0); // shallow copy
+    copy.startingBoosters = this.startingBoosters; // copy ref
+    copy.worker = this.worker.getCopy(); // deep copy
+    copy.extensions = this.extensions;
+    copy.fasts = this.fasts;
+    copy.drills = this.drills;
+    copy.teleports = this.teleports;
+    return copy;
   }
 
   moveWorker(newPos : Coord) {
@@ -340,7 +425,7 @@ export class State {
     for(let i = 0; i < this.boosters.length; i++) {
       if (this.boosters[i].pos.x === x && this.boosters[i].pos.y === y) {
         //if (this.boosters[i].type !== "X") {
-        if (this.boosters[i].type === "B") {
+        if (this.boosters[i].type === "B" || this.boosters[i].type === "L" || this.boosters[i].type === "R") {
           //console.log("booster!")
           return true;
         }

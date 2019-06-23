@@ -34,8 +34,10 @@ export default class MapParser {
     };
     this.formContoursMap(contourClusters, obj);
 
-    let obstaclesArr = obstacles.split(';');
-    obstaclesArr.forEach(o => this.formContoursMap(o, obj));
+    if (obstacles) {
+      let obstaclesArr = obstacles.split(';');
+      obstaclesArr.forEach(o => this.formContoursMap(o, obj));
+    }
 
     //console.log(obstaclesArr)
 
@@ -53,25 +55,31 @@ export default class MapParser {
       }
     }
 
-    this.fillWorkerStartPos(initialWorkerPos);
+    if (initialWorkerPos) {
+      this.fillWorkerStartPos(initialWorkerPos);
+    }
 
-    let boostersArr = boosters.split(';');
-    //console.log(boostersArr);
-    boostersArr.forEach(str => {
-      if(!str)
-        return;
+    if (boosters) {
+      let boostersArr = boosters.split(';');
+      //console.log(boostersArr);
+      boostersArr.forEach(str => {
+        if(!str)
+          return;
 
-      const type = str[0];
-      str = str.substr(1);
+        const type = str[0];
+        str = str.substr(1);
 
-      const t = str.split(',');
-      const x = parseInt(t[0].slice(1), 10);
-      const y = parseInt(t[1].slice(0, -1), 10);
+        const t = str.split(',');
+        const x = parseInt(t[0].slice(1), 10);
+        const y = parseInt(t[1].slice(0, -1), 10);
 
-      //console.log(type + " " + x + " " + y);
-      this.state.boosters.push(new Booster(x, y, type));
-    });
+        //console.log(type + " " + x + " " + y);
+        this.state.boosters.push(new Booster(x, y, type));
 
+        // bookkeeping
+        this.state.startingBoosters.push(new Booster(x, y, type));
+      });
+    }
 
     return this.state
   }

@@ -1,6 +1,6 @@
 import {  } from "../../src/model/model";
 import assert from 'assert';
-import { Matrix, parseMatrix, State, Booster, parseState } from "../../src/model/model";
+import { Matrix, parseMatrix, State, Booster, parseState, parseCoords } from "../../src/model/model";
 import { WRAPPED, OBSTACLE } from "../../src/model/model";
 import {Coord} from "../../src/model/model";
 
@@ -26,6 +26,17 @@ describe("Basic model", () => {
 `;
     let m = parseMatrix(layout);
     expect(m.dump()).toEqual(layout);
+  });
+
+  test("Matrix copy", () => {
+    const layout = `| . # # |
+| . # # |
+| . . . |
+| * . . |
+`;
+    let m = parseMatrix(layout);
+    let copy = m.getCopy();
+    expect(copy.dump()).toEqual(layout);
   });
 
   test("State dump", () => {
@@ -66,6 +77,8 @@ describe("Basic model", () => {
 
     let s = parseState(layout);
     expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(1, 2))).toEqual(true);
+    expect(s.m.isCrossObstacle(new Coord(2, 1), new Coord(1, 2))).toEqual(false);
+    expect(s.m.isCrossObstacle(new Coord(1, 2), new Coord(2, 1))).toEqual(false);
     expect(s.m.isCrossObstacle(new Coord(3, 1), new Coord(2, 0))).toEqual(false);
   });
 
@@ -78,6 +91,18 @@ describe("Basic model", () => {
     let s = parseState(layout);
     expect(s.m.w).toEqual(4);
     expect(s.m.h).toEqual(2);
+  });
+
+  test("State copy", () => {
+
+    const layout = `| B # # . |
+| W # # . |
+| . F . L |
+| * . X . |
+`;
+    let s = parseState(layout);
+    let copy = s.getCopy();
+    expect(copy.dump()).toEqual(layout);
   });
 
   test("State occupancy test", () => {
@@ -100,4 +125,16 @@ describe("Basic model", () => {
     expect(s.m.isObstacle(1, 0)).toEqual(true);
   });
 
+  test("get neighbors", () => {
+    let layout = `
+      | . . * . |
+      | . . * * |
+      | . . . . |
+      | * . # . |
+    `;
+
+    let m = parseMatrix(layout);
+
+    expect(m.getNeighbors(new Coord(0, 0))).toEqual(parseCoords("(-1,0),(0,-1),(0,1),(1,0)"));
+  })
 });
