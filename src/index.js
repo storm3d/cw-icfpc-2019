@@ -38,8 +38,8 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
 
 if (process.send === undefined) {
 
-    let mapsFrom = 221;
-    let mapsTo = 221;
+    let mapsFrom = 300;
+    let mapsTo = 300;
     for(let i = mapsFrom; i <= mapsTo; i++) {
         exec((i + "").padStart(3, "0"), () => 0, 0);
 

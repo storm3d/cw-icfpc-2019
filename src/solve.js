@@ -266,6 +266,9 @@ export default class Solver {
                       : this.state.getRemainingBoostersNum() ? '*'
                           : ''));
 
+          if(seekingBooster === 'X')
+            this.state.lockInventoryBooster('C', workerId);
+
           //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
 
           // ban other targets
