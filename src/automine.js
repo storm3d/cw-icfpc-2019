@@ -10,6 +10,18 @@ const getLastBlockNumber = (): number => {
     return Math.max(...blocks);
 };
 
+const execSyncFailProofed = (cmd): string => {
+    try {
+        return execSync(cmd).toString().replace('\n', '');
+    } catch (e) {
+        console.error('--------------------------------------ERROR--------------------------------------');
+        console.error(e.message);
+        console.error('--------------------------------------ERROR--------------------------------------');
+
+        return '';
+    }
+};
+
 const getFormattedDate = () => new Date().toLocaleString();
 
 const exec = (checkIntervalMinutes: number) => {
@@ -25,16 +37,16 @@ const exec = (checkIntervalMinutes: number) => {
 
         console.log(getFormattedDate(), '=====================================');
         console.log(getFormattedDate(), `New block detected: #${newLastBlock}`);
-        execSync('yarn generate');
+        execSyncFailProofed('yarn generate');
         console.log(getFormattedDate(), `Solution generated...`);
         lastBlock = newLastBlock;
-        const t = execSync(
+        const t = execSyncFailProofed(
           'cd lambda-client && ' +
           `./lambda-cli.py submit ${newLastBlock} ` +
           `./blocks/${newLastBlock}/task.sol ./blocks/${newLastBlock}/puzzle_sol.desc`
         );
         console.log(getFormattedDate(), `Solution was submitted...`);
-        console.log(getFormattedDate(), `Server response: ${t.toString().replace('\n', '')}`);
+        console.log(getFormattedDate(), `Server response: ${t}`);
         console.log(getFormattedDate(), '=====================================');
     };
 
