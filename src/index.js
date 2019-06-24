@@ -30,7 +30,7 @@ const exec = (model: string, callback: Function, coins: number = 0) => {
     });
      */
 
-    let writer = new Writer(solution, extensions);
+    let writer = new Writer(solution, extensions, solver.state.step + 1);
     writer.write('solutions', model);
 
     callback();
