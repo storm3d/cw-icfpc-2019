@@ -6,7 +6,7 @@ import {Balance} from "../model/balance";
 const {fork} = require('child_process');
 
 const totalProblems = 300;
-let lambdaBalance = 0;
+let lambdaBalance = 238026;
 
 function formatNum(num: number, size: number): string {
     let s = String(num);
@@ -35,9 +35,9 @@ const launch = () => {
 
     let models = Array.from({length: totalProblems}, (v, k) => k + 1);
 
-    let balance = new Balance();
-    lambdaBalance = balance.getBalance();
-
+    // let balance = new Balance();
+    // lambdaBalance = balance.getBalance();
+    
     for (let i = 0; i < numCPUs; i++) {
         const forked = fork('./dist/fork.js');
         forked.send({type: 'start'});
