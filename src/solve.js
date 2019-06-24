@@ -253,14 +253,14 @@ export default class Solver {
         }
 
         // find out target
-        let findResult = this.findWorkerTarget(workerId);
+        let boosterSkip = this.findWorkerTarget(workerId);
         // no target found, exiting
-        if (findResult === 0)
+        if (boosterSkip === 0)
           return this.solution;
 
         // booster was applied before new worker target
-        if (findResult !== ''){
-          this.tickWorkerBoosters(workerId, findResult);
+        if (boosterSkip !== ''){
+          this.tickWorkerBoosters(workerId, boosterSkip);
           continue;
         }
 
@@ -338,12 +338,12 @@ export default class Solver {
     // DRILL TIME!!!
     worker.isDrilling = drillingLong;
     if (worker.drillTicks > 0)
-      return {path: pathDrill, booster: false}; // no extra drilling
+      return {path: pathDrill, boosterSkip: ''}; // no extra drilling
 
     this.state.spendInventoryBooster('L', workerId);
     this.solution.startUsingDrill();
     worker.drillTicks = DRILL_TIME;
-    return {path: pathDrill, booster: true};
+    return {path: pathDrill, boosterSkip: 'L'};
   }
 
   drillTickUpdate(workerId: number) : boolean {
@@ -417,12 +417,12 @@ export default class Solver {
   }
 
   applyTeleportBooster(workerId: number, banTargets, options, workerPath) : Object {
-    // RETURN FALSE TO DISABLE
-    // return false;
+    // RETURN null TO DISABLE
+    // return null;
 
     ////////////// check if it can plant TP
     if (this.tryToPlantTeleport(workerId))
-      return {path: workerPath, booster: "*"};
+      return {path: workerPath, boosterSkip: "*"};
 
     ////////////// ok, let's see if can use some TPs
     let thisStep = this.state.step;
@@ -437,7 +437,7 @@ export default class Solver {
 
     teleports.forEach(teleportObj => {
         if (teleportObj.updated === thisStep)
-          return;
+          return null;
 
         if (teleportObj.path && (workerPath.length < (teleportObj.path.length + 5)))
           return null;
@@ -484,25 +484,29 @@ export default class Solver {
     this.solution.activateTeleport(bestTeleport.pos.x, bestTeleport.pos.y);
     this.state.moveWorker(workerId, bestTeleport.pos);
     //
-    return {path: bestTeleport.path, booster: "*"};
+    return {path: bestTeleport.path, boosterSkip: "*"};
   }
 
   // dumb greedy wheels
-  applyWheelsBooster(workerId: number, workerPath): boolean {
-    // RETURN FALSE TO DISABLE
-    return false;
+  applyWheelsBooster(workerId: number, banTargets, options, workerPath): Object {
+    // RETURN null TO DISABLE
+    return null;
 
     let worker = this.state.workers[workerId];
     if (worker.wheelTicks > 0 || this.state.getAvailableInventoryBoosters('F', workerId) === 0 || worker.drillTicks > 0)
-      return false;
+      return null;
 
-    let pathF = findPath(this.state, this.state.workers[workerId], {fastTime: FAST_TIME});
-    if (pathF !== undefined) {
-      path = pathF;
-      this.state.spendInventoryBooster('F', workerId);
-      this.solution.attachFastWheels();
-      wheelsTurns = FAST_TIME;
+    options.fastTime = FAST_TIME;
+    let pathFast = findPath(this.state, worker, banTargets, options);
+    if (pathF === undefined) {
+      return null;
     }
+
+
+    this.state.spendInventoryBooster('F', workerId);
+    this.solution.attachFastWheels();
+    worker.wheelTicks = FAST_TIME;
+    return {path: pathFast, boosterSkip: 'F'};
 
   }
 
@@ -521,38 +525,48 @@ export default class Solver {
     if (this.isWorkerHasPath(workerId))
       return '';
 
-    let options = {};
-    let result = '';
+    let worker = this.state.workers[workerId];
+    let getOptions = (options) => {
+        return {fastTime: worker.wheelTicks, seekingBooster: options.seekingBooster};
+        };
+
+    let result = ''; // just go for path
     // if path undefined - stop it
     let cb = (path, banTargets, options) => {
       if (path === undefined) {
         if (this.state.m.getFreeNum() === 0) {
-          result = 0;
+          result = 0; // END OF SOLUTION
           return false;
         }
       }
       // try drills
-      let drillOptions = {seekingBooster: options.seekingBooster};
-      let tryDrill = this.tryToApplyDrill(workerId, banTargets, drillOptions, path);
+      let tryDrill = this.tryToApplyDrill(workerId, banTargets, getOptions(options), path);
       if (tryDrill != null) {
-        result = tryDrill.booster;
+        result = tryDrill.boosterSkip;
         path = tryDrill.path;
         return true;
       }
 
       // try teleports
-      let tpOptions = {seekingBooster: options.seekingBooster};
-      let tryTP = this.applyTeleportBooster(workerId, banTargets, drillOptions, path);
+      let tryTP = this.applyTeleportBooster(workerId, banTargets, getOptions(options), path);
       if (tryTP != null) {
-        result = tryTP.booster;
+        result = tryTP.boosterSkip;
         path = tryTP.path;
+        return true;
+      }
+
+      // try wheels
+      let tryW = this.applyWheelsBooster(workerId, banTargets, getOptions(options), path);
+      if (tryW != null) {
+        result = tryW.boosterSkip;
+        path = tryW.path;
         return true;
       }
 
 
       return true;
     };
-    this.tryFindWorkerTarget(workerId, this.state.workers[workerId], options, cb);
+    this.tryFindWorkerTarget(workerId, worker, getOptions({}), cb);
 
     return result;
   }
