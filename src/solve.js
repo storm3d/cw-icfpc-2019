@@ -407,7 +407,7 @@ export default class Solver {
         return false;
 
       // check that it is not too close to another one
-      let teleportsNear = hasActiveTeleport.filter(t => workerPos.isWithinRange(t.pos, 20));
+      let teleportsNear = this.teleports.filter(t => workerPos.isWithinRange(t.pos, 20));
       plantTeleportHere = teleportsNear.length === 0;
     }
 
@@ -452,11 +452,12 @@ export default class Solver {
       return false;
 
     let worker = this.state.workers[workerId];
-    // query for possible path
+
+    // query for possible path of this worker
     let workerPath = null;
     this.tryFindWorkerTarget(workerId, worker, {}, (path) => {
       workerPath = path;
-      //always false here
+      // !! always false here
       return false;
       });
     if (workerPath === undefined)
@@ -472,11 +473,12 @@ export default class Solver {
         if (teleportObj.path && (workerPath.length < (teleportObj.path.length + 5)))
           return false;
 
-        // create worker s if it is in teleport
+        // create worker AS IF it teleported
         let worker = this.state.workers[workerId];
         let workerT = worker.getCopy();
         workerT.pos = teleportObj.pos;
 
+        // query for path from TP
         let tryPathfromTP = (pathTP, banTargets, options) => {
             teleportObj.path = pathTP;
             // no TP-ing if undefined
@@ -484,13 +486,12 @@ export default class Solver {
               return false;
             }
 
-
             // check if it is better than the best
             if (bestTeleport.len < pathTP.length)
               return false;
 
-            // check if it is better than existing
-            let pathIsBetter = (pathTP.length + 25 < workerPath.length);
+            // check if it is better than existing for this worker
+            let pathIsBetter = (pathTP.length + 25) < workerPath.length;
             let isWorkerNear = teleportObj.pos.isWithinRange(worker.pos, 10);
             if (!pathIsBetter || isWorkerNear)
               return false;
@@ -501,19 +502,18 @@ export default class Solver {
                 path: pathTP,
                 seekingBooster : options.seekingBooster,
               };
-            // always false here
+            // !! always false here
             return false;
           };
 
-
-
-
         this.tryFindWorkerTarget(workerId, worker, {}, tryPathfromTP);
+
+        // update TP flag
         teleportObj.updated = thisStep;
       });
 
 
-    // check we have a winner TP here:
+    // check we have a winner TP:
     if (!bestTeleport.pos)
       return false;
 
