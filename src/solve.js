@@ -265,8 +265,8 @@ export default class Solver {
         }
 
         // make worker step
-        this.stepWorkerPath(workerId);
-        this.tickWorkerBoosters(workerId);
+        if (this.stepWorkerPath(workerId))
+          this.tickWorkerBoosters(workerId);
       }
 
       boostersNum = this.state.workers.length;
@@ -490,7 +490,7 @@ export default class Solver {
   // dumb greedy wheels
   applyWheelsBooster(workerId: number, banTargets, options, workerPath): Object {
     // RETURN null TO DISABLE
-    return null;
+    //return null;
 
     let worker = this.state.workers[workerId];
     if (worker.wheelTicks > 0 || this.state.getAvailableInventoryBoosters('F', workerId) === 0 || worker.drillTicks > 0)
@@ -498,7 +498,7 @@ export default class Solver {
 
     options.fastTime = FAST_TIME;
     let pathFast = findPath(this.state, worker, banTargets, options);
-    if (pathF === undefined) {
+    if (pathFast === undefined) {
       return null;
     }
 
@@ -635,11 +635,11 @@ export default class Solver {
                 .map(w => w.target);
   }
 
-  stepWorkerPath(workerId: number) {
+  stepWorkerPath(workerId: number) : boolean {
     let worker = this.state.workers[workerId];
     // act on our current path
     if(!worker.path) {
-      return;
+      return false;
     }
     let curPos = worker.pos;
     let nextPos = worker.path[worker.pathStep];
@@ -658,6 +658,31 @@ export default class Solver {
       this.state.moveWorker(workerId, curPos);
     } else {
 
+        let deltaCoord = curPos.getDiff(nextPos);
+        let stepDelta = Math.abs(deltaCoord.x) + Math.abs(deltaCoord.y);
+        //  console.log(`delta = ${stepDelta}, ${curPos}, ${nextPos}`);
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ARGH!!!! ERROR - PATH TOO SHORT
+        // skip move to ajust to singlesteps
+        if ((stepDelta === 1) && (worker.wheelTicks > 0)) {
+          this.solution.skipTurn();
+          return true;
+        }
+
+        // fast move
+        if (stepDelta === 2) {
+          // create half step move
+          let delta2 = new Coord(deltaCoord.x / 2, deltaCoord.y / 2);
+          let halfPos = curPos.getAdded(delta2);
+          if (worker.wheelTicks > 0) {
+            // apply half step move here to update state properly
+            this.state.moveWorker(workerId, halfPos);
+          } else {
+            worker.path.splice(worker.pathStep+1, 0, nextPos);
+            nextPos = halfPos;
+          }
+        }
+
       // do actual move
         //console.log("moving");
         //console.log(worker.pos);
@@ -672,6 +697,7 @@ export default class Solver {
         worker.pathStep = 0;
       }
     }
+    return true;
   }
 
   solveOld(): Solution {
