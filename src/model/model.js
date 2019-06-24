@@ -584,7 +584,7 @@ export class State {
   }
 
   static isBoosterUseful(type : string) : boolean {
-    return type === "C" || type === "B" /*|| type === "L" || type === "R" || type === "F"*/;
+    return type === "C" || type === "B" || type === "L" /* || type === "R" */ || type === "F";
   }
 
   checkBooster(x : number, y : number, type : string, filterLocked = false) {

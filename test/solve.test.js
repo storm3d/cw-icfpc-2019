@@ -41,13 +41,13 @@ describe("solver", () => {
     //console.log(solver.state.dump());
     expect(solver.state.dump()).toEqual(`| * * W |
 | X # # |
-| * * F |
-| * * R |
+| * * * |
+| * * * |
 `);
     //solver.state.step+=10;
     expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(1);
-    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(1);
+    expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(2);
     expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(1);
 
   })
@@ -112,9 +112,9 @@ describe("solver", () => {
     let solution = solver.solve();
 
     expect(solver.state.m.getFreeNum()).toEqual(0);
-    expect(solver.solution.score).toEqual(543);
+    expect(solver.solution.score).toEqual(572);
     expect(solver.state.getAvailableInventoryBoosters('B', 0)).toEqual(0);
-    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(2);
+    expect(solver.state.getAvailableInventoryBoosters('F', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('L', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('R', 0)).toEqual(0);
     expect(solver.state.getAvailableInventoryBoosters('C', 0)).toEqual(0);

@@ -200,7 +200,7 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
   //adjustPathRotations(wavestep.rotation[btIndex], worker.rotation);
 
  if (fastTime > 0) {
-   console.log([fastTime, worker.pos, path]);
+   //console.log([fastTime, worker.pos, path]);
  }
   return path;
 }
@@ -423,7 +423,7 @@ export default class Solver {
 
   applyTeleportBooster(workerId: number, banTargets, options, workerPath) : Object {
     // RETURN null TO DISABLE
-    // return null;
+    return null;
 
     ////////////// check if it can plant TP
     if (this.tryToPlantTeleport(workerId))
@@ -496,7 +496,7 @@ export default class Solver {
   // dumb greedy wheels
   applyWheelsBooster(workerId: number, banTargets, options, workerPath): Object {
     // RETURN null TO DISABLE
-    return null;
+    // return null;
 
     let worker = this.state.workers[workerId];
     if (worker.wheelTicks > 0 || this.state.getAvailableInventoryBoosters('F', workerId) === 0 || worker.drillTicks > 0)
@@ -539,6 +539,16 @@ export default class Solver {
     let result = ''; // just go for path
     // if path undefined - stop it
     let cb = (path, banTargets, options, resPath) => {
+      //console.log("HERE", path);
+      if (path === undefined) {
+        // try rerun w\o fast bonus
+        if (options.fastTime > 0) {
+          let slowRun = getOptions(options);
+          slowRun.fastTime = 0;
+          path = findPath(this.state, worker, banTargets, slowRun);
+          resPath.path = path;
+        }
+      }
       if (path === undefined) {
         if (this.state.m.getFreeNum() === 0) {
           result = 0; // END OF SOLUTION
@@ -671,8 +681,7 @@ export default class Solver {
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ARGH!!!! ERROR - PATH TOO SHORT
         // skip move to ajust to singlesteps
         if ((stepDelta === 1) && (worker.wheelTicks > 0)) {
-          console.log(worker.path);
-          throw "UPS";
+          //throw "UPS";
           this.solution.skipTurn();
           return true;
         }
