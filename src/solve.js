@@ -239,8 +239,19 @@ export default class Solver {
       for(let workerId = 0; workerId < boostersNum; workerId++) {
         this.solution.setWorkerId(workerId);
 
+        if (this.drillTickUpdate(workerId)) {
+          this.tickWorkerBoosters(workerId, 'L');
+          continue;
+        }
+
         // do we need to apply booster?
         if (this.applyMainBoosters(workerId)) {
+          this.tickWorkerBoosters(workerId);
+          continue;
+        }
+
+        if (this.tryToApplyDrill(workerId)) {
+          this.tickWorkerBoosters(workerId, 'L');
           continue;
         }
 
@@ -249,7 +260,7 @@ export default class Solver {
           return this.solution;
         // make worker step
         this.stepWorkerPath(workerId);
-
+        this.tickWorkerBoosters(workerId);
       }
 
       boostersNum = this.state.workers.length;
@@ -277,84 +288,153 @@ export default class Solver {
     }
     return false;
   }
-  
-  tryToDrill(workerId: number, banTargets : Array<Coord>, options: Object) {
+
+  // dumb greedy drills
+  tryToApplyDrill(workerId: number) {
+    if (this.isWorkerHasPath(workerId))
+        return false;
+
     let worker = this.state.workers[workerId];
+    worker.isDrilling = false;
+
     let drillsCount = this.state.getAvailableInventoryBoosters('L', workerId);
-    // dumb greedy drills
     if (drillsCount === 0 && worker.drillTicks === 0)
       return false;
 
+    let applyDrills = false;
+    let tryOptions = {isDrilling : true};
+    // if path undefined - stop it
+    let cb = (pathDrill, banTargets, options) => {
+      // no drills if undefined`
+      if (pathDrill === undefined) {
+        return false;
+      }
+      // calculate w\o drilling
+      options.isDrilling = false;
+      let pathNoDrill = findPath(this.state, worker, banTargets, options);
 
-    options.isDrilling = true;
-    let pathDrill = findPath(this.state, worker, banTargets, options);
-    
-    // consider path if you actually can do it
-    let considerDrilling = (path1.length < (drillTurns + drillsCount * DRILL_TIME));
-    let pathDrillIsShorter = (pathDrill.length + 20) < worker.path.length;
-    //
-    let drilling = considerDrilling && pathDrillIsShorter;
-    if (drilling) {
-        //console.log(`!!!!!!!!!!!!${path.length}, ${path1.length}`);
-        worker.path = path1;
-        if (drillTurns === 0) {
-            this.state.spendInventoryBooster('L', workerId);
-            this.solution.startUsingDrill();
-            drillTurns = DRILL_TIME;
-            stepActiveWheels();
-        }
+      // consider path if you actually can do it
+      let considerDrilling = (pathDrill.length < (worker.drillTicks + drillsCount * DRILL_TIME));
+      let pathDrillIsShorter = (pathDrill.length + 20) < pathNoDrill;
+      //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
+      if (!considerDrilling || !pathDrillIsShorter) {
+        return false;
+      }
+
+      if (worker.drillTicks === 0) {
+        this.state.spendInventoryBooster('L', workerId);
+        this.solution.startUsingDrill();
+        worker.drillTicks = DRILL_TIME;
+        applyDrills = true;
+      }
+      worker.isDrilling = true;
+      // apply new
+      return true;
+    };
+    let pathIsNew = this.tryFindWorkerTarget(workerId, tryOptions, cb);
+    if (pathIsNew){
+      return applyDrills;
+    }
+    return false;
+  }
+
+  drillTickUpdate(workerId: number) : boolean {
+    let worker = this.state.workers[workerId];
+
+    if (!worker.isDrilling || worker.drillTicks > 0) {
+      return false;
+    }
+
+    if (this.state.getAvailableInventoryBoosters('L', workerId) === 0) {
+      return false;
+    }
+    this.state.spendInventoryBooster('L', workerId);
+    this.solution.startUsingDrill();
+    worker.drillTicks = DRILL_TIME;
+    return true;
+  }
+
+  tickWorkerBoosters(workerId: number, skipBoosterTick: string = '*') : boolean {
+    let worker = this.state.workers[workerId];
+
+    if (skipBoosterTick !== 'L' && worker.drillTicks > 0) {
+        worker.drillTicks--;
     }
   }
 
   findWorkerTarget(workerId: number): boolean {
+    if (this.isWorkerHasPath(workerId))
+      return true;
+
+    let options = {};
+    // if path undefined - stop it
+    let cb = (path) => {
+      if (path === undefined) {
+        if (this.state.m.getFreeNum() === 0) {
+          return false;
+        }
+      }
+      return true;
+    };
+    return this.tryFindWorkerTarget(workerId, options, cb);
+  }
+
+  isWorkerHasPath(workerId: number) : boolean {
     let worker = this.state.workers[workerId];
     if(!worker.path || worker.path.length > 0) {
       return true;
     }
+    return false;
+  }
 
-    let seekingBooster = !this.state.spawnsPresent ? 0
+  isSeekingBooster(workerId: number) : string {
+    return !this.state.spawnsPresent ? 0
         : (this.state.getAvailableInventoryBoosters('C', workerId) ? 'X'
         : (this.state.getRemainingCloningNum() ? 'C'
                 : this.state.getRemainingUnlockedBoostersNum() ? '*'
                     : ''));
+  }
 
-    //if(this.state.getRemainingUnlockedBoostersNum())
-          //  console.log(this.state.step + " worker: " + workerId + " seeking "
-           ///     + seekingBooster + " unlocked "
-              //  + this.state.getRemainingUnlockedBoostersNum() + " cloning unlocked " + this.state.getRemainingCloningNum());
-          if(seekingBooster === 'X')
-            this.state.lockInventoryBooster('C', workerId);
-
-    //console.log(seekingBooster + " " + this.state.getRemainingBoostersNum());
-
-    // ban other targets
-    let banTargets = this.getBannedTargets(workerId);
-    let options = {seekingBooster : seekingBooster};
-
-    let path = findPath(this.state, worker, banTargets, options);
-    if (path === undefined) {
-      if (this.state.m.getFreeNum() === 0) {
-        return false;
-      }
-    } else {
-      //this.tryToDrill(workerId, banTargets, options);
+  lockIfCloneBooster(workerId: number, seekingBooster: string) {
+    if(seekingBooster === 'X') {
+      this.state.lockInventoryBooster('C', workerId);
     }
+  }
 
-    //console.log("1");
-          worker.path = path;
-          if(worker.path)
-            worker.target = path[path.length - 1];
-          else
-            worker.target = 0;
+  applyNewPath(workerId: number, seekingBooster: string, path) {
+    let worker = this.state.workers[workerId];
+    worker.path = path;
+    if(worker.path)
+      worker.target = path[path.length - 1];
+    else
+      worker.target = 0;
 
     if(worker.target && (seekingBooster === '*' || seekingBooster === 'C')) {
       let b = this.state.checkBooster(worker.target.x, worker.target.y, '*');
       if(b.lockedBy === -1 && b.type !== 'X') {
         b.lockedBy = workerId;
               //console.log("locked "+ b.type);
-            }
+      }
+    }
+  }
+
+  tryFindWorkerTarget(workerId: number, options, cb): boolean {
+    let worker = this.state.workers[workerId];
+
+    let seekingBooster = this.isSeekingBooster(workerId);
+    this.lockIfCloneBooster(workerId, seekingBooster);
+
+    // ban other targets
+    let banTargets = this.getBannedTargets(workerId);
+    options.seekingBooster = seekingBooster;
+
+    let path = findPath(this.state, worker, banTargets, options);
+    if (!cb(path, banTargets, options)) {
+      return false;
     }
 
+    //console.log("1");
+    this.applyNewPath(workerId, seekingBooster, path);
     return true;
   }
 
