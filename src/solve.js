@@ -303,7 +303,7 @@ export default class Solver {
 
     let applyDrills = false;
     let tryOptions = {isDrilling : true};
-    // LONG DRILLS
+    // LONG DRILLS (WARNING! not safe!)
     // let possibleDrillLen = worker.drillTicks + drillsCount * DRILL_TIME;
     // let drillingLong = true;
 
@@ -321,23 +321,22 @@ export default class Solver {
         return false;
       }
       // calculate path w\o drilling option
-      // to compare
+      // to compare with
       options.isDrilling = false;
       let pathNoDrill = findPath(this.state, worker, banTargets, options);
-      if (pathNoDrill === undefined) {
-        return false;
-      }
+      if (pathNoDrill !== undefined) {
 
-      // consider path if you actually can do it
-      let considerDrilling = (pathDrill.length < possibleDrillLen);
-      let pathDrillIsShorter = (pathDrill.length + 10) < pathNoDrill;
-      // some heuristic to compare path targets
-      let p1 = pathDrill[pathDrill.length - 1];
-      let p2 = pathNoDrill[pathNoDrill.length - 1];
-      let pathDrillIsBetter = pixelCost(this.state.m, p1.x, p1.y) < pixelCost(this.state.m, p2.x, p2.y);
-      //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
-      if (!(considerDrilling && (pathDrillIsShorter || pathDrillIsBetter))) {
-        return false;
+        // consider path if you actually can do it
+        let considerDrilling = (pathDrill.length < possibleDrillLen);
+        let pathDrillIsShorter = (pathDrill.length + 10) < pathNoDrill;
+        // some heuristic to compare path targets
+        let p1 = pathDrill[pathDrill.length - 1];
+        let p2 = pathNoDrill[pathNoDrill.length - 1];
+        let pathDrillIsBetter = pixelCost(this.state.m, p1.x, p1.y) < pixelCost(this.state.m, p2.x, p2.y);
+        //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
+        if (!(considerDrilling && (pathDrillIsShorter || pathDrillIsBetter))) {
+          return false;
+        }
       }
 
       // DRILL TIME!!!
@@ -365,6 +364,7 @@ export default class Solver {
     }
 
     if (this.state.getAvailableInventoryBoosters('L', workerId) === 0) {
+      worker.isDrilling = false;
       return false;
     }
     this.state.spendInventoryBooster('L', workerId);
