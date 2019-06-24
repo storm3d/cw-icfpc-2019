@@ -252,19 +252,18 @@ export default class Solver {
           continue;
         }
 
-        if (this.tryToApplyDrill(workerId)) {
-          this.tickWorkerBoosters(workerId, 'L');
-          continue;
-        }
-
-        if (this.applyTeleportBooster(workerId)) {
-          this.tickWorkerBoosters(workerId);
-          continue;
-        }
-
         // find out target
-        if (!this.findWorkerTarget(workerId))
+        let findResult = this.findWorkerTarget(workerId);
+        // no target found, exiting
+        if (findResult === 0)
           return this.solution;
+
+        // booster was applied before new worker target
+        if (findResult !== ''){
+          this.tickWorkerBoosters(workerId, findResult);
+          continue;
+        }
+
         // make worker step
         this.stepWorkerPath(workerId);
         this.tickWorkerBoosters(workerId);
@@ -297,19 +296,17 @@ export default class Solver {
   }
 
   // dumb greedy drills
-  tryToApplyDrill(workerId: number) {
-    if (this.isWorkerHasPath(workerId))
-        return false;
+  tryToApplyDrill(workerId: number, banTargets, options, pathNoDrill) : Object {
+    // RETURN null TO DISABLE
+    // return null;
 
     let worker = this.state.workers[workerId];
     worker.isDrilling = false;
 
     let drillsCount = this.state.getAvailableInventoryBoosters('L', workerId);
     if (drillsCount === 0 && worker.drillTicks === 0)
-      return false;
+      return null;
 
-    let applyDrills = false;
-    let tryOptions = {isDrilling : true};
     // LONG DRILLS (WARNING! not safe!)
     // let possibleDrillLen = worker.drillTicks + drillsCount * DRILL_TIME;
     // let drillingLong = true;
@@ -318,49 +315,35 @@ export default class Solver {
     let possibleDrillLen = worker.drillTicks > 0 ? worker.drillTicks : DRILL_TIME;
     let drillingLong = false;
 
-    let cb = (pathDrill, banTargets, options) => {
-      ///////
-      /////// just return false here to forbid drills
-      /////// return false;
+    options.isDrilling = true;
+    let pathDrill = findPath(this.state, worker, banTargets, options);
 
-      // no drills if undefined
-      if (pathDrill === undefined) {
-        return false;
-      }
-      // calculate path w\o drilling option
-      // to compare with
-      options.isDrilling = false;
-      let pathNoDrill = findPath(this.state, worker, banTargets, options);
-      if (pathNoDrill !== undefined) {
-
-        // consider path if you actually can do it
-        let considerDrilling = (pathDrill.length < possibleDrillLen);
-        let pathDrillIsShorter = (pathDrill.length + 10) < pathNoDrill;
-        // some heuristic to compare path targets
-        let p1 = pathDrill[pathDrill.length - 1];
-        let p2 = pathNoDrill[pathNoDrill.length - 1];
-        let pathDrillIsBetter = pixelCost(this.state.m, p1.x, p1.y) < pixelCost(this.state.m, p2.x, p2.y);
-        //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
-        if (!(considerDrilling && (pathDrillIsShorter || pathDrillIsBetter))) {
-          return false;
-        }
-      }
-
-      // DRILL TIME!!!
-      if (worker.drillTicks === 0) {
-        this.state.spendInventoryBooster('L', workerId);
-        this.solution.startUsingDrill();
-        worker.drillTicks = DRILL_TIME;
-        applyDrills = true;
-      }
-      worker.isDrilling = drillingLong;
-      return true;
-    };
-    let pathIsNew = this.tryFindWorkerTarget(workerId, worker, tryOptions, cb);
-    if (pathIsNew){
-      return applyDrills;
+    // no drills if undefined
+    if (pathDrill === undefined) {
+      return null;
     }
-    return false;
+
+    // consider path if you actually can do it
+    let considerDrilling = (pathDrill.length < possibleDrillLen);
+    let pathDrillIsShorter = (pathDrill.length + 10) < pathNoDrill;
+    // some heuristic to compare path targets
+    let p1 = pathDrill[pathDrill.length - 1];
+    let p2 = pathNoDrill[pathNoDrill.length - 1];
+    let pathDrillIsBetter = pixelCost(this.state.m, p1.x, p1.y) < pixelCost(this.state.m, p2.x, p2.y);
+    //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
+    if (!(considerDrilling && (pathDrillIsShorter || pathDrillIsBetter))) {
+      return null;
+    }
+
+    // DRILL TIME!!!
+    worker.isDrilling = drillingLong;
+    if (worker.drillTicks > 0)
+      return {path: pathDrill, booster: false}; // no extra drilling
+
+    this.state.spendInventoryBooster('L', workerId);
+    this.solution.startUsingDrill();
+    worker.drillTicks = DRILL_TIME;
+    return {path: pathDrill, booster: true};
   }
 
   drillTickUpdate(workerId: number) : boolean {
@@ -381,7 +364,7 @@ export default class Solver {
   }
 
   // teleports
-  tryToPlantTeleport(workerId: number) {
+  tryToPlantTeleport(workerId: number) : boolean {
     let worker = this.state.workers[workerId];
     let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
 
@@ -433,96 +416,94 @@ export default class Solver {
     return true;
   }
 
-  applyTeleportBooster(workerId: number) : boolean {
-    if (this.isWorkerHasPath(workerId))
-        return false;
+  applyTeleportBooster(workerId: number, banTargets, options, workerPath) : Object {
     // RETURN FALSE TO DISABLE
-    return false;
+    // return false;
 
     ////////////// check if it can plant TP
     if (this.tryToPlantTeleport(workerId))
-      return true;
+      return {path: workerPath, booster: "*"};
 
-    ////////////// ok, let's if can use some TPs
-
+    ////////////// ok, let's see if can use some TPs
     let thisStep = this.state.step;
     // filter available TPs
     let teleports = this.teleports.filter(t => t.step > thisStep);
     if (teleports.length === 0)
-      return false;
+      return null;
 
     let worker = this.state.workers[workerId];
 
-    // query for possible path of this worker
-    let workerPath = null;
-    this.tryFindWorkerTarget(workerId, worker, {}, (path) => {
-      workerPath = path;
-      // !! always false here
-      return false;
-      });
-    if (workerPath === undefined)
-      return false;
-
     let bestTeleport = {len: 999999, pos: null, path: null, seekingBooster: null};
-
 
     teleports.forEach(teleportObj => {
         if (teleportObj.updated === thisStep)
           return;
 
         if (teleportObj.path && (workerPath.length < (teleportObj.path.length + 5)))
-          return false;
+          return null;
 
         // create worker AS IF it teleported
         let worker = this.state.workers[workerId];
         let workerT = worker.getCopy();
         workerT.pos = teleportObj.pos;
 
-        // query for path from TP
-        let tryPathfromTP = (pathTP, banTargets, options) => {
-            teleportObj.path = pathTP;
-            // no TP-ing if undefined
-            if (pathTP === undefined) {
-              return false;
-            }
+        let pathTP = findPath(this.state, workerT, banTargets, options);
 
-            // check if it is better than the best
-            if (bestTeleport.len < pathTP.length)
-              return false;
+        teleportObj.path = pathTP;
+        teleportObj.updated = thisStep;
+        // no TP-ing if undefined
+        if (pathTP === undefined) {
+          return null;
+        }
 
-            // check if it is better than existing for this worker
-            let pathIsBetter = (pathTP.length + 25) < workerPath.length;
-            let isWorkerNear = teleportObj.pos.isWithinRange(worker.pos, 10);
-            if (!pathIsBetter || isWorkerNear)
-              return false;
+        // check if it is better than the best
+        if (bestTeleport.len < pathTP.length)
+          return null;
 
-            bestTeleport = {
-                len : pathTP.length,
-                pos : teleportObj.pos,
-                path: pathTP,
-                seekingBooster : options.seekingBooster,
-              };
-            // !! always false here
-            return false;
+        // check if it is better than existing for this worker
+        let pathIsBetter = (pathTP.length + 25) < workerPath.length;
+        let isWorkerNear = teleportObj.pos.isWithinRange(worker.pos, 10);
+        if (!pathIsBetter || isWorkerNear)
+          return null;
+
+        bestTeleport = {
+            len : pathTP.length,
+            pos : teleportObj.pos,
+            path: pathTP,
+            seekingBooster : options.seekingBooster,
           };
 
-        this.tryFindWorkerTarget(workerId, worker, {}, tryPathfromTP);
-
-        // update TP flag
-        teleportObj.updated = thisStep;
       });
 
 
     // check we have a winner TP:
     if (!bestTeleport.pos)
-      return false;
+      return null;
 
-    // apply TP pos and assign new path for worker
+    // apply TP pos to worker
     this.solution.activateTeleport(bestTeleport.pos.x, bestTeleport.pos.y);
     this.state.moveWorker(workerId, bestTeleport.pos);
     //
-    this.applyNewPath(workerId, bestTeleport.seekingBooster, bestTeleport.path);
-    return true;
+    return {path: bestTeleport.path, booster: "*"};
+  }
+
+  // dumb greedy wheels
+  applyWheelsBooster(workerId: number, workerPath): boolean {
+    // RETURN FALSE TO DISABLE
+    return false;
+
+    let worker = this.state.workers[workerId];
+    if (worker.wheelTicks > 0 || this.state.getAvailableInventoryBoosters('F', workerId) === 0 || worker.drillTicks > 0)
+      return false;
+
+    let pathF = findPath(this.state, this.state.workers[workerId], {fastTime: FAST_TIME});
+    if (pathF !== undefined) {
+      path = pathF;
+      this.state.spendInventoryBooster('F', workerId);
+      this.solution.attachFastWheels();
+      wheelsTurns = FAST_TIME;
+    }
+
   }
 
   tickWorkerBoosters(workerId: number, skipBoosterTick: string = '*') : boolean {
@@ -531,23 +512,49 @@ export default class Solver {
     if (skipBoosterTick !== 'L' && worker.drillTicks > 0) {
         worker.drillTicks--;
     }
+    if (skipBoosterTick !== 'F' && worker.wheelTicks > 0) {
+        worker.wheelTicks--;
+    }
   }
 
-  findWorkerTarget(workerId: number): boolean {
+  findWorkerTarget(workerId: number) {
     if (this.isWorkerHasPath(workerId))
-      return true;
+      return '';
 
     let options = {};
+    let result = '';
     // if path undefined - stop it
-    let cb = (path) => {
+    let cb = (path, banTargets, options) => {
       if (path === undefined) {
         if (this.state.m.getFreeNum() === 0) {
+          result = 0;
           return false;
         }
       }
+      // try drills
+      let drillOptions = {seekingBooster: options.seekingBooster};
+      let tryDrill = this.tryToApplyDrill(workerId, banTargets, drillOptions, path);
+      if (tryDrill != null) {
+        result = tryDrill.booster;
+        path = tryDrill.path;
+        return true;
+      }
+
+      // try teleports
+      let tpOptions = {seekingBooster: options.seekingBooster};
+      let tryTP = this.applyTeleportBooster(workerId, banTargets, drillOptions, path);
+      if (tryTP != null) {
+        result = tryTP.booster;
+        path = tryTP.path;
+        return true;
+      }
+
+
       return true;
     };
-    return this.tryFindWorkerTarget(workerId, this.state.workers[workerId], options, cb);
+    this.tryFindWorkerTarget(workerId, this.state.workers[workerId], options, cb);
+
+    return result;
   }
 
   isWorkerHasPath(workerId: number) : boolean {
