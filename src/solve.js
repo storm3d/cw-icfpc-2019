@@ -6,7 +6,7 @@ import {Coord, Matrix, WaveMatrix, State, Rover, DRILL_TIME, FAST_TIME, Inventor
 import { MANIPULATOR_PRICE, CLONING_PRICE } from './constants/boosters';
 
 const maxSearchLen = 10000;
-const minSearchLen = 2;
+const minSearchLen = 3;
 
 
 export function getTurnType(rotation : number, dx : number, dy : number) : number {
