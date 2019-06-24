@@ -36,8 +36,10 @@ export class Coord {
     return new Coord(this.x + 0.5, this.y + 0.5);
   }
 
-  isEqual(c : Coord) {
-    return this.x === c.x && this.y === c.y;
+  isWithinRange(c : Coord, range: number): boolean {
+    let dx = c.x - this.x;
+    let dy = c.y - this.y;
+    return (Math.abs(dx) + Math.abs(dy)) < range;
   }
 
   getCopy() {

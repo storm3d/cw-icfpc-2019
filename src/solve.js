@@ -212,6 +212,8 @@ export default class Solver {
   state : State;
   solution : Solution;
   coins: number = 0;
+  hasTeleportInCenter: boolean = false;
+  teleports: Array<Object> = [];
 
   constructor(state : State) {
     this.state = state;
@@ -252,6 +254,11 @@ export default class Solver {
 
         if (this.tryToApplyDrill(workerId)) {
           this.tickWorkerBoosters(workerId, 'L');
+          continue;
+        }
+
+        if (this.applyTeleportBooster(workerId)) {
+          this.tickWorkerBoosters(workerId);
           continue;
         }
 
@@ -349,7 +356,7 @@ export default class Solver {
       worker.isDrilling = drillingLong;
       return true;
     };
-    let pathIsNew = this.tryFindWorkerTarget(workerId, tryOptions, cb);
+    let pathIsNew = this.tryFindWorkerTarget(workerId, worker, tryOptions, cb);
     if (pathIsNew){
       return applyDrills;
     }
@@ -370,6 +377,151 @@ export default class Solver {
     this.state.spendInventoryBooster('L', workerId);
     this.solution.startUsingDrill();
     worker.drillTicks = DRILL_TIME;
+    return true;
+  }
+
+  // teleports
+  tryToPlantTeleport(workerId: number) {
+    let worker = this.state.workers[workerId];
+    let matrixCenter = new Coord(this.state.m.w /2 , this.state.m.h /2);
+
+    let teleportsInInventory = this.state.getAvailableInventoryBoosters('R', workerId);
+    if (worker.isDrilling || (teleportsInInventory === 0))
+      return false;
+
+    // not use it in very small tasks
+    if (matrixCenter.x < 20 && matrixCenter.y < 20)
+      return false;
+
+    let workerPos = worker.pos;
+
+    // plant teleport near center if we have one
+    let isNearCenter = workerPos.isWithinRange(matrixCenter, 20);
+    let plantTeleportHere = !this.hasTeleportInCenter && isNearCenter;
+
+    // try another approach:
+    let DEBUG_PLANT_MORE_THAN_ONE = true; // TODO: remove
+    if (DEBUG_PLANT_MORE_THAN_ONE && !plantTeleportHere) {
+      // if there is one TP in center or we have more than one TP in inventory
+      if (teleportsInInventory < 2 && !this.hasTeleportInCenter)
+        return false;
+
+      // check that it is not too close to another one
+      let teleportsNear = hasActiveTeleport.filter(t => workerPos.isWithinRange(t.pos, 20));
+      plantTeleportHere = teleportsNear.length === 0;
+    }
+
+    if (!plantTeleportHere)
+      return false;
+
+    ////// now plant teleport:
+
+    // set flag
+    if (isNearCenter)
+        this.hasTeleportInCenter = true;
+
+    this.state.spendInventoryBooster('R', workerId);
+    this.solution.plantTeleport();
+    let newTeleport = {
+        pos: workerPos.getCopy(),
+        path: null,
+        updated: this.state.step,
+        step: this.state.step,
+      };
+    this.teleports.push(newTeleport);
+
+    return true;
+  }
+
+  applyTeleportBooster(workerId: number) : boolean {
+    if (this.isWorkerHasPath(workerId))
+        return false;
+    // RETURN FALSE TO DISABLE
+    return false;
+
+    ////////////// check if it can plant TP
+    if (this.tryToPlantTeleport(workerId))
+      return true;
+
+    ////////////// ok, let's if can use some TPs
+
+    let thisStep = this.state.step;
+    // filter available TPs
+    let teleports = this.teleports.filter(t => t.step > thisStep);
+    if (teleports.length === 0)
+      return false;
+
+    let worker = this.state.workers[workerId];
+    // query for possible path
+    let workerPath = null;
+    this.tryFindWorkerTarget(workerId, worker, {}, (path) => {
+      workerPath = path;
+      //always false here
+      return false;
+      });
+    if (workerPath === undefined)
+      return false;
+
+    let bestTeleport = {len: 999999, pos: null, path: null, seekingBooster: null};
+
+
+    teleports.forEach(teleportObj => {
+        if (teleportObj.updated === thisStep)
+          return;
+
+        if (teleportObj.path && (workerPath.length < (teleportObj.path.length + 5)))
+          return false;
+
+        // create worker s if it is in teleport
+        let worker = this.state.workers[workerId];
+        let workerT = worker.getCopy();
+        workerT.pos = teleportObj.pos;
+
+        let tryPathfromTP = (pathTP, banTargets, options) => {
+            teleportObj.path = pathTP;
+            // no TP-ing if undefined
+            if (pathTP === undefined) {
+              return false;
+            }
+
+
+            // check if it is better than the best
+            if (bestTeleport.len < pathTP.length)
+              return false;
+
+            // check if it is better than existing
+            let pathIsBetter = (pathTP.length + 25 < workerPath.length);
+            let isWorkerNear = teleportObj.pos.isWithinRange(worker.pos, 10);
+            if (!pathIsBetter || isWorkerNear)
+              return false;
+
+            bestTeleport = {
+                len : pathTP.length,
+                pos : teleportObj.pos,
+                path: pathTP,
+                seekingBooster : options.seekingBooster,
+              };
+            // always false here
+            return false;
+          };
+
+
+
+
+        this.tryFindWorkerTarget(workerId, worker, {}, tryPathfromTP);
+        teleportObj.updated = thisStep;
+      });
+
+
+    // check we have a winner TP here:
+    if (!bestTeleport.pos)
+      return false;
+
+    // apply TP pos and assign new path for worker
+    this.solution.activateTeleport(bestTeleport.pos.x, bestTeleport.pos.y);
+    this.state.moveWorker(workerId, bestTeleport.pos);
+    //
+    this.applyNewPath(workerId, bestTeleport.seekingBooster, bestTeleport.path);
     return true;
   }
 
@@ -395,7 +547,7 @@ export default class Solver {
       }
       return true;
     };
-    return this.tryFindWorkerTarget(workerId, options, cb);
+    return this.tryFindWorkerTarget(workerId, this.state.workers[workerId], options, cb);
   }
 
   isWorkerHasPath(workerId: number) : boolean {
@@ -437,9 +589,7 @@ export default class Solver {
     }
   }
 
-  tryFindWorkerTarget(workerId: number, options, cb): boolean {
-    let worker = this.state.workers[workerId];
-
+  tryFindWorkerTarget(workerId: number, worker: Rover, options, cb): boolean {
     let seekingBooster = this.isSeekingBooster(workerId);
     this.lockIfCloneBooster(workerId, seekingBooster);
 
