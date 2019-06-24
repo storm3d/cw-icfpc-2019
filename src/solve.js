@@ -538,6 +538,7 @@ export default class Solver {
           result = 0; // END OF SOLUTION
           return false;
         }
+        return true;
       }
       // try drills
       let tryDrill = this.tryToApplyDrill(workerId, banTargets, getOptions(options), path);
