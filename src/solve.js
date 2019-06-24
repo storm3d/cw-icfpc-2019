@@ -199,6 +199,9 @@ export function findPath(s: State, worker : Rover, banTargets : Array<Coord>, op
   path.shift();
   //adjustPathRotations(wavestep.rotation[btIndex], worker.rotation);
 
+ if (fastTime > 0) {
+   console.log([fastTime, worker.pos, path]);
+ }
   return path;
 }
 
@@ -316,6 +319,8 @@ export default class Solver {
     let drillingLong = false;
 
     options.isDrilling = true;
+    if (worker.drillTicks === 0)
+      options.fastTime = worker.wheelTicks - 1;
     let pathDrill = findPath(this.state, worker, banTargets, options);
 
     // no drills if undefined
@@ -447,6 +452,7 @@ export default class Solver {
         let workerT = worker.getCopy();
         workerT.pos = teleportObj.pos;
 
+        options.fastTime = worker.wheelTicks - 1;
         let pathTP = findPath(this.state, workerT, banTargets, options);
 
         teleportObj.path = pathTP;
@@ -490,7 +496,7 @@ export default class Solver {
   // dumb greedy wheels
   applyWheelsBooster(workerId: number, banTargets, options, workerPath): Object {
     // RETURN null TO DISABLE
-    //return null;
+    return null;
 
     let worker = this.state.workers[workerId];
     if (worker.wheelTicks > 0 || this.state.getAvailableInventoryBoosters('F', workerId) === 0 || worker.drillTicks > 0)
@@ -532,7 +538,7 @@ export default class Solver {
 
     let result = ''; // just go for path
     // if path undefined - stop it
-    let cb = (path, banTargets, options) => {
+    let cb = (path, banTargets, options, resPath) => {
       if (path === undefined) {
         if (this.state.m.getFreeNum() === 0) {
           result = 0; // END OF SOLUTION
@@ -544,7 +550,7 @@ export default class Solver {
       let tryDrill = this.tryToApplyDrill(workerId, banTargets, getOptions(options), path);
       if (tryDrill != null) {
         result = tryDrill.boosterSkip;
-        path = tryDrill.path;
+        resPath.path = tryDrill.path;
         return true;
       }
 
@@ -552,7 +558,7 @@ export default class Solver {
       let tryTP = this.applyTeleportBooster(workerId, banTargets, getOptions(options), path);
       if (tryTP != null) {
         result = tryTP.boosterSkip;
-        path = tryTP.path;
+        resPath.path = tryTP.path;
         return true;
       }
 
@@ -560,10 +566,9 @@ export default class Solver {
       let tryW = this.applyWheelsBooster(workerId, banTargets, getOptions(options), path);
       if (tryW != null) {
         result = tryW.boosterSkip;
-        path = tryW.path;
+        resPath.path = tryW.path;
         return true;
       }
-
 
       return true;
     };
@@ -620,12 +625,13 @@ export default class Solver {
     options.seekingBooster = seekingBooster;
 
     let path = findPath(this.state, worker, banTargets, options);
-    if (!cb(path, banTargets, options)) {
+    let resPath = {path: path};
+    if (!cb(path, banTargets, options, resPath)) {
       return false;
     }
 
     //console.log("1");
-    this.applyNewPath(workerId, seekingBooster, path);
+    this.applyNewPath(workerId, seekingBooster, resPath.path);
     return true;
   }
 
@@ -665,6 +671,8 @@ export default class Solver {
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ARGH!!!! ERROR - PATH TOO SHORT
         // skip move to ajust to singlesteps
         if ((stepDelta === 1) && (worker.wheelTicks > 0)) {
+          console.log(worker.path);
+          throw "UPS";
           this.solution.skipTurn();
           return true;
         }
