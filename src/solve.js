@@ -303,32 +303,51 @@ export default class Solver {
 
     let applyDrills = false;
     let tryOptions = {isDrilling : true};
-    // if path undefined - stop it
+    // LONG DRILLS
+    // let possibleDrillLen = worker.drillTicks + drillsCount * DRILL_TIME;
+    // let drillingLong = true;
+
+    // SHORT DRILLS
+    let possibleDrillLen = worker.drillTicks > 0 ? worker.drillTicks : DRILL_TIME;
+    let drillingLong = false;
+
     let cb = (pathDrill, banTargets, options) => {
-      // no drills if undefined`
+      ///////
+      /////// just return false here to forbid drills
+      /////// return false;
+
+      // no drills if undefined
       if (pathDrill === undefined) {
         return false;
       }
-      // calculate w\o drilling
+      // calculate path w\o drilling option
+      // to compare
       options.isDrilling = false;
       let pathNoDrill = findPath(this.state, worker, banTargets, options);
-
-      // consider path if you actually can do it
-      let considerDrilling = (pathDrill.length < (worker.drillTicks + drillsCount * DRILL_TIME));
-      let pathDrillIsShorter = (pathDrill.length + 20) < pathNoDrill;
-      //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
-      if (!considerDrilling || !pathDrillIsShorter) {
+      if (pathNoDrill === undefined) {
         return false;
       }
 
+      // consider path if you actually can do it
+      let considerDrilling = (pathDrill.length < possibleDrillLen);
+      let pathDrillIsShorter = (pathDrill.length + 10) < pathNoDrill;
+      // some heuristic to compare path targets
+      let p1 = pathDrill[pathDrill.length - 1];
+      let p2 = pathNoDrill[pathNoDrill.length - 1];
+      let pathDrillIsBetter = pixelCost(this.state.m, p1.x, p1.y) < pixelCost(this.state.m, p2.x, p2.y);
+      //console.log([considerDrilling , pathDrill.length, pathNoDrill]);
+      if (!(considerDrilling && (pathDrillIsShorter || pathDrillIsBetter))) {
+        return false;
+      }
+
+      // DRILL TIME!!!
       if (worker.drillTicks === 0) {
         this.state.spendInventoryBooster('L', workerId);
         this.solution.startUsingDrill();
         worker.drillTicks = DRILL_TIME;
         applyDrills = true;
       }
-      worker.isDrilling = true;
-      // apply new
+      worker.isDrilling = drillingLong;
       return true;
     };
     let pathIsNew = this.tryFindWorkerTarget(workerId, tryOptions, cb);

@@ -52,7 +52,7 @@ export class Writer {
         let scoreStr = `${model}:${this.score};`;
         fs.appendFileSync('./current_result.txt', scoreStr)
         // eslint-disable-next-line no-console
-        console.log(`The file ${filename} has been saved!`);
+        console.log(`The file ${filename} has been saved! (score: ${this.score})`);
 
         this.writeExtensions();
 
