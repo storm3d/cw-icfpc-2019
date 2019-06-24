@@ -19,7 +19,7 @@ function formatNum(num: number, size: number): string {
 function getCoins(model: number): number {
     let c = 1;
     let spend = CLONING_PRICE * c;
-    if (lambdaBalance > spend && model < 220) {
+    if (lambdaBalance > spend && model <= 220) {
         lambdaBalance -= spend;
 
         return spend;
